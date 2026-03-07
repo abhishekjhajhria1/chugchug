@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* === Premium Cartoony Theme Tokens === */
+:root {
+  --color-creamy: #FFF8E7;
+  /* Cosmic Latte */
+  --color-primary: #FF7B9C;
+  /* Sakura Pink */
+  --color-secondary: #60D394;
+  /* Minty Green */
+  --color-accent: #FFD166;
+  /* Sunny Yellow */
+  --color-dark: #3D2C24;
+  /* Professional Chocolate Brown */
+  --color-light-blue: #A0E8AF;
+
+  --shadow-color: var(--color-dark);
+  --border-radius: 20px;
+  --border-width: 3px;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: var(--color-creamy);
+  color: var(--color-dark);
+  /* Optional: A subtle polka dot or grid background could go here for extra "anime" feel */
+  background-image: radial-gradient(#FF7B9C30 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+  background-color: var(--color-creamy);
+}
+
+/* Base layouts */
+.bg-creamy {
+  background-color: var(--color-creamy);
+}
+
+/* Premium Cartoon Card */
+.cartoon-card {
+  background-color: white;
+  border: var(--border-width) solid var(--color-dark);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cartoon-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px var(--shadow-color);
+}
+
+/* Premium Cartoon Buttons */
+.cartoon-btn {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: var(--border-width) solid var(--color-dark);
+  border-radius: 9999px;
+  padding: 14px 28px;
+  box-shadow: 3px 3px 0px var(--shadow-color);
+  transition: all 0.15s ease-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cartoon-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  background-color: #ff8fae;
+  /* slightly lighter pink */
+}
+
+.cartoon-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px var(--shadow-color);
+}
+
+/* Secondary Button (e.g., for forms/signup) */
+.cartoon-btn-secondary {
+  background-color: var(--color-accent);
+  color: var(--color-dark);
+  font-weight: 800;
+  border: var(--border-width) solid var(--color-dark);
+  border-radius: 9999px;
+  padding: 12px 24px;
+  box-shadow: 3px 3px 0px var(--shadow-color);
+  transition: all 0.15s ease-out;
+  cursor: pointer;
+}
+
+.cartoon-btn-secondary:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--shadow-color);
+  background-color: #ffe066;
+}
+
+.cartoon-btn-secondary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px var(--shadow-color);
+}
+
+/* Fun bubbly inputs */
+.cartoon-input {
+  background-color: white;
+  border: var(--border-width) solid var(--color-dark);
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--color-dark);
+  box-shadow: 3px 3px 0px var(--shadow-color);
+  transition: all 0.2s;
+  outline: none;
+}
+
+.cartoon-input:focus {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px var(--color-secondary);
+  /* Highlight focus with secondary color */
+  border-color: var(--color-dark);
+}
