@@ -43,6 +43,7 @@ export default function GroupFeed() {
 
         if (groupData) setGroup(groupData)
 
+        // Fetch logs only for this group
         const { data: logsData, error } = await supabase
             .from("activity_logs")
             .select(`
@@ -50,7 +51,7 @@ export default function GroupFeed() {
                 profiles:user_id ( username ),
                 log_appraisals ( vote_type, appraiser_id )
             `)
-            .in('privacy_level', ['public', 'groups'])
+            .eq('group_id', id)
             .order("created_at", { ascending: false })
             .limit(50)
 

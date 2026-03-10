@@ -6,13 +6,13 @@ import Layout from "./components/Layout"
 import Home from "./pages/Home"
 import Log from "./pages/Log"
 import Party from "./pages/Party"
-import Rank from "./pages/Rank"
 import Profile from "./pages/Profile"
 import Auth from "./pages/Auth"
 import Groups from "./pages/Groups"
 import GroupFeed from "./pages/GroupFeed"
 import PartyView from "./pages/PartyView"
 import PublicProfile from "./pages/PublicProfile"
+import World from "./pages/World"
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -38,7 +38,7 @@ function App() {
         <Route path="/log" element={<Log />} />
         <Route path="/party" element={<Party />} />
         <Route path="/party/:id" element={<PartyView />} />
-        <Route path="/rank" element={<Rank />} />
+        <Route path="/world" element={<World />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:id" element={<PublicProfile />} />
         <Route path="/groups" element={<Groups />} />

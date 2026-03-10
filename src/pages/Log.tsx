@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { Plus, Camera, Image as ImageIcon, CheckCircle2 } from "lucide-react"
@@ -20,6 +20,26 @@ export default function Log() {
   const [itemName, setItemName] = useState("")
   const [quantity, setQuantity] = useState<number | string>(1)
   const [privacy, setPrivacy] = useState<'public' | 'groups' | 'private' | 'hidden'>('groups')
+
+  const [groups, setGroups] = useState<{ id: string, name: string }[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<string>('')
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      if (!user) return
+      const { data } = await supabase
+        .from("group_members")
+        .select(`groups (id, name)`)
+        .eq("user_id", user.id)
+
+      if (data) {
+        const gList = data.map(m => Array.isArray(m.groups) ? m.groups[0] : m.groups) as any as { id: string, name: string }[]
+        setGroups(gList)
+        if (gList.length > 0) setSelectedGroup(gList[0].id)
+      }
+    }
+    fetchGroups()
+  }, [user])
 
   const [isRecipe, setIsRecipe] = useState(false)
   const [consumedMyself, setConsumedMyself] = useState(true)
@@ -89,7 +109,8 @@ export default function Log() {
         xp_earned: xpEarned,
         photo_url: photoUrl,
         photo_metadata: mergedMetadata,
-        privacy_level: privacy
+        privacy_level: privacy,
+        group_id: privacy === 'groups' ? (selectedGroup || null) : null
       })
 
       if (error) throw error
@@ -290,13 +311,31 @@ export default function Log() {
           <select
             value={privacy}
             onChange={(e) => setPrivacy(e.target.value as 'public' | 'groups' | 'private' | 'hidden')}
-            className="cartoon-input w-full"
+            className="cartoon-input w-full mb-3"
           >
             <option value="public">🌍 Public (Global Feed)</option>
             <option value="groups">👥 Groups Only (Appraisals On)</option>
             <option value="private">🔒 Private (Just me)</option>
             <option value="hidden">🥷 Stealth Mode (Doesn't affect streaks)</option>
           </select>
+
+          {privacy === 'groups' && groups.length > 0 && (
+            <div className="space-y-2 mt-2 fade-in">
+              <label className="font-bold text-sm text-[#3D2C24] uppercase tracking-widest text-[#FF7B9C]">Post to Group</label>
+              <select
+                value={selectedGroup}
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                className="cartoon-input w-full bg-[#FF7B9C]/10 border-[#FF7B9C]"
+              >
+                {groups.map(g => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          {privacy === 'groups' && groups.length === 0 && (
+            <p className="text-xs font-bold text-red-500 mt-1">You are not in any groups. This will act like a private post.</p>
+          )}
         </div>
 
         <button

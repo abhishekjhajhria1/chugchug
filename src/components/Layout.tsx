@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
 import BottomNav from "./BottomNav"
-
 interface Props {
   children: ReactNode
 }

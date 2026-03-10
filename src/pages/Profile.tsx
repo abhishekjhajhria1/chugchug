@@ -14,7 +14,14 @@ export default function Profile() {
     stealth_mode: false
   })
   const [saving, setSaving] = useState(false)
-  const [activities, setActivities] = useState<{ id: string, item_name: string, category: string, quantity: number, xp_earned: number, created_at: string }[]>([])
+  const [activities, setActivities] = useState<{ id: string, item_name: string, category: string, quantity: number, xp_earned: number, created_at: string, privacy_level: string, group_id: string | null }[]>([])
+  const [groups, setGroups] = useState<{ id: string, name: string }[]>([])
+
+  // Edit Log State
+  const [editingLogId, setEditingLogId] = useState<string | null>(null)
+  const [editLogPrivacy, setEditLogPrivacy] = useState<'public' | 'groups' | 'private' | 'hidden'>('public')
+  const [editLogGroupStr, setEditLogGroupStr] = useState<string>('')
+  const [savingLog, setSavingLog] = useState(false)
 
   useEffect(() => {
     if (profile) {
@@ -52,18 +59,56 @@ export default function Profile() {
   }
 
   useEffect(() => {
-    const fetchActivities = async () => {
+    const fetchActivitiesAndGroups = async () => {
       if (!profile) return
-      const { data } = await supabase
+
+      const { data: actData } = await supabase
         .from("activity_logs")
         .select(`*, log_appraisals(vote_type, xp_awarded)`)
         .eq("user_id", profile.id)
         .order("created_at", { ascending: false })
-      if (data) setActivities(data)
+      if (actData) setActivities(actData as any)
+
+      const { data: grpData } = await supabase
+        .from("group_members")
+        .select(`groups (id, name)`)
+        .eq("user_id", profile.id)
+
+      if (grpData) {
+        const gList = grpData.map(m => Array.isArray(m.groups) ? m.groups[0] : m.groups) as any as { id: string, name: string }[]
+        setGroups(gList)
+        if (gList.length > 0) setEditLogGroupStr(gList[0].id)
+      }
     }
 
-    if (!isEditing) fetchActivities()
+    if (!isEditing) fetchActivitiesAndGroups()
   }, [profile, isEditing])
+
+  const handleEditLogSave = async (id: string) => {
+    setSavingLog(true)
+    const { error } = await supabase
+      .from('activity_logs')
+      .update({
+        privacy_level: editLogPrivacy,
+        group_id: editLogPrivacy === 'groups' ? (editLogGroupStr || null) : null
+      })
+      .eq('id', id)
+
+    if (!error) {
+      // Optimistically update
+      setActivities(activities.map(a => a.id === id ? { ...a, privacy_level: editLogPrivacy, group_id: editLogPrivacy === 'groups' ? (editLogGroupStr || null) : null } : a))
+      setEditingLogId(null)
+    } else {
+      alert("Failed to update log: " + error.message)
+    }
+    setSavingLog(false)
+  }
+
+  const startEditingLog = (log: any) => {
+    setEditLogPrivacy(log.privacy_level as any || 'public')
+    setEditLogGroupStr(log.group_id || (groups.length > 0 ? groups[0].id : ''))
+    setEditingLogId(log.id)
+  }
 
   if (!profile) return <div className="p-8 text-center font-bold">Loading Profile...</div>
 
@@ -194,19 +239,64 @@ export default function Profile() {
           ) : (
             <div className="space-y-3">
               {activities.map(act => (
-                <div key={act.id} className="cartoon-card bg-white flex justify-between items-center p-4">
-                  <div>
-                    <p className="font-black text-lg leading-tight text-[#3D2C24]">{act.item_name}</p>
-                    <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">
-                      {act.category} • Qty: {act.quantity}
-                    </p>
+                <div key={act.id} className="cartoon-card bg-white flex flex-col p-4 relative">
+                  <div className="flex justify-between items-center z-10">
+                    <div>
+                      <p className="font-black text-lg leading-tight text-[#3D2C24]">{act.item_name}</p>
+                      <p className="text-xs font-bold uppercase tracking-widest opacity-50 mt-1">
+                        {act.category} • Qty: {act.quantity}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-black text-lg text-[#60D394]">+{act.xp_earned} XP</p>
+                      <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">
+                        {new Date(act.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-black text-lg text-[#60D394]">+{act.xp_earned} XP</p>
-                    <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">
-                      {new Date(act.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
+
+                  {editingLogId === act.id ? (
+                    <div className="mt-4 pt-4 border-t-2 border-[#3D2C24]/10 fade-in">
+                      <label className="font-bold text-xs text-[#3D2C24] uppercase tracking-widest">Visibility</label>
+                      <select
+                        value={editLogPrivacy}
+                        onChange={(e) => setEditLogPrivacy(e.target.value as any)}
+                        className="cartoon-input w-full mt-1 text-sm py-2! mb-3"
+                      >
+                        <option value="public">🌍 Public (Global Feed)</option>
+                        <option value="groups">👥 Groups Only</option>
+                        <option value="private">🔒 Private (Just me)</option>
+                        <option value="hidden">🥷 Stealth Mode</option>
+                      </select>
+
+                      {editLogPrivacy === 'groups' && groups.length > 0 && (
+                        <div className="mb-3">
+                          <label className="font-bold text-xs text-[#FF7B9C] uppercase tracking-widest">Post to Group</label>
+                          <select
+                            value={editLogGroupStr}
+                            onChange={(e) => setEditLogGroupStr(e.target.value)}
+                            className="cartoon-input w-full mt-1 text-sm py-2! bg-[#FF7B9C]/10 border-[#FF7B9C]"
+                          >
+                            {groups.map(g => (
+                              <option key={g.id} value={g.id}>{g.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 justify-end">
+                        <button onClick={() => setEditingLogId(null)} className="cartoon-btn-secondary text-xs! py-1! px-3! bg-white text-[#3D2C24]">Cancel</button>
+                        <button onClick={() => handleEditLogSave(act.id)} disabled={savingLog} className="cartoon-btn text-xs! py-1! px-3!">{savingLog ? "..." : "Save"}</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => startEditingLog(act)}
+                      className="absolute bottom-2 right-4 text-[10px] font-black uppercase tracking-widest text-[#3D2C24] opacity-30 hover:opacity-100 transition-opacity flex items-center gap-1"
+                    >
+                      <Edit3 size={12} strokeWidth={3} /> Edit Visibility
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

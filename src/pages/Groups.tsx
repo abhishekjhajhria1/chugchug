@@ -17,6 +17,7 @@ interface PartyPreview {
   title: string
   event_date: string
   address: string
+  host_id: string
   profiles?: { username: string }
 }
 
@@ -31,7 +32,7 @@ export default function Groups() {
   const navigate = useNavigate()
 
   const [groups, setGroups] = useState<Group[]>([])
-  const [feed, setFeed] = useState<FeedItem[]>([])
+  const [groupFeed, setGroupFeed] = useState<FeedItem[]>([])
   const [loading, setLoading] = useState(true)
 
   const [showDropdown, setShowDropdown] = useState(false)
@@ -61,8 +62,20 @@ export default function Groups() {
       .select(`groups (id, name, invite_code)`)
       .eq("user_id", user.id)
 
-    if (memberData) {
-      setGroups(memberData.map((m) => (Array.isArray(m.groups) ? m.groups[0] : m.groups) as unknown as Group))
+    let groupUserIds: string[] = []
+    if (memberData && memberData.length > 0) {
+      const gList = memberData.map(m => Array.isArray(m.groups) ? m.groups[0] : m.groups) as unknown as Group[]
+      setGroups(gList)
+
+      const groupIds = gList.map(g => g.id)
+      const { data: groupMembers } = await supabase
+        .from('group_members')
+        .select('user_id')
+        .in('group_id', groupIds)
+
+      if (groupMembers) {
+        groupUserIds = [...new Set(groupMembers.map(m => m.user_id))]
+      }
     }
 
     const { data: logsData } = await supabase
@@ -84,7 +97,17 @@ export default function Groups() {
       ...(partiesData || []).map(p => ({ type: 'party' as const, date: p.created_at, data: p }))
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-    setFeed(combined)
+    // Filter feed to only group members
+    const gFeed: FeedItem[] = []
+
+    for (const item of combined) {
+      const authorId = item.type === 'log' ? (item.data as ActivityLog).user_id : (item.data as PartyPreview).host_id
+      if (groupUserIds.includes(authorId) && authorId !== user.id) {
+        gFeed.push(item)
+      }
+    }
+
+    setGroupFeed(gFeed)
     setLoading(false)
   }, [user])
 
@@ -244,17 +267,22 @@ export default function Groups() {
 
       {/* The Social Feed: Logs + Parties */}
       <div>
-        <h2 className="text-lg font-black text-[#3D2C24] mb-4 px-1">Recent Activity</h2>
         {loading ? (
           <div className="text-center font-bold opacity-50 py-8">Loading feed...</div>
-        ) : feed.length === 0 ? (
-          <div className="text-center cartoon-card bg-gray-100 border-dashed opacity-70">
-            <p className="font-bold">No recent activities.</p>
-          </div>
         ) : (
-          <div className="space-y-5">
-            {feed.map(item => item.type === 'log' ? renderLog(item.data as ActivityLog) : renderParty(item.data as PartyPreview))}
-          </div>
+          <>
+            {/* Group Activity Section */}
+            <h2 className="text-lg font-black text-[#3D2C24] mb-4 px-1">Activity From Your Groups</h2>
+            {groupFeed.length === 0 ? (
+              <div className="text-center cartoon-card bg-gray-100 border-dashed opacity-70 mb-8">
+                <p className="font-bold">No recent activities from your group members.</p>
+              </div>
+            ) : (
+              <div className="space-y-4 mb-8">
+                {groupFeed.map(item => item.type === 'log' ? renderLog(item.data as ActivityLog) : renderParty(item.data as PartyPreview))}
+              </div>
+            )}
+          </>
         )}
       </div>
 
