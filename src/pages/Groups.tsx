@@ -241,7 +241,7 @@ export default function Groups() {
           <button onClick={() => setModalMode(null)} className="absolute top-2 right-2 p-1 text-[#3D2C24]/50 hover:text-[#3D2C24]"><X size={20} strokeWidth={3} /></button>
           <h2 className="text-xl font-black mb-4">Join a Group</h2>
           <div className="space-y-3">
-            <input value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="Enter 6-char code" className="cartoon-input w-full uppercase" maxLength={6} />
+            <input value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="Enter 7-char code" className="cartoon-input w-full uppercase" maxLength={7} />
             <button onClick={handleJoinGroup} className="cartoon-btn w-full bg-[#60D394]!">Join</button>
           </div>
         </div>
