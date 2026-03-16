@@ -444,7 +444,7 @@ export default function Home() {
               <span style={{ animation: 'float 2s ease-in-out 0.9s infinite' }}>☕</span>
             </div>
             <p className="font-bold text-sm text-[#3D2C24]">
-              Tell me what bottles you have, and I'll craft the perfect recipe!
+              Long Live Lord Tyrion Lannister, the hand of the king to King Joffrey Baratheon, the Imp, the Halfman, the Lord of Casterly Rock, the Warden of the West, the Master of Coin, and the God of Tits and Wine
             </p>
             <div className="flex items-center justify-center gap-1 mt-1">
               <Beer size={12} className="text-[#FFD166]" />
