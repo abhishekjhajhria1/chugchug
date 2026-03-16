@@ -123,6 +123,26 @@ export default function Log() {
       }
       console.log("RPC Data returned:", rpcData)
 
+      // Automatically store in AI Bartender RAG if it's a recipe
+      if (isRecipe && recipeDetails) {
+         try {
+            await fetch('http://127.0.0.1:8001/embed_recipe', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({
+                  item_name: itemName,
+                  category: category,
+                  ingredients: recipeDetails.split('\n').filter(s => s.trim()), 
+                  instructions: recipeDetails,
+                  flavor_profile: itemName // Send item name as flavor context
+               })
+            })
+            console.log("Embedded recipe to AI Bartender RAG.")
+         } catch(e) {
+            console.error("Failed to embed recipe to AI Bartender:", e)
+         }
+      }
+
       await refreshProfile()
 
       setSuccess(true)

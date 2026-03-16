@@ -62,17 +62,22 @@ export default function Profile() {
     const fetchActivitiesAndGroups = async () => {
       if (!profile) return
 
-      const { data: actData } = await supabase
-        .from("activity_logs")
-        .select(`*, log_appraisals(vote_type, xp_awarded)`)
-        .eq("user_id", profile.id)
-        .order("created_at", { ascending: false })
-      if (actData) setActivities(actData as any)
+      const [
+        { data: actData },
+        { data: grpData }
+      ] = await Promise.all([
+        supabase
+          .from("activity_logs")
+          .select(`*, log_appraisals(vote_type, xp_awarded)`)
+          .eq("user_id", profile.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("group_members")
+          .select(`groups (id, name)`)
+          .eq("user_id", profile.id)
+      ])
 
-      const { data: grpData } = await supabase
-        .from("group_members")
-        .select(`groups (id, name)`)
-        .eq("user_id", profile.id)
+      if (actData) setActivities(actData as any)
 
       if (grpData) {
         const gList = grpData.map(m => Array.isArray(m.groups) ? m.groups[0] : m.groups) as any as { id: string, name: string }[]

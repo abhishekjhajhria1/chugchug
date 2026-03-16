@@ -78,19 +78,23 @@ export default function Groups() {
       }
     }
 
-    const { data: logsData } = await supabase
-      .from("activity_logs")
-      .select(`*, profiles:user_id(username), log_appraisals(vote_type, appraiser_id)`)
-      .in('privacy_level', ['public', 'groups'])
-      .order("created_at", { ascending: false })
-      .limit(20)
-
-    const { data: partiesData } = await supabase
-      .from("parties")
-      .select(`*, profiles:host_id(username)`)
-      .neq('privacy_level', 'hidden')
-      .order("created_at", { ascending: false })
-      .limit(10)
+    const [
+      { data: logsData },
+      { data: partiesData }
+    ] = await Promise.all([
+      supabase
+        .from("activity_logs")
+        .select(`*, profiles:user_id(username), log_appraisals(vote_type, appraiser_id)`)
+        .in('privacy_level', ['public', 'groups'])
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("parties")
+        .select(`*, profiles:host_id(username)`)
+        .neq('privacy_level', 'hidden')
+        .order("created_at", { ascending: false })
+        .limit(10)
+    ])
 
     const combined: FeedItem[] = [
       ...(logsData || []).map(l => ({ type: 'log' as const, date: l.created_at, data: l })),
