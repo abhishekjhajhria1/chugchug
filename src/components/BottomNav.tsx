@@ -1,92 +1,153 @@
-import { useState, useRef, useEffect } from "react"
-import { NavLink, Link, useLocation } from "react-router-dom"
-import { Home, Plus, PartyPopper, Users, Menu, Globe, User, X } from "lucide-react"
+import { useState } from "react"
+import { Home, Users, Globe, User, Plus, Trophy, PartyPopper, X } from "lucide-react"
+import { NavLink, useNavigate } from "react-router-dom"
+
+const NAV_ITEMS = [
+  { to: "/", icon: Home, label: "Home" },
+  { to: "/groups", icon: Users, label: "Groups" },
+  null, // fab placeholder
+  { to: "/world", icon: Globe, label: "World" },
+  { to: "/profile", icon: User, label: "Profile" },
+] as const
+
+const MENU_ACTIONS = [
+  { to: "/log", icon: Plus, label: "Log Activity", accent: "var(--accent-mint)" },
+  { to: "/rank", icon: Trophy, label: "Leaderboard", accent: "var(--accent-gold)" },
+  { to: "/party", icon: PartyPopper, label: "Party Hub", accent: "var(--accent-rose)" },
+]
 
 export default function BottomNav() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const location = useLocation()
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  useEffect(() => {
-    setIsMenuOpen(false)
-  }, [location.pathname])
-
-  const baseNavItem = "flex flex-col items-center text-[10px] font-black uppercase tracking-wider text-[#3D2C24] transition-transform hover:scale-110 active:scale-95 gap-1 opacity-70 hover:opacity-100"
+  const [menuOpen, setMenuOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <>
-      {/* Dimmed Background Overlay */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 bg-black/20 z-[40] slide-in-from-bottom animate-in fade-in duration-200" />
+      {/* Backdrop overlay */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          style={{ background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setMenuOpen(false)}
+        />
       )}
 
-      <div className="fixed bottom-0 w-full bg-white border-t-[3px] border-[#3D2C24] rounded-t-3xl flex justify-around py-3 z-50 shadow-[0px_-4px_0px_rgba(0,0,0,0.05)]">
-
-        <NavLink to="/" className={({ isActive }) => `${baseNavItem} ${isActive ? 'text-[#FF7B9C] opacity-100' : ''}`}>
-          <Home size={24} strokeWidth={2.5} />
-          <span className="mt-1">Home</span>
-        </NavLink>
-
-        <NavLink to="/groups" className={({ isActive }) => `${baseNavItem} ${isActive ? 'text-[#FF7B9C] opacity-100' : ''}`}>
-          <Users size={24} strokeWidth={2.5} />
-          <span className="mt-1">Groups</span>
-        </NavLink>
-
-        <NavLink
-          to="/log"
-          className="relative -top-8 cartoon-btn bg-[#60D394]! hover:bg-[#A0E8AF]! p-0! border-[3px] border-[#3D2C24] flex items-center justify-center text-white"
-          style={{ borderRadius: '50%', width: '60px', height: '60px' }}
+      {/* FAB Menu */}
+      {menuOpen && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3"
+          style={{ animation: 'slideUp 0.3s cubic-bezier(0.22,0.68,0,1.1) both' }}
         >
-          <Plus size={32} strokeWidth={3} />
-        </NavLink>
-
-        <NavLink to="/party" className={({ isActive }) => `${baseNavItem} ${isActive ? 'text-[#FF7B9C] opacity-100' : ''}`}>
-          <PartyPopper size={24} strokeWidth={2.5} />
-          <span className="mt-1">Party</span>
-        </NavLink>
-
-        {/* Drop-up Menu Trigger */}
-        <div className="relative flex flex-col items-center" ref={menuRef}>
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`${baseNavItem} ${isMenuOpen ? 'text-[#FF7B9C] opacity-100 scale-110' : ''} bg-transparent border-none p-0 cursor-pointer h-full relative z-[60]`}
-          >
-            {isMenuOpen ? <X size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
-            <span className="mt-1">Menu</span>
-          </button>
-
-          {/* Drop-up Content */}
-          {isMenuOpen && (
-            <div className="absolute bottom-[calc(100%+20px)] right-0 w-48 bg-white border-[3px] border-[#3D2C24] rounded-2xl shadow-[6px_6px_0px_rgba(61,44,36,1)] overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 fade-in duration-200 z-[50]">
-              <Link
-                to="/world"
-                className="flex items-center gap-3 px-4 py-3 font-black text-[#3D2C24] hover:bg-[#FFD166]/20 transition-colors border-b-[3px] border-[#3D2C24]"
-              >
-                <Globe size={20} strokeWidth={3} className="text-[#FFD166]" />
-                World
-              </Link>
-              <Link
-                to="/profile"
-                className="flex items-center gap-3 px-4 py-3 font-black text-[#3D2C24] hover:bg-[#A0E8AF]/20 transition-colors"
-              >
-                <User size={20} strokeWidth={3} className="text-[#A0E8AF]" />
-                Profile
-              </Link>
-            </div>
-          )}
+          {MENU_ACTIONS.map((action, i) => (
+            <button
+              key={action.to}
+              onClick={() => { navigate(action.to); setMenuOpen(false) }}
+              className="flex items-center gap-3 px-5 py-3 rounded-2xl font-semibold text-sm"
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderTopColor: 'rgba(255,255,255,0.20)',
+                color: 'var(--text-bright)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.06)',
+                animation: `slideUp 0.3s ease both`,
+                animationDelay: `${i * 0.06}s`,
+                minWidth: 180,
+              }}
+            >
+              <action.icon size={18} strokeWidth={2} style={{ color: action.accent }} />
+              {action.label}
+            </button>
+          ))}
         </div>
+      )}
 
-      </div>
+      {/* Bottom Bar */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50"
+        style={{
+          background: 'rgba(8,6,18,0.75)',
+          backdropFilter: 'blur(24px) saturate(1.3)',
+          WebkitBackdropFilter: 'blur(24px) saturate(1.3)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <div className="max-w-lg mx-auto flex items-center justify-around py-2 relative">
+          {NAV_ITEMS.map((item) => {
+            if (item === null) {
+              // FAB
+              return (
+                <button
+                  key="fab"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label={menuOpen ? "Close quick actions menu" : "Open quick actions menu"}
+                  aria-expanded={menuOpen}
+                  aria-haspopup="menu"
+                  className="relative -mt-6 transition-all duration-300"
+                  style={{
+                    width: 52, height: 52,
+                    borderRadius: '50%',
+                    background: menuOpen
+                      ? 'rgba(255,255,255,0.12)'
+                      : 'linear-gradient(135deg, rgba(167,139,250,0.55), rgba(93,228,255,0.40))',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    boxShadow: menuOpen
+                      ? '0 2px 12px rgba(0,0,0,0.30)'
+                      : '0 4px 20px rgba(167,139,250,0.25), 0 0 0 4px rgba(167,139,250,0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--text-bright)',
+                    transform: menuOpen ? 'rotate(45deg)' : 'none',
+                    transition: 'transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease',
+                  }}
+                >
+                  {menuOpen ? <X size={22} strokeWidth={2} /> : <Plus size={22} strokeWidth={2.5} />}
+                </button>
+              )
+            }
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                className="flex flex-col items-center px-3 py-1 transition-all duration-200"
+              >
+                {({ isActive }) => (
+                  <>
+                    <item.icon
+                      size={22}
+                      strokeWidth={isActive ? 2.2 : 1.6}
+                      style={{
+                        color: isActive ? 'var(--accent-aqua)' : 'var(--text-ghost)',
+                        filter: isActive ? 'drop-shadow(0 0 6px rgba(93,228,255,0.35))' : 'none',
+                        transition: 'all 0.2s ease',
+                      }}
+                    />
+                    <span
+                      className="text-[10px] font-semibold mt-0.5"
+                      style={{
+                        color: isActive ? 'var(--accent-aqua)' : 'var(--text-ghost)',
+                        transition: 'color 0.2s ease',
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                    {isActive && (
+                      <div
+                        className="w-1 h-1 rounded-full mt-0.5"
+                        style={{
+                          background: 'var(--accent-aqua)',
+                          boxShadow: '0 0 6px var(--accent-aqua)',
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              </NavLink>
+            )
+          })}
+        </div>
+      </nav>
     </>
   )
 }

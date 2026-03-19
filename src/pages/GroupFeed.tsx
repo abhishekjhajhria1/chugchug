@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
-import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, Camera, X, HandCoins, Loader2 } from "lucide-react"
+import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, Camera, X, HandCoins, Loader2, PartyPopper } from "lucide-react"
 import { Link } from "react-router-dom"
 import PhotoUpload from "../components/PhotoUpload"
+import BeerCounter from "../components/BeerCounter"
+import LiveCounter from "../components/LiveCounter"
+import PhotoMetadata from "../components/PhotoMetadata"
 
 export interface ActivityLog {
     id: string
@@ -21,6 +24,11 @@ export interface ActivityLog {
     log_appraisals?: {
         vote_type: string
         appraiser_id: string
+    }[]
+    photo_metadata?: any | null
+    photo_verifications?: {
+        verifier_id: string
+        profiles?: { username: string }
     }[]
 }
 
@@ -52,7 +60,7 @@ export default function GroupFeed() {
     const [selectedSplitters, setSelectedSplitters] = useState<string[]>([])
     const [submittingSplit, setSubmittingSplit] = useState(false)
 
-    const fetchGroupData = async () => {
+    const fetchGroupData = useCallback(async () => {
         if (!id) return
 
         const { data: groupData } = await supabase
@@ -68,7 +76,8 @@ export default function GroupFeed() {
             .select(`
                 *,
                 profiles:user_id ( username ),
-                log_appraisals ( vote_type, appraiser_id )
+                log_appraisals ( vote_type, appraiser_id ),
+                photo_verifications ( verifier_id, profiles:verifier_id ( username ) )
             `)
             .eq('group_id', id)
             .order("created_at", { ascending: false })
@@ -105,7 +114,7 @@ export default function GroupFeed() {
         }
 
         setLoading(false)
-    }
+    }, [id])
 
     useEffect(() => {
         fetchGroupData()
@@ -120,6 +129,21 @@ export default function GroupFeed() {
                 )
                 .on(
                     'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'log_appraisals' },
+                    () => fetchGroupData()
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'log_appraisals' },
+                    () => fetchGroupData()
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'photo_verifications' },
+                    () => fetchGroupData()
+                )
+                .on(
+                    'postgres_changes',
                     { event: 'INSERT', schema: 'public', table: 'photos' },
                     () => fetchGroupData()
                 )
@@ -129,27 +153,39 @@ export default function GroupFeed() {
                 supabase.removeChannel(channel)
             }
         }
-    }, [id])
+    }, [id, fetchGroupData])
 
     const handleAppraisal = async (logId: string, voteType: 'legit' | 'fake' | 'legendary') => {
         if (!user) return
 
-        let bonusXp = 0
-        if (voteType === 'legit') bonusXp = 2
-        if (voteType === 'legendary') bonusXp = 10
-        if (voteType === 'fake') bonusXp = -5
+        const targetLog = logs.find(l => l.id === logId)
+        if (!targetLog) return
+        if (targetLog.user_id === user.id) {
+            alert("You cannot appraise your own activity.")
+            return
+        }
+
+        const xpByVote: Record<'legit' | 'fake' | 'legendary', number> = {
+            legit: 2,
+            fake: -5,
+            legendary: 10,
+        }
+
+        const previousVote = targetLog.log_appraisals?.find(a => a.appraiser_id === user.id)?.vote_type as 'legit' | 'fake' | 'legendary' | undefined
+        const previousXp = previousVote ? xpByVote[previousVote] : 0
+        const newXp = xpByVote[voteType]
+        const xpDelta = newXp - previousXp
 
         const { error } = await supabase.from('log_appraisals').upsert({
             log_id: logId,
             appraiser_id: user.id,
             vote_type: voteType,
-            xp_awarded: bonusXp
+            xp_awarded: newXp
         }, { onConflict: 'log_id, appraiser_id' })
 
         if (!error) {
-            const targetLog = logs.find(l => l.id === logId)
-            if (targetLog && targetLog.user_id && bonusXp !== 0) {
-                await supabase.rpc('add_xp', { user_id_param: targetLog.user_id, xp_to_add: bonusXp })
+            if (targetLog.user_id && xpDelta !== 0) {
+                await supabase.rpc('add_xp', { user_id_param: targetLog.user_id, xp_to_add: xpDelta })
             }
             fetchGroupData()
         } else {
@@ -160,6 +196,7 @@ export default function GroupFeed() {
     const handleSplitSubmit = async () => {
         if (!user || !id || !splitTitle.trim() || !splitAmount || isNaN(Number(splitAmount))) return
         if (selectedSplitters.length === 0) return alert("Select at least one person to split with.")
+        if (Number(splitAmount) <= 0) return alert("Amount must be greater than 0.")
 
         setSubmittingSplit(true)
         try {
@@ -203,88 +240,107 @@ export default function GroupFeed() {
         <div className="space-y-6 pb-24">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
-                <button onClick={() => navigate('/groups')} className="p-2 bg-white rounded-full border-[3px] border-[#3D2C24] shadow-[2px_2px_0px_#3D2C24] text-[#3D2C24] transition-transform active:scale-95">
-                    <ArrowLeft size={20} strokeWidth={3} />
+                <button onClick={() => navigate('/groups')} className="p-2 bg-white/5 rounded-full border border-white/15 shadow-lg shadow-black/20 text-white/90 transition-transform active:scale-95">
+                    <ArrowLeft size={20} strokeWidth={2} />
                 </button>
-                <h1 className="text-2xl font-black text-[#3D2C24] truncate flex-1">{group?.name || "Group"}</h1>
+                <h1 className="text-2xl font-black text-white/90 truncate flex-1">{group?.name || "Group"}</h1>
                 <button
                     onClick={() => navigate(`/group/${id}/chat`)}
-                    className="flex bg-[#FF7B9C] text-white px-3 py-1.5 rounded-full border-2 border-[#3D2C24] shadow-[2px_2px_0px_#3D2C24] font-black text-xs items-center gap-1 transition-transform active:scale-95 hover:scale-105"
+                    className="flex bg-pink-500/30 text-white px-3 py-1.5 rounded-full border border-white/15 shadow-lg shadow-black/20 font-black text-xs items-center gap-1 transition-transform active:scale-95 hover:scale-105"
                 >
-                    <MessageCircle size={14} strokeWidth={3} /> Chat
+                    <MessageCircle size={14} strokeWidth={2} /> Chat
                 </button>
             </div>
 
             {/* Quick Actions / Info Row */}
             <div className="flex gap-4">
                {/* Invite Code */}
-               <div className="flex-1 bg-white/50 border-[3px] border-[#3D2C24] border-dashed rounded-xl p-3 text-center text-sm font-bold text-[#3D2C24] opacity-80 flex flex-col justify-center">
+               <div className="flex-1 bg-white/50 border border-white/15 border-dashed rounded-xl p-3 text-center text-sm font-bold text-white/90 opacity-80 flex flex-col justify-center">
                    <span className="mb-1 uppercase tracking-widest text-[10px]">Invite Code</span>
-                   <span className="text-[#FF7B9C] select-all cursor-pointer text-xl tracking-widest bg-white rounded border-2 border-[#3D2C24] inline-block mx-auto px-4 py-1">{group?.invite_code || "..."}</span>
+                   <span className="neon-pink select-all cursor-pointer text-xl tracking-widest bg-white/5 rounded border border-white/15 inline-block mx-auto px-4 py-1">{group?.invite_code || "..."}</span>
                </div>
 
                 {/* Balances Quick Action */}
                <div className="flex-1 flex flex-col gap-2 justify-center">
                    <button 
                        onClick={() => setShowSplitModal(true)}
-                       className="cartoon-btn-secondary text-xs! py-2! bg-[#FFD166] text-[#3D2C24] border-[#3D2C24] flex items-center justify-center gap-1 shadow-[2px_2px_0px_#3D2C24]"
+                       className="glass-btn-secondary text-xs! py-2! bg-amber-400/30 text-white/90 border-white/15 flex items-center justify-center gap-1 shadow-lg shadow-black/20"
                    >
-                       <HandCoins size={14} strokeWidth={3} /> Add Split
+                       <HandCoins size={14} strokeWidth={2} /> Add Split
                    </button>
                    <button 
                        onClick={() => navigate(`/group/${id}/balances`)}
-                       className="cartoon-btn-secondary text-xs! py-2! bg-white text-[#3D2C24] border-[#3D2C24] flex items-center justify-center gap-1 shadow-[2px_2px_0px_#3D2C24]"
+                       className="glass-btn-secondary text-xs! py-2! bg-white/5 text-white/90 border-white/15 flex items-center justify-center gap-1 shadow-lg shadow-black/20"
                    >
-                       <Crown size={14} strokeWidth={3} /> View Balances
+                       <Crown size={14} strokeWidth={2} /> View Balances
+                   </button>
+                   <button 
+                       onClick={async () => {
+                           if (!user || !id) return
+                           const { data, error } = await supabase.from('parties').insert({
+                               host_id: user.id, title: `${group?.name || 'Group'} Party`, description: 'Group party!',
+                               address: 'TBD', privacy_level: 'invite_only', group_id: id,
+                               event_date: new Date().toISOString(), status: 'active'
+                           }).select().single()
+                           if (data) navigate(`/party/${data.id}`)
+                           if (error) alert(error.message)
+                       }}
+                       className="glass-btn-secondary text-xs! py-2! bg-pink-500/30 text-white border-pink-500/30 flex items-center justify-center gap-1 shadow-lg shadow-black/20"
+                   >
+                       <PartyPopper size={14} strokeWidth={2} /> Start Party
                    </button>
                </div>
             </div>
 
+            {/* Live Beer Counter for this Group */}
+            <BeerCounter groupId={id} compact />
+            <LiveCounter groupId={id} showLeaderboard />
+
             {/* Splitwise Modal */}
             {showSplitModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="cartoon-card bg-white w-full max-w-sm relative">
-                        <button onClick={() => setShowSplitModal(false)} className="absolute top-3 right-3 p-1 text-[#3D2C24]/50 hover:text-[#3D2C24]">
-                            <X size={20} strokeWidth={3} />
+                    <div className="glass-card bg-white/5 w-full max-w-sm relative">
+                        <button onClick={() => setShowSplitModal(false)} className="absolute top-3 right-3 p-1 text-white/90/50 hover:text-white/90">
+                            <X size={20} strokeWidth={2} />
                         </button>
                         
-                        <h2 className="text-xl font-black text-[#3D2C24] mb-4 flex items-center gap-2">
-                            <HandCoins className="text-[#60D394]" size={24} strokeWidth={3} /> Add an Expense
+                        <h2 className="text-xl font-black text-white/90 mb-4 flex items-center gap-2">
+                            <HandCoins className="neon-lime" size={24} strokeWidth={2} /> Add an Expense
                         </h2>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[#3D2C24] mb-1">What for?</label>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-white/90 mb-1">What for?</label>
                                 <input 
                                     value={splitTitle} 
                                     onChange={e => setSplitTitle(e.target.value)} 
                                     placeholder="Dinner, Uber, Drinks..." 
-                                    className="cartoon-input w-full"
+                                    className="glass-input w-full"
                                 />
                             </div>
                             
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-[#3D2C24] mb-1">Amount Paid ($)</label>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-white/90 mb-1">Amount Paid ($)</label>
                                 <input 
                                     type="number"
                                     value={splitAmount} 
                                     onChange={e => setSplitAmount(e.target.value)} 
                                     placeholder="0.00" 
                                     step="0.01"
-                                    className="cartoon-input w-full text-xl font-black text-[#FF7B9C]"
+                                    className="glass-input w-full text-xl font-black neon-pink"
                                 />
-                                <p className="text-[10px] font-bold text-[#3D2C24]/50 mt-1 uppercase">You paid this amount</p>
+                                <p className="text-[10px] font-bold text-white/90/50 mt-1 uppercase">You paid this amount</p>
                             </div>
 
-                            <div className="bg-gray-50 p-3 rounded-xl border-2 border-[#3D2C24]/10">
-                                <label className="flex items-center justify-between text-xs font-bold text-[#3D2C24] mb-2">
+                            <div className="bg-white/3 p-3 rounded-xl border border-white/15/10">
+                                <label className="flex items-center justify-between text-xs font-bold text-white/90 mb-2">
                                     <span className="uppercase tracking-widest">Split equally with:</span>
-                                    <span className="text-[#3D2C24]/50">{selectedSplitters.length} selected</span>
+                                    <span className="text-white/90/50">{selectedSplitters.length} selected</span>
                                 </label>
                                 
                                 <div className="max-h-32 overflow-y-auto space-y-1 scrollbar-none pr-1">
                                     {groupMembers.map(member => (
-                                        <label key={member.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-white cursor-pointer transition-colors border-2 border-transparent hover:border-[#3D2C24]/10">
+                                        <label key={member.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/15/10">
                                             <input 
                                                 type="checkbox" 
                                                 checked={selectedSplitters.includes(member.id)}
@@ -292,9 +348,9 @@ export default function GroupFeed() {
                                                     if (e.target.checked) setSelectedSplitters([...selectedSplitters, member.id])
                                                     else setSelectedSplitters(selectedSplitters.filter(id => id !== member.id))
                                                 }}
-                                                className="w-4 h-4 rounded border-2 border-[#3D2C24] text-[#60D394] focus:ring-0"
+                                                className="w-4 h-4 rounded border border-white/15 neon-lime focus:ring-0"
                                             />
-                                            <span className="font-bold text-sm text-[#3D2C24] flex-1 truncate">{member.id === user?.id ? "You" : member.username}</span>
+                                            <span className="font-bold text-sm text-white/90 flex-1 truncate">{member.id === user?.id ? "You" : member.username}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -303,7 +359,7 @@ export default function GroupFeed() {
                             <button 
                                 onClick={handleSplitSubmit} 
                                 disabled={submittingSplit}
-                                className="cartoon-btn w-full bg-[#60D394]! flex items-center justify-center gap-2"
+                                className="glass-btn w-full bg-green-400/30! flex items-center justify-center gap-2"
                             >
                                 {submittingSplit ? <Loader2 size={20} className="animate-spin" /> : "Save Expense"}
                             </button>
@@ -316,37 +372,37 @@ export default function GroupFeed() {
             <div className="flex gap-3">
                 <button
                     onClick={() => navigate(`/group/${id}/chat`)}
-                    className="flex-1 bg-[#A0E8AF] py-3 rounded-xl border-[3px] border-[#3D2C24] font-black text-[#3D2C24] shadow-[3px_3px_0px_#3D2C24] flex items-center justify-center gap-2 transition-transform active:scale-95"
+                    className="flex-1 bg-green-300/20 py-3 rounded-xl border border-white/15 font-black text-white/90 shadow-lg shadow-black/20 flex items-center justify-center gap-2 transition-transform active:scale-95"
                 >
-                    <MessageCircle size={18} strokeWidth={3} /> Group Chat
+                    <MessageCircle size={18} strokeWidth={2} /> Group Chat
                 </button>
                 <button
                     onClick={() => {
                         document.getElementById('group-photos-section')?.scrollIntoView({ behavior: 'smooth' })
                     }}
-                    className="flex-1 bg-[#FFD166] py-3 rounded-xl border-[3px] border-[#3D2C24] font-black text-[#3D2C24] shadow-[3px_3px_0px_#3D2C24] flex items-center justify-center gap-2 transition-transform active:scale-95"
+                    className="flex-1 bg-amber-400/30 py-3 rounded-xl border border-white/15 font-black text-white/90 shadow-lg shadow-black/20 flex items-center justify-center gap-2 transition-transform active:scale-95"
                 >
-                    <Camera size={18} strokeWidth={3} /> Jump to Photos {photos.length > 0 && <span className="bg-[#FF7B9C] text-white text-[10px] px-1.5 py-0.5 rounded-full">{photos.length}</span>}
+                    <Camera size={18} strokeWidth={2} /> Jump to Photos {photos.length > 0 && <span className="bg-pink-500/30 text-white text-[10px] px-1.5 py-0.5 rounded-full">{photos.length}</span>}
                 </button>
             </div>
 
             {/* FEED SECTION */}
             <div className="mt-8">
                 <div className="flex items-center gap-2 mb-4">
-                    <Users className="text-[#8B5CF6]" size={24} strokeWidth={3} />
-                    <h2 className="text-xl font-black text-[#3D2C24]">Activity Feed</h2>
+                    <Users className="neon-purple" size={24} strokeWidth={2} />
+                    <h2 className="text-xl font-black text-white/90">Activity Feed</h2>
                 </div>
 
-                <div className="cartoon-card bg-[#FFD166]/20 border-[#FFD166] text-center mb-6">
-                    <p className="font-bold text-[#3D2C24]">To post to this group, use the main <span className="text-[#FF7B9C] font-black">Log Activity</span> button (+) and ensure your visibility includes Groups.</p>
+                <div className="glass-card bg-amber-400/30/20 border-amber-400/30 text-center mb-6">
+                    <p className="font-bold text-white/90">To post to this group, use the main <span className="neon-pink font-black">Log Activity</span> button (+) and ensure your visibility includes Groups.</p>
                 </div>
 
                 {loading ? (
-                    <div className="text-center font-bold text-[#3D2C24] opacity-50 py-10">Loading activities...</div>
+                    <div className="text-center font-bold text-white/90 opacity-50 py-10">Loading activities...</div>
                 ) : (
                     <div className="space-y-6">
                         {logs.length === 0 ? (
-                            <div className="text-center font-bold text-[#3D2C24] opacity-50 py-10">No activities shared with this group yet!</div>
+                            <div className="text-center font-bold text-white/90 opacity-50 py-10">No activities shared with this group yet!</div>
                         ) : (
                             logs.map((log) => {
                                 const legitVotes = log.log_appraisals?.filter(a => a.vote_type === 'legit').length || 0
@@ -358,47 +414,65 @@ export default function GroupFeed() {
                                 const badgeColor = catColors[log.category] || '#CCC'
 
                                 return (
-                                    <div key={log.id} className="cartoon-card flex flex-col gap-3 fade-in bg-white">
+                                    <div key={log.id} className="glass-card flex flex-col gap-3 animate-fadeInScale bg-white/5">
                                         <div className="flex justify-between items-start">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-8 h-8 rounded-full border-2 border-[#3D2C24] shadow-[2px_2px_0px_#3D2C24]" style={{ backgroundColor: badgeColor }} />
+                                                <div className="w-8 h-8 rounded-full border border-white/15 shadow-lg shadow-black/20" style={{ backgroundColor: badgeColor }} />
                                                 <div>
-                                                    <Link to={`/profile/${log.user_id}`} className="text-sm font-bold text-[#3D2C24] opacity-70 leading-none hover:text-[#FF7B9C] hover:opacity-100 transition-colors">
+                                                    <Link to={`/profile/${log.user_id}`} className="text-sm font-bold text-white/90 opacity-70 leading-none hover:neon-pink hover:opacity-100 transition-colors">
                                                         {log.profiles?.username || "Unknown"}
                                                     </Link>
                                                     <p className="text-[10px] uppercase font-black tracking-widest opacity-50">{log.category}</p>
                                                 </div>
                                             </div>
-                                            <span className="bg-gray-100 text-[#3D2C24] font-black px-3 py-1 rounded-full border-2 border-[#3D2C24] text-xs">
+                                            <span className="bg-white/5 text-white/90 font-black px-3 py-1 rounded-full border border-white/15 text-xs">
                                                 {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
 
-                                        <h2 className="font-black text-2xl text-[#3D2C24] leading-none mb-1">{log.item_name}</h2>
-                                        <p className="font-bold text-[#FF7B9C] text-sm">Quantity/Duration: {log.quantity}</p>
+                                        <h2 className="font-black text-2xl text-white/90 leading-none mb-1">{log.item_name}</h2>
+                                        <p className="font-bold neon-pink text-sm">Quantity/Duration: {log.quantity}</p>
 
-                                        <div className="flex justify-between items-center mt-3 pt-3 border-t-2 border-dashed border-[#3D2C24]/10">
-                                            <p className="text-xs font-bold text-[#3D2C24] uppercase tracking-widest opacity-60">Appraise:</p>
+                                        {log.photo_url && (
+                                            <div className="mt-2 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+                                                <img 
+                                                    src={`${supabase.storage.from('photos').getPublicUrl(log.photo_url).data.publicUrl}`} 
+                                                    alt={log.item_name} 
+                                                    className="w-full h-auto object-cover max-h-64"
+                                                />
+                                                {log.photo_metadata && (
+                                                    <PhotoMetadata 
+                                                        logId={log.id} 
+                                                        metadata={log.photo_metadata} 
+                                                        verifications={log.photo_verifications}
+                                                        onVerify={() => fetchGroupData()}
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
+
+                                        <div className="flex justify-between items-center mt-3 pt-3 border-t-2 border-dashed border-white/15/10">
+                                            <p className="text-xs font-bold text-white/90 uppercase tracking-widest opacity-60">Appraise:</p>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleAppraisal(log.id, 'legit')}
-                                                    className={`flex items-center gap-1 px-3 py-1 rounded-full border-2 border-[#3D2C24] font-black text-xs transition-transform hover:scale-105 active:scale-95 ${userVote === 'legit' ? 'bg-[#A0E8AF] shadow-[2px_2px_0px_#3D2C24]' : 'bg-gray-100'}`}
+                                                    className={`flex items-center gap-1 px-3 py-1 rounded-full border border-white/15 font-black text-xs transition-transform hover:scale-105 active:scale-95 ${userVote === 'legit' ? 'bg-green-300/20 shadow-lg shadow-black/20' : 'bg-white/5'}`}
                                                 >
-                                                    <ThumbsUp size={14} strokeWidth={3} /> {legitVotes} Legit
+                                                    <ThumbsUp size={14} strokeWidth={2} /> {legitVotes} Legit
                                                 </button>
 
                                                 <button
                                                     onClick={() => handleAppraisal(log.id, 'fake')}
-                                                    className={`flex items-center gap-1 px-3 py-1 rounded-full border-2 border-[#3D2C24] font-black text-xs transition-transform hover:scale-105 active:scale-95 ${userVote === 'fake' ? 'bg-[#FF7B9C] text-white shadow-[2px_2px_0px_#3D2C24]' : 'bg-gray-100'}`}
+                                                    className={`flex items-center gap-1 px-3 py-1 rounded-full border border-white/15 font-black text-xs transition-transform hover:scale-105 active:scale-95 ${userVote === 'fake' ? 'bg-pink-500/30 text-white shadow-lg shadow-black/20' : 'bg-white/5'}`}
                                                 >
-                                                    <ThumbsDown size={14} strokeWidth={3} /> {fakeVotes} Fake
+                                                    <ThumbsDown size={14} strokeWidth={2} /> {fakeVotes} Fake
                                                 </button>
 
                                                 <button
                                                     onClick={() => handleAppraisal(log.id, 'legendary')}
-                                                    className={`flex items-center gap-1 px-3 py-1 rounded-full border-2 border-[#3D2C24] font-black text-xs transition-transform hover:scale-105 active:scale-95 ${userVote === 'legendary' ? 'bg-[#FFD166] shadow-[2px_2px_0px_#3D2C24]' : 'bg-gray-100'}`}
+                                                    className={`flex items-center gap-1 px-3 py-1 rounded-full border border-white/15 font-black text-xs transition-transform hover:scale-105 active:scale-95 ${userVote === 'legendary' ? 'bg-amber-400/30 shadow-lg shadow-black/20' : 'bg-white/5'}`}
                                                 >
-                                                    <Crown size={14} strokeWidth={3} /> {legendaryVotes}
+                                                    <Crown size={14} strokeWidth={2} /> {legendaryVotes}
                                                 </button>
                                             </div>
                                         </div>
@@ -411,24 +485,24 @@ export default function GroupFeed() {
             </div>
 
             {/* PHOTOS SECTION */}
-            <div id="group-photos-section" className="mt-12 pt-8 border-t-[3px] border-dashed border-[#3D2C24]/20 space-y-4">
+            <div id="group-photos-section" className="mt-12 pt-8 border-t-[3px] border-dashed border-white/15/20 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
-                    <Camera className="text-[#FF7B9C]" size={24} strokeWidth={3} />
-                    <h2 className="text-xl font-black text-[#3D2C24]">Group Photos</h2>
+                    <Camera className="neon-pink" size={24} strokeWidth={2} />
+                    <h2 className="text-xl font-black text-white/90">Group Photos</h2>
                 </div>
 
                 {/* Upload Toggle */}
                 {!showPhotoUpload ? (
                     <button
                         onClick={() => setShowPhotoUpload(true)}
-                        className="cartoon-btn w-full bg-[#A0E8AF]! flex items-center justify-center gap-2"
+                        className="glass-btn w-full bg-green-300/20! flex items-center justify-center gap-2"
                     >
-                        <Camera size={18} strokeWidth={3} /> Share a Photo
+                        <Camera size={18} strokeWidth={2} /> Share a Photo
                     </button>
                 ) : (
                     <div className="relative">
-                        <button onClick={() => setShowPhotoUpload(false)} className="absolute top-2 right-2 z-10 p-1 text-[#3D2C24]/50 hover:text-[#3D2C24]">
-                            <X size={20} strokeWidth={3} />
+                        <button onClick={() => setShowPhotoUpload(false)} className="absolute top-2 right-2 z-10 p-1 text-white/90/50 hover:text-white/90">
+                            <X size={20} strokeWidth={2} />
                         </button>
                         {user && id && (
                             <PhotoUpload
@@ -445,7 +519,7 @@ export default function GroupFeed() {
 
                 {/* Photo Grid */}
                 {photos.length === 0 ? (
-                    <div className="text-center cartoon-card bg-gray-100 border-dashed opacity-70">
+                    <div className="text-center glass-card bg-white/5 border-dashed opacity-70">
                         <p className="font-bold">No photos shared yet. Be the first! 📸</p>
                     </div>
                 ) : (
@@ -453,11 +527,11 @@ export default function GroupFeed() {
                         {photos.map(photo => (
                             <div
                                 key={photo.id}
-                                className="relative rounded-xl overflow-hidden border-[3px] border-[#3D2C24] shadow-[3px_3px_0px_#3D2C24] cursor-pointer hover:-translate-y-1 transition-transform"
+                                className="relative rounded-xl overflow-hidden border border-white/15 shadow-lg shadow-black/20 cursor-pointer hover:-translate-y-1 transition-transform"
                                 onClick={() => setLightboxPhoto(photo)}
                             >
                                 <img src={photo.url} alt={photo.caption || "Group photo"} className="w-full h-40 object-cover" />
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent p-2">
                                     <p className="text-white font-bold text-xs truncate">{photo.profiles?.username}</p>
                                     {photo.caption && <p className="text-white/80 text-[10px] truncate">{photo.caption}</p>}
                                 </div>
@@ -467,16 +541,16 @@ export default function GroupFeed() {
                 )}
                     {/* Lightbox */}
                     {lightboxPhoto && (
-                        <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxPhoto(null)}>
+                        <div className="fixed inset-0 z-100 bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxPhoto(null)}>
                             <div className="relative max-w-lg w-full" onClick={e => e.stopPropagation()}>
-                                <button onClick={() => setLightboxPhoto(null)} className="absolute -top-3 -right-3 p-2 bg-white rounded-full border-2 border-[#3D2C24] shadow-[2px_2px_0px_#3D2C24] z-10">
-                                    <X size={16} strokeWidth={3} />
+                                <button onClick={() => setLightboxPhoto(null)} className="absolute -top-3 -right-3 p-2 bg-white/5 rounded-full border border-white/15 shadow-lg shadow-black/20 z-10">
+                                    <X size={16} strokeWidth={2} />
                                 </button>
-                                <img src={lightboxPhoto.url} alt={lightboxPhoto.caption || ""} className="w-full rounded-2xl border-[3px] border-[#3D2C24]" />
-                                <div className="bg-white rounded-b-2xl border-x-[3px] border-b-[3px] border-[#3D2C24] p-4 -mt-2">
-                                    <p className="font-black text-[#3D2C24]">{lightboxPhoto.profiles?.username}</p>
-                                    {lightboxPhoto.caption && <p className="font-bold text-sm text-[#3D2C24]/70 mt-1">{lightboxPhoto.caption}</p>}
-                                    <p className="text-[10px] font-bold text-[#3D2C24]/40 mt-2">{new Date(lightboxPhoto.created_at).toLocaleDateString()}</p>
+                                <img src={lightboxPhoto.url} alt={lightboxPhoto.caption || ""} className="w-full rounded-2xl border border-white/15" />
+                                <div className="bg-white/5 rounded-b-2xl border-x-[3px] border-b-[3px] border-white/15 p-4 -mt-2">
+                                    <p className="font-black text-white/90">{lightboxPhoto.profiles?.username}</p>
+                                    {lightboxPhoto.caption && <p className="font-bold text-sm text-white/90/70 mt-1">{lightboxPhoto.caption}</p>}
+                                    <p className="text-[10px] font-bold text-white/90/40 mt-2">{new Date(lightboxPhoto.created_at).toLocaleDateString()}</p>
                                 </div>
                             </div>
                         </div>

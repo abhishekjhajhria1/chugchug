@@ -14,6 +14,7 @@ interface UserProfile {
     city: string | null;
     country: string | null;
     stealth_mode?: boolean;
+    privacy_settings?: any;
 }
 
 interface ChugContextType {

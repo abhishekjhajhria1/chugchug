@@ -87,33 +87,33 @@ export default function Rank() {
   return (
     <div className="space-y-6 pb-24">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-black text-[#3D2C24]">Leaderboard</h1>
+        <h1 className="text-3xl font-black text-white/90">Leaderboard</h1>
       </div>
 
-      <div className="flex bg-white rounded-xl border-[3px] border-[#3D2C24] overflow-hidden shadow-[4px_4px_0px_#3D2C24] mb-6">
+      <div className="flex bg-white/5 rounded-xl border border-white/15 overflow-hidden shadow-lg shadow-black/20 mb-6">
         <button
           onClick={() => setScope('global')}
-          className={`flex-1 py-3 font-black text-sm transition-colors flex items-center justify-center gap-2 ${scope === 'global' ? 'bg-[#FFD166] text-[#3D2C24]' : 'text-[#3D2C24]/50'}`}
+          className={`flex-1 py-3 font-black text-sm transition-colors flex items-center justify-center gap-2 ${scope === 'global' ? 'bg-amber-400/30 text-white/90' : 'text-white/90/50'}`}
         >
-          <Globe size={18} strokeWidth={3} /> Global
+          <Globe size={18} strokeWidth={2} /> Global
         </button>
         <div className="w-0.75 bg-[#3D2C24]" />
         <button
           onClick={() => setScope('group')}
-          className={`flex-1 py-3 font-black text-sm transition-colors flex items-center justify-center gap-2 ${scope === 'group' ? 'bg-[#A0E8AF] text-[#3D2C24]' : 'text-[#3D2C24]/50'}`}
+          className={`flex-1 py-3 font-black text-sm transition-colors flex items-center justify-center gap-2 ${scope === 'group' ? 'bg-green-300/20 text-white/90' : 'text-white/90/50'}`}
         >
-          <Users size={18} strokeWidth={3} /> Group
+          <Users size={18} strokeWidth={2} /> Group
         </button>
         <div className="w-0.75 bg-[#3D2C24]" />
         <button
           onClick={() => setScope('regional')}
-          className={`flex-1 py-3 font-black text-sm transition-colors flex items-center justify-center gap-2 ${scope === 'regional' ? 'bg-[#FF7B9C] text-white' : 'text-[#3D2C24]/50'}`}
+          className={`flex-1 py-3 font-black text-sm transition-colors flex items-center justify-center gap-2 ${scope === 'regional' ? 'bg-pink-500/30 text-white' : 'text-white/90/50'}`}
         >
-          <MapPin size={18} strokeWidth={3} /> Local
+          <MapPin size={18} strokeWidth={2} /> Local
         </button>
       </div>
 
-      <div className="bg-[#FFD166]/20 p-4 rounded-3xl border-[3px] border-[#FFD166]">
+      <div className="bg-amber-400/30/20 p-4 rounded-3xl border border-amber-400/30">
         {loading ? (
           <div className="text-center font-bold opacity-50 py-8">Loading ranks...</div>
         ) : leaders.length === 0 ? (
@@ -125,21 +125,21 @@ export default function Rank() {
             {leaders.map((leader, index) => (
               <div
                 key={leader.id}
-                className={`flex items-center justify-between bg-white rounded-xl p-4 border-[3px] border-[#3D2C24] shadow-[4px_4px_0px_#3D2C24] ${leader.id === user?.id ? 'ring-4 ring-[#FF7B9C]/50' : ''}`}
+                className={`flex items-center justify-between bg-white/5 rounded-xl p-4 border border-white/15 shadow-lg shadow-black/20 ${leader.id === user?.id ? 'ring-4 ring-[#FF7B9C]/50' : ''}`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg border-2 border-[#3D2C24] shadow-[2px_2px_0px_#3D2C24] ${index === 0 ? 'bg-[#FFD166]' : index === 1 ? 'bg-gray-300' : index === 2 ? 'bg-[#cd7f32]' : 'bg-[#A0E8AF]'}`}>
-                    {index === 0 ? <Trophy size={20} strokeWidth={3} /> : `#${index + 1}`}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-lg border border-white/15 shadow-lg shadow-black/20 ${index === 0 ? 'bg-amber-400/30' : index === 1 ? 'bg-gray-300' : index === 2 ? 'bg-amber-600/30' : 'bg-green-300/20'}`}>
+                    {index === 0 ? <Trophy size={20} strokeWidth={2} /> : `#${index + 1}`}
                   </div>
                   <div>
-                    <Link to={`/profile/${leader.id}`} className="font-bold text-lg block leading-tight hover:text-[#FF7B9C] transition-colors">
+                    <Link to={`/profile/${leader.id}`} className="font-bold text-lg block leading-tight hover:neon-pink transition-colors">
                       {leader.username}
                     </Link>
                     {scope === 'regional' && leader.city && <span className="text-xs font-bold opacity-50">{leader.city}</span>}
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="font-black text-xl text-[#FF7B9C] block leading-none">{leader.xp} XP</span>
+                  <span className="font-black text-xl neon-pink block leading-none">{leader.xp} XP</span>
                   <span className="text-xs font-bold opacity-50 uppercase tracking-widest block mt-1">Lvl {leader.level || 1}</span>
                 </div>
               </div>
