@@ -284,15 +284,16 @@ export default function GroupChat() {
       <div className="flex items-center gap-3 mb-4 shrink-0">
         <button
           onClick={() => navigate(`/group/${groupId}`)}
-          className="p-2 bg-white/5 rounded-full border border-white/15 shadow-lg shadow-black/20 text-white/90 transition-transform active:scale-95"
+          className="p-2 rounded-xl transition-transform active:scale-95"
+          style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
         >
-          <ArrowLeft size={20} strokeWidth={2} />
+          <ArrowLeft size={18} strokeWidth={2} />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-black text-white/90 truncate">{groupName || "Chat"}</h1>
-          <p className="text-xs font-bold text-white/90/50">Group Chat</p>
+          <h1 className="text-lg font-black truncate" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>{groupName || "Chat"}</h1>
+          <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>Group Chat</p>
         </div>
-        <div className="flex bg-pink-500/30/20 neon-pink px-3 py-1.5 rounded-full border border-white/15 shadow-lg shadow-black/20 font-black text-xs items-center gap-1">
+        <div className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(244,132,95,0.25)', color: 'var(--coral)' }}>
           💬 Live
         </div>
       </div>

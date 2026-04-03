@@ -163,8 +163,8 @@ export default function Party() {
 
   return (
     <div className="space-y-6 pb-24">
-      <h1 className="text-3xl font-black mb-2 flex items-center gap-3 text-white/90">
-        <PartyPopper size={32} strokeWidth={2} className="neon-pink" /> Party Hub
+      <h1 className="page-title flex items-center gap-2">
+        <PartyPopper size={26} style={{ color: 'var(--coral)' }} /> Party Hub
       </h1>
 
       {/* QR Modal */}
@@ -178,20 +178,33 @@ export default function Party() {
       />
 
       {/* Tabs */}
-      <div className="flex bg-white/5 rounded-xl border border-white/15 overflow-hidden shadow-lg shadow-black/20 mb-6 font-bold text-xs">
-        <button onClick={() => setView('feed')} className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap py-2 ${view === 'feed' ? 'bg-amber-400/30 text-white/90' : 'text-white/90/50'}`}>Discover</button>
-        <div className="w-0.75 bg-[#3D2C24]" />
-        <button onClick={() => setView('create')} className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap py-2 ${view === 'create' ? 'bg-pink-500/30 text-white' : 'text-white/90/50'}`}>Host</button>
-        <div className="w-0.75 bg-[#3D2C24]" />
-        <button onClick={() => setView('manage')} className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap py-2 ${view === 'manage' ? 'bg-green-300/20 text-white/90' : 'text-white/90/50'}`}>Manage</button>
-        <div className="w-0.75 bg-[#3D2C24]" />
-        <button onClick={() => setView('history')} className={`flex-1 overflow-hidden text-ellipsis whitespace-nowrap py-2 ${view === 'history' ? 'bg-[#118AB2] text-white' : 'text-white/90/50'}`}>History</button>
+      <div className="flex rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)' }}>
+        {([
+          { id: 'feed' as const,    label: 'Discover' },
+          { id: 'create' as const,  label: 'Host' },
+          { id: 'manage' as const,  label: 'Manage' },
+          { id: 'history' as const, label: 'History' },
+        ]).map(({ id, label }, i) => (
+          <button
+            key={id}
+            onClick={() => setView(id)}
+            className="flex-1 py-2.5 font-bold text-xs transition-all"
+            style={{
+              background: view === id ? 'var(--amber-dim)' : 'transparent',
+              color: view === id ? 'var(--amber)' : 'var(--text-muted)',
+              fontFamily: 'Nunito, sans-serif',
+              borderRight: i < 3 ? '1px solid var(--border)' : 'none',
+            }}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      {/* Scan to Join Button */}
+      {/* Scan QR Button */}
       <button onClick={() => setQrModal({ open: true, mode: 'scan', title: 'Scan Party QR' })}
-        className="w-full glass-btn-secondary mb-6 flex items-center justify-center gap-2 text-sm">
-        <Scan size={16} className="accent-violet" /> Scan QR to Join a Party
+        className="glass-btn-secondary w-full flex items-center justify-center gap-2 text-sm">
+        <Scan size={16} style={{ color: 'var(--indigo)' }} /> Scan QR to Join
       </button>
 
       {/* DISCOVER VIEW */}

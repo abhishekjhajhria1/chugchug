@@ -20,8 +20,6 @@ export default function QRCodeModal({ isOpen, onClose, mode: initialMode, data: 
   const [copied, setCopied] = useState(false)
   const [scanning, setScanning] = useState(false)
   const [scanError, setScanError] = useState("")
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
   const openerRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -44,63 +42,40 @@ export default function QRCodeModal({ isOpen, onClose, mode: initialMode, data: 
   useEffect(() => {
     if (!isOpen || mode !== 'scan') return
 
-    let detector: any = null
-    let animFrame: number
+    let html5QrCode: any;
 
     const startScanner = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        })
-        streamRef.current = stream
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream
-          await videoRef.current.play()
-          setScanning(true)
-        }
-
-        if ('BarcodeDetector' in window) {
-          detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] })
-
-          const scan = async () => {
-            if (!videoRef.current || videoRef.current.readyState < 2) {
-              animFrame = requestAnimationFrame(scan)
-              return
+        const { Html5Qrcode } = await import('html5-qrcode');
+        html5QrCode = new Html5Qrcode("qr-reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        
+        await html5QrCode.start(
+          { facingMode: "environment" }, 
+          config, 
+          (decodedText: string) => {
+            if (decodedText && onScanResult) {
+              onScanResult(decodedText);
+              html5QrCode.stop().then(() => onClose()).catch(console.error);
             }
-            try {
-              const barcodes = await detector.detect(videoRef.current)
-              if (barcodes.length > 0) {
-                const result = barcodes[0].rawValue
-                if (result && onScanResult) {
-                  onScanResult(result)
-                  stopScanner()
-                  onClose()
-                  return
-                }
-              }
-            } catch { /* ignore frame errors */ }
-            animFrame = requestAnimationFrame(scan)
-          }
-          scan()
-        } else {
-          setScanError("QR scanning not supported on this browser. Try Chrome on Android or Safari on iOS.")
-        }
+          }, 
+          () => { /* Ignore decode errors as they happen constantly on blank frames */ }
+        );
+        setScanning(true)
       } catch (err: any) {
         setScanError(err.message || "Could not access camera")
       }
     }
 
-    const stopScanner = () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(t => t.stop())
-        streamRef.current = null
-      }
-      if (animFrame) cancelAnimationFrame(animFrame)
-      setScanning(false)
-    }
+    // Small delay to ensure the DOM element exists
+    const timer = setTimeout(() => startScanner(), 100);
 
-    startScanner()
-    return () => stopScanner()
+    return () => {
+      clearTimeout(timer);
+      if (html5QrCode?.isScanning) {
+        html5QrCode.stop().catch(console.error);
+      }
+    }
   }, [isOpen, mode, onScanResult, onClose])
 
   const handleCopy = () => {
@@ -172,24 +147,14 @@ export default function QRCodeModal({ isOpen, onClose, mode: initialMode, data: 
                 </p>
               </div>
             ) : (
-              <div className="relative w-full aspect-square rounded-2xl overflow-hidden" role="region" aria-label="QR scanner" style={{ border: '2px solid var(--glass-edge)' }}>
-                <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
-                {scanning && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-48 h-48 border-2 rounded-2xl"
-                      style={{
-                        borderColor: 'rgba(167,139,250,0.50)',
-                        boxShadow: '0 0 20px rgba(167,139,250,0.20)',
-                        animation: 'glowPulse 2s ease-in-out infinite',
-                      }} />
-                  </div>
-                )}
+              <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black flex items-center justify-center" style={{ border: '2px solid var(--glass-edge)' }}>
+                <div id="qr-reader" className="w-full h-full [&_video]:object-cover" />
                 {!scanning && (
-                  <div className="absolute inset-0 flex items-center justify-center"
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none"
                     style={{ background: 'rgba(0,0,0,0.50)' }}>
-                    <div className="text-center" aria-live="polite">
-                      <Camera size={32} className="mx-auto mb-2 accent-violet" />
-                      <p className="text-sm font-medium">Starting camera...</p>
+                    <div className="text-center">
+                      <Camera size={32} className="mx-auto mb-2 accent-violet animate-pulse" />
+                      <p className="text-sm font-medium text-white">Starting camera...</p>
                     </div>
                   </div>
                 )}

@@ -1,8 +1,21 @@
 import { useState, useEffect, useMemo } from "react"
-import { Globe, Trophy, UtensilsCrossed, Star, Flame, TrendingUp, Zap, Award, BarChart3, Sparkles } from "lucide-react"
+import { Globe, Trophy, UtensilsCrossed, Star, Flame, TrendingUp, Zap, Award, BarChart3, Sparkles, MessageSquareText, Plus, Loader2 } from "lucide-react"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { Link } from "react-router-dom"
+
+interface WorldExperience {
+    id: string
+    user_id: string
+    title: string
+    content: string
+    likes_count: number
+    created_at: string
+    profiles: {
+        username: string
+        avatar_url: string
+    }
+}
 
 interface Activity {
     id: string
@@ -76,10 +89,16 @@ export default function World() {
     const [totalLogs, setTotalLogs] = useState(0)
     const [userRank, setUserRank] = useState<number | null>(null)
     const [recentActivities, setRecentActivities] = useState<Activity[]>([])
-    const [challenges] = useState<Challenge[]>([
-        { id: '1', title: 'Weekend Warrior', description: 'Log 10 activities this week', target: 10, current: 0, icon: '⚔️', color: '#FFD166' },
+    const [experiences, setExperiences] = useState<WorldExperience[]>([])
+    const [showExpForm, setShowExpForm] = useState(false)
+    const [newExpTitle, setNewExpTitle] = useState("")
+    const [newExpContent, setNewExpContent] = useState("")
+    const [submittingExp, setSubmittingExp] = useState(false)
+
+    const [challenges, setChallenges] = useState<Challenge[]>([
+        { id: '1', title: 'Weekly Warrior', description: 'Log 10 activities this week', target: 10, current: 0, icon: '⚔️', color: '#FFD166' },
         { id: '2', title: 'Social Butterfly', description: 'Join 3 groups', target: 3, current: 0, icon: '🦋', color: '#A0E8AF' },
-        { id: '3', title: 'Recipe Master', description: 'Log 5 unique recipes', target: 5, current: 0, icon: '👨‍🍳', color: '#FF7B9C' },
+        { id: '3', title: 'Recipe Master', description: 'Log 5 recipes', target: 5, current: 0, icon: '👨‍🍳', color: '#FF7B9C' },
     ])
 
     const [tickerIndex, setTickerIndex] = useState(0)
@@ -125,7 +144,32 @@ export default function World() {
                     supabase
                         .from("activity_logs")
                         .select("id", { count: "exact", head: true }),
+                    supabase
+                        .from("world_experiences")
+                        .select("*, profiles(username, avatar_url)")
+                        .order("created_at", { ascending: false })
+                        .limit(5),
                 ])
+
+                // Calculate Challenges dynamically
+                try {
+                    const startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); startOfWeek.setHours(0,0,0,0)
+                    const [ { data: weekLogs }, { count: grps } ] = await Promise.all([
+                        supabase.from("activity_logs").select("id, photo_metadata").eq("user_id", user.id).gte("created_at", startOfWeek.toISOString()),
+                        supabase.from("group_members").select("group_id", { count: "exact", head: true }).eq("user_id", user.id)
+                    ])
+                    
+                    const wLogs = weekLogs || []
+                    const currentActivityCount = wLogs.length
+                    const recipeLogs = wLogs.filter(l => l.photo_metadata?.is_recipe).length
+                    
+                    setChallenges(prev => prev.map(c => {
+                        if (c.id === '1') return { ...c, current: currentActivityCount }
+                        if (c.id === '2') return { ...c, current: grps || 0 }
+                        if (c.id === '3') return { ...c, current: recipeLogs }
+                        return c
+                    }))
+                } catch(e) { console.error("Could not load challenges", e) }
 
                 if (activityRes.data?.[0]) {
                     setTopActivity(activityRes.data[0] as Activity)
@@ -203,6 +247,16 @@ export default function World() {
                     setRecentActivities(recentRes.data as Activity[])
                 }
 
+                // Experiences are fetched below separately
+
+                const { data: expData } = await supabase
+                    .from("world_experiences")
+                    .select("*, profiles(username, avatar_url)")
+                    .order("created_at", { ascending: false })
+                    .limit(5)
+                
+                if (expData) setExperiences(expData as WorldExperience[])
+
                 setTotalUsers(countRes.count || 0)
                 setTotalLogs(logCountRes.count || 0)
 
@@ -223,6 +277,25 @@ export default function World() {
         }, 3000)
         return () => clearInterval(interval)
     }, [recentActivities])
+
+    const handleSubmitExp = async () => {
+        if (!user || !newExpTitle.trim() || !newExpContent.trim()) return
+        setSubmittingExp(true)
+        const { data, error } = await supabase.from('world_experiences').insert({
+            user_id: user.id,
+            title: newExpTitle,
+            content: newExpContent
+        }).select('*, profiles(username, avatar_url)').single()
+        
+        if (data) {
+            setExperiences([data as WorldExperience, ...experiences])
+            setShowExpForm(false)
+            setNewExpTitle("")
+            setNewExpContent("")
+        }
+        if (error) alert("Error sharing tale: " + error.message)
+        setSubmittingExp(false)
+    }
 
     const countryGroups = useMemo(() => {
         return topRankers.reduce((acc, r) => {
@@ -317,6 +390,65 @@ export default function World() {
                     </div>
                 </div>
             )}
+
+            {/* 🌌 TALES FROM THE VOID (FORUM) */}
+            <section className="glass-card bg-violet-500/20 border-violet-500/30 glow-violet">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-black text-white/90 flex items-center gap-2">
+                        <MessageSquareText className="neon-purple" size={24} strokeWidth={2} /> Tales from the Void
+                    </h2>
+                    {(profile?.xp ?? 0) > 50 && !showExpForm && (
+                        <button onClick={() => setShowExpForm(true)} className="glass-btn-secondary py-1.5 px-3 text-xs">
+                            <Plus size={14} /> Share Tale
+                        </button>
+                    )}
+                </div>
+
+                {showExpForm && (
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/15 mb-4 anim-slide">
+                        <input 
+                            value={newExpTitle} onChange={e => setNewExpTitle(e.target.value)}
+                            placeholder="A wild night at..." 
+                            className="glass-input mb-3 font-black text-lg" 
+                        />
+                        <textarea 
+                            value={newExpContent} onChange={e => setNewExpContent(e.target.value)}
+                            placeholder="Share your experience with the world (it was legendary, right?)" 
+                            className="glass-input mb-3 h-24 resize-none"
+                        />
+                        <div className="flex gap-2">
+                            <button onClick={() => setShowExpForm(false)} className="glass-btn-secondary flex-1">Cancel</button>
+                            <button onClick={handleSubmitExp} disabled={submittingExp} className="glass-btn flex-1 bg-violet-500/30!">
+                                {submittingExp ? <Loader2 className="animate-spin" size={16}/> : 'Post to Void'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="space-y-3">
+                    {experiences.length === 0 ? (
+                        <p className="text-center font-bold text-white/50 py-4">The void is silent. No tales yet.</p>
+                    ) : (
+                        experiences.map(exp => (
+                            <div key={exp.id} className="bg-black/40 rounded-xl p-4 border border-white/5 shadow-inner">
+                                <h3 className="font-black text-lg neon-amber mb-1 leading-tight">{exp.title}</h3>
+                                <p className="text-sm font-medium text-white/80 mb-3">{exp.content}</p>
+                                <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-5 h-5 rounded-full bg-pink-500/30 overflow-hidden">
+                                           {exp.profiles?.avatar_url && <img src={exp.profiles.avatar_url} className="w-full h-full object-cover"/>}
+                                        </div>
+                                        <span className="text-xs font-bold opacity-60">@{exp.profiles?.username}</span>
+                                    </div>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">
+                                        {new Date(exp.created_at).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </section>
 
             {/* 🔥 TRENDING NOW */}
             {trending.length > 0 && (

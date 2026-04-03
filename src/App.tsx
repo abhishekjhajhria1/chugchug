@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom"
 import { supabase } from "./lib/supabase"
 import type { Session } from "@supabase/supabase-js"
 import Layout from "./components/Layout"
+import BottomNav from "./components/BottomNav"
 import Home from "./pages/Home"
 import Log from "./pages/Log"
 import Party from "./pages/Party"
@@ -16,6 +17,11 @@ import PublicProfile from "./pages/PublicProfile"
 import World from "./pages/World"
 import GroupBalances from "./pages/GroupBalances"
 import ConnectPage from "./pages/ConnectPage"
+import Rank from "./pages/Rank"
+import LiveParty from "./pages/LiveParty"
+import SessionPage from "./pages/SessionPage"
+import Social from "./pages/Social"
+import ManaByteOverlay from "./components/ManaByteOverlay"
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -36,20 +42,26 @@ function App() {
 
   return (
     <Layout>
+      <ManaByteOverlay />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/log" element={<Log />} />
-        <Route path="/party" element={<Party />} />
-        <Route path="/party/:id" element={<PartyView />} />
-        <Route path="/world" element={<World />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/profile/:id" element={<PublicProfile />} />
-        <Route path="/groups" element={<Groups />} />
-        <Route path="/group/:id" element={<GroupFeed />} />
-        <Route path="/group/:id/chat" element={<GroupChat />} />
-        <Route path="/group/:id/balances" element={<GroupBalances />} />
-        <Route path="/connect/:id" element={<ConnectPage />} />
+        <Route path="/"                    element={<Home />} />
+        <Route path="/log"                 element={<Log />} />
+        <Route path="/party"               element={<Party />} />
+        <Route path="/party/:id"           element={<PartyView />} />
+        <Route path="/world"               element={<World />} />
+        <Route path="/profile"             element={<Profile />} />
+        <Route path="/profile/:id"         element={<PublicProfile />} />
+        <Route path="/groups"              element={<Groups />} />
+        <Route path="/group/:id"           element={<GroupFeed />} />
+        <Route path="/group/:id/chat"      element={<GroupChat />} />
+        <Route path="/group/:id/balances"  element={<GroupBalances />} />
+        <Route path="/connect/:id"         element={<ConnectPage />} />
+        <Route path="/rank"                element={<Rank />} />
+        <Route path="/live-party/:partyId?"element={<LiveParty />} />
+        <Route path="/session"             element={<SessionPage />} />
+        <Route path="/social"              element={<Social />} />
       </Routes>
+      <BottomNav />
     </Layout>
   )
 }

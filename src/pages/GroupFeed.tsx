@@ -2,9 +2,8 @@ import { useCallback, useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
-import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, Camera, X, HandCoins, Loader2, PartyPopper } from "lucide-react"
+import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, X, HandCoins, Loader2, PartyPopper } from "lucide-react"
 import { Link } from "react-router-dom"
-import PhotoUpload from "../components/PhotoUpload"
 import BeerCounter from "../components/BeerCounter"
 import LiveCounter from "../components/LiveCounter"
 import PhotoMetadata from "../components/PhotoMetadata"
@@ -20,6 +19,7 @@ export interface ActivityLog {
     created_at: string
     profiles?: {
         username: string
+        level?: number
     }
     log_appraisals?: {
         vote_type: string
@@ -32,13 +32,7 @@ export interface ActivityLog {
     }[]
 }
 
-interface GroupPhoto {
-    id: string
-    url: string
-    caption: string | null
-    created_at: string
-    profiles?: { username: string }
-}
+
 
 export default function GroupFeed() {
     const { id } = useParams()
@@ -47,10 +41,7 @@ export default function GroupFeed() {
 
     const [group, setGroup] = useState<{ name: string, invite_code: string } | null>(null)
     const [logs, setLogs] = useState<ActivityLog[]>([])
-    const [photos, setPhotos] = useState<GroupPhoto[]>([])
     const [loading, setLoading] = useState(true)
-    const [showPhotoUpload, setShowPhotoUpload] = useState(false)
-    const [lightboxPhoto, setLightboxPhoto] = useState<GroupPhoto | null>(null)
 
     // Splitwise State
     const [showSplitModal, setShowSplitModal] = useState(false)
@@ -71,46 +62,39 @@ export default function GroupFeed() {
 
         if (groupData) setGroup(groupData)
 
-        const { data: logsData, error } = await supabase
-            .from("activity_logs")
-            .select(`
-                *,
-                profiles:user_id ( username ),
-                log_appraisals ( vote_type, appraiser_id ),
-                photo_verifications ( verifier_id, profiles:verifier_id ( username ) )
-            `)
-            .eq('group_id', id)
-            .order("created_at", { ascending: false })
-            .limit(50)
-
-        if (!error && logsData) {
-            setLogs(logsData as any)
-        }
-
-        const { data: photosData } = await supabase
-            .from("photos")
-            .select("id, url, caption, created_at, profiles:user_id(username)")
-            .eq("group_id", id)
-            .order("created_at", { ascending: false })
-            .limit(30)
-
-        if (photosData) {
-            setPhotos(photosData as any)
-        }
-
         const { data: membersData } = await supabase
             .from("group_members")
             .select("profiles(id, username)")
             .eq("group_id", id)
 
+        let memberIds: string[] = []
         if (membersData) {
             const parsedMembers = membersData.map((m: any) => ({
                 id: m.profiles.id,
                 username: m.profiles.username
             }))
             setGroupMembers(parsedMembers)
-            // Default to everyone selected
             setSelectedSplitters(parsedMembers.map((m: any) => m.id))
+            memberIds = parsedMembers.map((m: any) => m.id)
+        }
+
+        if (memberIds.length > 0) {
+            const { data: logsData, error } = await supabase
+                .from("activity_logs")
+                .select(`
+                    *,
+                    profiles ( username, level ),
+                    log_appraisals ( vote_type, appraiser_id )
+                `)
+                .in("user_id", memberIds)
+                .order("created_at", { ascending: false })
+                .limit(50)
+
+            if (!error && logsData) {
+                setLogs(logsData as any)
+            }
+        } else {
+            setLogs([])
         }
 
         setLoading(false)
@@ -124,7 +108,17 @@ export default function GroupFeed() {
                 .channel(`group:${id}:activities`)
                 .on(
                     'postgres_changes',
-                    { event: 'INSERT', schema: 'public', table: 'activity_logs' },
+                    { event: 'INSERT', schema: 'public', table: 'activity_logs', filter: `group_id=eq.${id}` },
+                    () => fetchGroupData()
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'activity_logs', filter: `group_id=eq.${id}` },
+                    () => fetchGroupData()
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'DELETE', schema: 'public', table: 'activity_logs', filter: `group_id=eq.${id}` },
                     () => fetchGroupData()
                 )
                 .on(
@@ -144,7 +138,7 @@ export default function GroupFeed() {
                 )
                 .on(
                     'postgres_changes',
-                    { event: 'INSERT', schema: 'public', table: 'photos' },
+                    { event: 'INSERT', schema: 'public', table: 'photos', filter: `group_id=eq.${id}` },
                     () => fetchGroupData()
                 )
                 .subscribe()
@@ -292,8 +286,26 @@ export default function GroupFeed() {
                </div>
             </div>
 
-            {/* Live Beer Counter for this Group */}
-            <BeerCounter groupId={id} compact />
+            {/* Live Drinking Session Section */}
+            <div className="relative group overflow-hidden rounded-3xl p-[1px] my-6">
+               {/* Animated border glow */}
+               <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-500 to-rose-500 animate-[spin_4s_linear_infinite] opacity-50 group-hover:opacity-100 transition-opacity" />
+               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent z-0" />
+               
+               <div className="relative z-10 bg-black/80 backdrop-blur-xl rounded-[23px] p-5 h-full space-y-4">
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(0,240,255,1)] animate-pulse" />
+                        <h2 className="font-black text-xl text-white/90 uppercase tracking-widest">Active Session</h2>
+                     </div>
+                     <span className="text-[10px] bg-white/10 px-2 py-1 rounded border border-white/20 text-white/50 font-bold uppercase tracking-widest">Live</span>
+                  </div>
+                  
+                  {/* The actual counter components */}
+                  <BeerCounter groupId={id} compact onSessionLogged={fetchGroupData} />
+               </div>
+            </div>
+            {/* Solo Live Leaderboard tile (auto-hides when empty) */}
             <LiveCounter groupId={id} showLeaderboard />
 
             {/* Splitwise Modal */}
@@ -372,17 +384,9 @@ export default function GroupFeed() {
             <div className="flex gap-3">
                 <button
                     onClick={() => navigate(`/group/${id}/chat`)}
-                    className="flex-1 bg-green-300/20 py-3 rounded-xl border border-white/15 font-black text-white/90 shadow-lg shadow-black/20 flex items-center justify-center gap-2 transition-transform active:scale-95"
+                    className="flex-1 bg-green-400/20 py-3 rounded-xl border border-white/15 font-black text-white/90 shadow-lg shadow-black/20 flex items-center justify-center gap-2 transition-transform active:scale-95"
                 >
-                    <MessageCircle size={18} strokeWidth={2} /> Group Chat
-                </button>
-                <button
-                    onClick={() => {
-                        document.getElementById('group-photos-section')?.scrollIntoView({ behavior: 'smooth' })
-                    }}
-                    className="flex-1 bg-amber-400/30 py-3 rounded-xl border border-white/15 font-black text-white/90 shadow-lg shadow-black/20 flex items-center justify-center gap-2 transition-transform active:scale-95"
-                >
-                    <Camera size={18} strokeWidth={2} /> Jump to Photos {photos.length > 0 && <span className="bg-pink-500/30 text-white text-[10px] px-1.5 py-0.5 rounded-full">{photos.length}</span>}
+                    <MessageCircle size={18} strokeWidth={2} className="neon-lime" /> Group Chat
                 </button>
             </div>
 
@@ -413,11 +417,17 @@ export default function GroupFeed() {
                                 const catColors: Record<string, string> = { drink: '#FFD166', snack: '#FF9F1C', cigarette: '#A0E8AF', gym: '#118AB2', detox: '#06D6A0' }
                                 const badgeColor = catColors[log.category] || '#CCC'
 
+                                const userLevel = log.profiles?.level || 1
+                                
+                                let auraClass = "border-white/15"
+                                if (userLevel >= 25) auraClass = "shadow-[0_0_20px_rgba(168,85,247,0.6)] border-[#A855F7] animate-pulse"
+                                else if (userLevel >= 10) auraClass = "shadow-[0_0_15px_rgba(255,95,0,0.6)] border-[#FF5F00]"
+
                                 return (
                                     <div key={log.id} className="glass-card flex flex-col gap-3 animate-fadeInScale bg-white/5">
                                         <div className="flex justify-between items-start">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <div className="w-8 h-8 rounded-full border border-white/15 shadow-lg shadow-black/20" style={{ backgroundColor: badgeColor }} />
+                                                <div className={`w-8 h-8 rounded-full border shadow-lg ${auraClass}`} style={{ backgroundColor: badgeColor }} />
                                                 <div>
                                                     <Link to={`/profile/${log.user_id}`} className="text-sm font-bold text-white/90 opacity-70 leading-none hover:neon-pink hover:opacity-100 transition-colors">
                                                         {log.profiles?.username || "Unknown"}
@@ -483,79 +493,6 @@ export default function GroupFeed() {
                     </div>
                 )}
             </div>
-
-            {/* PHOTOS SECTION */}
-            <div id="group-photos-section" className="mt-12 pt-8 border-t-[3px] border-dashed border-white/15/20 space-y-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <Camera className="neon-pink" size={24} strokeWidth={2} />
-                    <h2 className="text-xl font-black text-white/90">Group Photos</h2>
-                </div>
-
-                {/* Upload Toggle */}
-                {!showPhotoUpload ? (
-                    <button
-                        onClick={() => setShowPhotoUpload(true)}
-                        className="glass-btn w-full bg-green-300/20! flex items-center justify-center gap-2"
-                    >
-                        <Camera size={18} strokeWidth={2} /> Share a Photo
-                    </button>
-                ) : (
-                    <div className="relative">
-                        <button onClick={() => setShowPhotoUpload(false)} className="absolute top-2 right-2 z-10 p-1 text-white/90/50 hover:text-white/90">
-                            <X size={20} strokeWidth={2} />
-                        </button>
-                        {user && id && (
-                            <PhotoUpload
-                                groupId={id}
-                                userId={user.id}
-                                onUploadComplete={() => {
-                                    setShowPhotoUpload(false)
-                                    fetchGroupData()
-                                }}
-                            />
-                        )}
-                    </div>
-                )}
-
-                {/* Photo Grid */}
-                {photos.length === 0 ? (
-                    <div className="text-center glass-card bg-white/5 border-dashed opacity-70">
-                        <p className="font-bold">No photos shared yet. Be the first! 📸</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 gap-3">
-                        {photos.map(photo => (
-                            <div
-                                key={photo.id}
-                                className="relative rounded-xl overflow-hidden border border-white/15 shadow-lg shadow-black/20 cursor-pointer hover:-translate-y-1 transition-transform"
-                                onClick={() => setLightboxPhoto(photo)}
-                            >
-                                <img src={photo.url} alt={photo.caption || "Group photo"} className="w-full h-40 object-cover" />
-                                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent p-2">
-                                    <p className="text-white font-bold text-xs truncate">{photo.profiles?.username}</p>
-                                    {photo.caption && <p className="text-white/80 text-[10px] truncate">{photo.caption}</p>}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                    {/* Lightbox */}
-                    {lightboxPhoto && (
-                        <div className="fixed inset-0 z-100 bg-black/80 flex items-center justify-center p-4" onClick={() => setLightboxPhoto(null)}>
-                            <div className="relative max-w-lg w-full" onClick={e => e.stopPropagation()}>
-                                <button onClick={() => setLightboxPhoto(null)} className="absolute -top-3 -right-3 p-2 bg-white/5 rounded-full border border-white/15 shadow-lg shadow-black/20 z-10">
-                                    <X size={16} strokeWidth={2} />
-                                </button>
-                                <img src={lightboxPhoto.url} alt={lightboxPhoto.caption || ""} className="w-full rounded-2xl border border-white/15" />
-                                <div className="bg-white/5 rounded-b-2xl border-x-[3px] border-b-[3px] border-white/15 p-4 -mt-2">
-                                    <p className="font-black text-white/90">{lightboxPhoto.profiles?.username}</p>
-                                    {lightboxPhoto.caption && <p className="font-bold text-sm text-white/90/70 mt-1">{lightboxPhoto.caption}</p>}
-                                    <p className="text-[10px] font-bold text-white/90/40 mt-2">{new Date(lightboxPhoto.created_at).toLocaleDateString()}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
         </div>
     )
 }

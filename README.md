@@ -37,6 +37,7 @@ Create a .env file in the project root with your own values:
 - VITE_FIREBASE_STORAGE_BUCKET
 - VITE_FIREBASE_MESSAGING_SENDER_ID
 - VITE_FIREBASE_APP_ID
+- VITE_BARTENDER_API
 
 ## Database Setup
 

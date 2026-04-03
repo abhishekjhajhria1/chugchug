@@ -29,20 +29,29 @@ export default function LiveCounter({ partyId, groupId, showLeaderboard, compact
     if (!path) return
 
     const counterRef = ref(firebaseDb, path)
-    onValue(counterRef, (snapshot) => {
+    const unsubscribe = onValue(counterRef, (snapshot) => {
       const data = snapshot.val()
       if (data) setCounters(data)
       else setCounters({})
     })
 
-    return () => off(counterRef)
+    return () => {
+      unsubscribe()
+      off(counterRef)
+    }
   }, [partyId, groupId])
 
   const entries = Object.entries(counters)
     .map(([userId, entry]) => ({ userId, ...entry }))
     .sort((a, b) => b.count - a.count)
 
-  const totalCount = entries.reduce((sum, e) => sum + e.count, 0)
+  const activeEntries = entries.filter(e => e.count > 0)
+  const totalCount = activeEntries.reduce((sum, e) => sum + e.count, 0)
+
+  // Hide the entire tile if no one is currently drinking
+  if (activeEntries.length === 0 && !compact) {
+    return null
+  }
 
   if (compact) {
     return (
@@ -50,14 +59,14 @@ export default function LiveCounter({ partyId, groupId, showLeaderboard, compact
         <Beer size={14} className="accent-gold" />
         <span className="font-bold text-sm accent-gold">{totalCount}</span>
         <span className="text-[10px] font-medium" style={{ color: 'var(--text-ghost)' }}>
-          · {entries.length} {entries.length === 1 ? 'person' : 'people'}
+          · {activeEntries.length} {activeEntries.length === 1 ? 'person' : 'people'}
         </span>
       </div>
     )
   }
 
   return (
-    <div className="glass-card glow-gold">
+    <div className="mt-4 pt-4 border-t border-white/10">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Beer size={18} className="accent-gold" />
@@ -71,41 +80,36 @@ export default function LiveCounter({ partyId, groupId, showLeaderboard, compact
         </div>
       </div>
 
-      {showLeaderboard && entries.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-1 mb-2">
-            <TrendingUp size={12} className="accent-mint" />
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-dim)' }}>
+      {showLeaderboard && activeEntries.length > 0 && (
+        <div className="space-y-3 mt-6">
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp size={16} className="neon-lime" />
+            <span className="text-xs font-black uppercase tracking-widest text-white/90">
               Live Leaderboard
             </span>
           </div>
-          {entries.map((entry, i) => (
-            <div key={entry.userId} className="flex items-center justify-between p-2 rounded-lg anim-slide"
+          {activeEntries.map((entry, i) => (
+            <div key={entry.userId} className="relative flex items-center justify-between p-3 rounded-2xl anim-slide overflow-hidden group border border-white/5"
               style={{
-                background: 'var(--glass-fill)',
-                border: '1px solid var(--glass-edge)',
-                animationDelay: `${i * 0.04}s`,
+                background: i === 0 ? 'linear-gradient(90deg, rgba(251,191,36,0.15) 0%, rgba(0,0,0,0.4) 100%)' : 'var(--glass-fill-inset)',
+                animationDelay: `${i * 0.05}s`,
               }}>
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
-                  style={{
-                    background: i === 0 ? 'rgba(251,191,36,0.25)' : 'var(--glass-fill)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}>
-                  {i + 1}
+              {/* Highlight bar for #1 */}
+              {i === 0 && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 shadow-[0_0_10px_#fbbf24]"></div>}
+
+              <div className="flex items-center gap-3 relative z-10">
+                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shadow-lg ${i === 0 ? 'bg-amber-400 text-black' : 'bg-white/10 text-white border border-white/10'}`}>
+                  #{i + 1}
                 </span>
-                <span className="font-semibold text-sm">{entry.username}</span>
+                <span className={`font-black text-base ${i === 0 ? 'text-amber-400' : 'text-white/90'}`}>{entry.username}</span>
               </div>
-              <span className="font-bold text-sm accent-gold">{entry.count} 🍺</span>
+              <div className="flex items-center gap-1 bg-black/40 px-3 py-1 rounded-full border border-white/5 relative z-10">
+                <span className="font-black text-lg neon-amber">{entry.count}</span>
+                <span className="text-[10px] text-white/50">🍺</span>
+              </div>
             </div>
           ))}
         </div>
-      )}
-
-      {entries.length === 0 && (
-        <p className="text-center text-sm font-medium py-4" style={{ color: 'var(--text-ghost)' }}>
-          No one is counting yet. Be the first! 🍺
-        </p>
       )}
     </div>
   )

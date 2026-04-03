@@ -149,18 +149,18 @@ export default function GroupBalances() {
 
   return (
     <div className="space-y-6 pb-24">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate(`/group/${groupId}/chat`)} className="p-2 bg-white/5 rounded-full border border-white/15 shadow-lg shadow-black/20 text-white/90 transition-transform active:scale-95">
-          <ArrowLeft size={20} strokeWidth={2} />
+      <div className="flex items-center gap-3">
+        <button onClick={() => navigate(`/group/${groupId}/chat`)} className="p-2 rounded-xl transition-transform active:scale-95" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+          <ArrowLeft size={18} strokeWidth={2} />
         </button>
-        <h1 className="text-2xl font-black text-white/90 truncate flex-1">Balances</h1>
+        <h1 className="page-title truncate flex-1">Balances</h1>
       </div>
 
-      <div className="glass-card bg-amber-400/30/20 border-amber-400/30">
-        <h2 className="text-xl font-black text-white/90 flex items-center gap-2 mb-2">
-          <Receipt strokeWidth={2} className="neon-amber" /> Who owes Who
+      <div className="glass-card">
+        <h2 className="text-lg font-black flex items-center gap-2 mb-2" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>
+          <Receipt strokeWidth={2} style={{ color: 'var(--amber)' }} /> Who Owes Who
         </h2>
-        <p className="font-bold text-sm text-white/90/60 mb-6">{groupName}</p>
+        <p className="font-bold text-sm mb-6" style={{ color: 'var(--text-muted)' }}>{groupName}</p>
 
         {loading ? (
           <div className="text-center font-bold text-white/90/50 py-10">

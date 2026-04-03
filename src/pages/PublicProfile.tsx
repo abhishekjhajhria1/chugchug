@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { UserCircle, ArrowLeft } from "lucide-react"
+import { UserCircle, ArrowLeft, UserPlus, Check } from "lucide-react"
+import { useChug } from "../context/ChugContext"
 
 interface PublicProfileData {
     id: string
@@ -19,9 +20,11 @@ interface PublicProfileData {
 export default function PublicProfile() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
+    const { user } = useChug()
     const [profile, setProfile] = useState<PublicProfileData | null>(null)
     const [activities, setActivities] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
+    const [friendStatus, setFriendStatus] = useState<'none' | 'pending' | 'accepted'>('none')
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -51,11 +54,38 @@ export default function PublicProfile() {
                 if (acts) setActivities(acts)
             }
 
+            if (user && id && user.id !== id) {
+                const u1 = user.id < id ? user.id : id
+                const u2 = user.id < id ? id : user.id
+                const { data: fData } = await supabase
+                    .from('friendships')
+                    .select('status')
+                    .eq('user_1', u1)
+                    .eq('user_2', u2)
+                    .single()
+                
+                if (fData) setFriendStatus(fData.status)
+            }
+
             setLoading(false)
         }
 
         fetchUser()
-    }, [id])
+    }, [id, user])
+
+    const handleAddFriend = async () => {
+        if (!user || !id) return
+        const u1 = user.id < id ? user.id : id
+        const u2 = user.id < id ? id : user.id
+        
+        setFriendStatus('pending')
+        await supabase.from('friendships').insert({
+            user_1: u1,
+            user_2: u2,
+            status: 'pending',
+            action_user_id: user.id
+        })
+    }
 
     if (loading) {
         return <div className="p-8 text-center font-bold">Loading Profile...</div>
@@ -114,6 +144,27 @@ export default function PublicProfile() {
                         <p className="font-black text-2xl neon-lime">{profile.xp ?? "-"}</p>
                     </div>
                 </div>
+
+                {user && user.id !== id && (
+                    <div className="mt-6 flex justify-center">
+                        {friendStatus === 'accepted' ? (
+                            <div className="px-6 py-3 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-2 font-black text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                                <Check size={18} /> Friends
+                            </div>
+                        ) : friendStatus === 'pending' ? (
+                            <div className="px-6 py-3 rounded-xl bg-white/5 text-white/50 border border-white/10 flex items-center gap-2 font-black text-sm uppercase tracking-widest">
+                                Request Sent
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={handleAddFriend}
+                                className="px-6 py-3 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/30 flex items-center gap-2 font-black text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(99,102,241,0.2)] transition-all active:scale-95"
+                            >
+                                <UserPlus size={18} /> Add Friend
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* ACTIVITY FEED */}

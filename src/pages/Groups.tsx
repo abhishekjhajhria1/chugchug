@@ -45,6 +45,7 @@ export default function Groups() {
   const [newInviteCode, setNewInviteCode] = useState("")
 
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -93,61 +94,116 @@ export default function Groups() {
       return
     }
 
-    const [
-      { data: logsData },
-      { data: partiesData }
-    ] = await Promise.all([
-      supabase
-        .from("activity_logs")
-        .select(`*, profiles:user_id(username), log_appraisals(vote_type, appraiser_id), photo_verifications(verifier_id, profiles:verifier_id(username))`)
-        .in('privacy_level', ['public', 'groups'])
-        .order("created_at", { ascending: false })
-        .limit(20),
-      supabase
-        .from("parties")
-        .select(`*, profiles:host_id(username)`)
-        .in('group_id', groupIds)
-        .neq('privacy_level', 'hidden')
-        .order("created_at", { ascending: false })
-        .limit(10)
-    ])
+    try {
+      const [
+        groupLogsResponse,
+        memberPublicLogsResponse,
+        partiesResponse
+      ] = await Promise.all([
+        supabase
+          .from("activity_logs")
+          .select(`*, profiles(username), log_appraisals(vote_type, appraiser_id)`)
+          .in('group_id', groupIds)
+          .in('privacy_level', ['public', 'groups'])
+          .order("created_at", { ascending: false })
+          .limit(30),
+        supabase
+          .from("activity_logs")
+          .select(`*, profiles(username), log_appraisals(vote_type, appraiser_id)`)
+          .in('user_id', groupUserIds)
+          .eq('privacy_level', 'public')
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("parties")
+          .select(`*, profiles:host_id(username)`)
+          .in('group_id', groupIds)
+          .neq('privacy_level', 'hidden')
+          .order("created_at", { ascending: false })
+          .limit(10)
+      ])
 
-    const combined: FeedItem[] = [
-      ...(logsData || []).map(l => ({ type: 'log' as const, date: l.created_at, data: l })),
-      ...(partiesData || []).map(p => ({ type: 'party' as const, date: p.created_at, data: p }))
-    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      const groupLogsData = groupLogsResponse.data
+      const memberPublicLogsData = memberPublicLogsResponse.data
+      const partiesData = partiesResponse.data
 
-    // Filter feed to only group members
-    const gFeed: FeedItem[] = []
+      const mergedLogs = new Map<string, ActivityLog>()
+      for (const log of [...(groupLogsData || []), ...(memberPublicLogsData || [])]) {
+        mergedLogs.set(log.id, log as ActivityLog)
+      }
 
-    for (const item of combined) {
-      const authorId = item.type === 'log' ? (item.data as ActivityLog).user_id : (item.data as PartyPreview).host_id
-      if (!groupUserIds.includes(authorId) || authorId === user.id) continue
+      const combined: FeedItem[] = [
+        ...Array.from(mergedLogs.values()).map(l => ({ type: 'log' as const, date: l.created_at, data: l })),
+        ...(partiesData || []).map(p => ({ type: 'party' as const, date: p.created_at, data: p }))
+      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-      if (item.type === 'log') {
-        const log = item.data as ActivityLog & { privacy_level?: string; group_id?: string | null }
-        if (log.privacy_level === 'groups' && (!log.group_id || !groupIds.includes(log.group_id))) {
-          continue
+      // Filter feed to only group members
+      const gFeed: FeedItem[] = []
+      const groupUserIdSet = new Set(groupUserIds)
+      const groupIdSet = new Set(groupIds)
+
+      for (const item of combined) {
+        const authorId = item.type === 'log' ? (item.data as ActivityLog).user_id : (item.data as PartyPreview).host_id
+        if (!groupUserIdSet.has(authorId)) continue
+
+        if (item.type === 'log') {
+          const log = item.data as ActivityLog & { privacy_level?: string; group_id?: string | null }
+          if (log.group_id && !groupIdSet.has(log.group_id)) {
+            continue
+          }
+          if (log.privacy_level === 'groups' && (!log.group_id || !groupIdSet.has(log.group_id))) {
+            continue
+          }
         }
-      }
 
-      if (item.type === 'party') {
-        const party = item.data as PartyPreview & { group_id?: string | null }
-        if (!party.group_id || !groupIds.includes(party.group_id)) continue
-      }
+        if (item.type === 'party') {
+          const party = item.data as PartyPreview & { group_id?: string | null }
+          if (!party.group_id || !groupIdSet.has(party.group_id)) continue
+        }
 
-      if (groupUserIds.includes(authorId)) {
         gFeed.push(item)
       }
-    }
 
-    setGroupFeed(gFeed)
-    setLoading(false)
+      setGroupFeed(gFeed)
+    } catch (err) {
+      console.error("Groups fetch error:", err)
+    } finally {
+      setLoading(false)
+    }
   }, [user])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    if (!user) return
+
+    const scheduleRefresh = () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current)
+      }
+      refreshTimeoutRef.current = setTimeout(() => {
+        fetchData()
+      }, 200)
+    }
+
+    const channel = supabase
+      .channel(`groups:${user.id}:feed`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'activity_logs' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'parties' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'group_members' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'log_appraisals' }, scheduleRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'photo_verifications' }, scheduleRefresh)
+      .subscribe()
+
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current)
+      }
+      supabase.removeChannel(channel)
+    }
+  }, [user, fetchData])
 
   const handleCreateGroup = async () => {
     if (!user || !groupName.trim()) return
@@ -218,7 +274,7 @@ export default function Groups() {
 
   const renderParty = (party: PartyPreview) => {
     return (
-      <div key={`party-${party.id}`} className="glass-card bg-pink-500/30/10 border-pink-500/30 animate-fadeInScale cursor-pointer" onClick={() => navigate(`/party/${party.id}`)}>
+      <div key={`party-${party.id}`} className="glass-card bg-pink-500/10 border-pink-500/30 animate-fadeInScale cursor-pointer" onClick={() => navigate(`/party/${party.id}`)}>
         <div className="flex items-center gap-2 mb-2">
           <PartyPopper size={24} className="neon-pink" />
           <div>
@@ -237,41 +293,49 @@ export default function Groups() {
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Header with Top-Left + Dropdown */}
-      <div className="flex items-center justify-between mb-4 relative">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="page-title">Community</h1>
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="w-10 h-10 bg-amber-400/30 rounded-full border border-white/15 shadow-lg shadow-black/20 flex items-center justify-center text-white/90 transition-transform active:scale-95"
+            className="glass-btn flex items-center gap-2 text-sm"
+            style={{ padding: '9px 16px', fontSize: 13 }}
           >
-            <Plus size={24} strokeWidth={2} />
+            <Plus size={16} strokeWidth={2.5} /> Group
           </button>
 
           {showDropdown && (
-            <div className="absolute top-12 left-0 w-48 bg-white/5 border border-white/15 rounded-xl shadow-lg shadow-black/20 overflow-hidden z-50">
+            <div
+              className="absolute top-12 right-0 w-48 rounded-2xl overflow-hidden z-50"
+              style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-mid)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+            >
               <button
                 onClick={() => { setModalMode('create'); setShowDropdown(false) }}
-                className="w-full text-left px-4 py-3 font-black text-white/90 hover:bg-amber-400/30/20 border-b-[3px] border-white/15 transition-colors"
+                className="w-full text-left px-4 py-3 font-bold text-sm transition-colors"
+                style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--amber-dim)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                Create Group
+                ✨ Create New Group
               </button>
               <button
                 onClick={() => { setModalMode('join'); setShowDropdown(false) }}
-                className="w-full text-left px-4 py-3 font-black text-white/90 hover:bg-green-300/20/20 transition-colors"
+                className="w-full text-left px-4 py-3 font-bold text-sm transition-colors"
+                style={{ color: 'var(--text-primary)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--sage-dim)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                Join Group
+                🔗 Join with Code
               </button>
             </div>
           )}
         </div>
-
-        <h1 className="text-3xl font-black text-white/90">Community</h1>
-        <div className="w-10" /> {/* Spacer for centering */}
       </div>
 
       {/* Modals for Create/Join */}
       {modalMode === 'create' && (
-        <div className="glass-card bg-amber-400/30/20 border-amber-400/30 relative mb-6">
+        <div className="glass-card bg-amber-400/20 border-amber-400/30 relative mb-6">
           <button onClick={() => { setModalMode(null); setNewInviteCode("") }} className="absolute top-2 right-2 p-1 text-white/90/50 hover:text-white/90"><X size={20} strokeWidth={2} /></button>
           <h2 className="text-xl font-black mb-4">Create a Group</h2>
           {!newInviteCode ? (
@@ -290,7 +354,7 @@ export default function Groups() {
       )}
 
       {modalMode === 'join' && (
-        <div className="glass-card bg-green-300/20/20 border-green-400/30 relative mb-6">
+        <div className="glass-card bg-green-300/10 border-green-400/30 relative mb-6">
           <button onClick={() => setModalMode(null)} className="absolute top-2 right-2 p-1 text-white/90/50 hover:text-white/90"><X size={20} strokeWidth={2} /></button>
           <h2 className="text-xl font-black mb-4">Join a Group</h2>
           <div className="space-y-3">
@@ -300,26 +364,25 @@ export default function Groups() {
         </div>
       )}
 
-      {/* Your Groups Horizontal Scroller */}
+      {/* Your Groups */}
       {groups.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-lg font-black text-white/90 mb-3 px-1">Your Groups</h2>
-          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none snap-x px-1">
+        <div>
+          <p className="section-label mb-3">Your Groups ({groups.length})</p>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x">
             {groups.map(g => (
               <button
                 key={g.id}
                 onClick={() => navigate(`/group/${g.id}`)}
-                className="snap-start shrink-0 bg-white/5 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:bg-white/10 px-5 py-4 rounded-3xl transition-all active:scale-95 flex flex-col items-start gap-3 min-w-40 relative overflow-hidden"
+                className="snap-start shrink-0 rounded-2xl px-4 py-3 transition-all active:scale-95 flex flex-col gap-3 min-w-[160px] text-left"
+                style={{ background: 'var(--card-bg)', border: '1px solid var(--border-warm)', minWidth: 160 }}
               >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-green-400/20 rounded-xl border border-green-400/30">
-                    <Users size={18} className="text-green-300" strokeWidth={2.5} />
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--sage-dim)' }}>
+                    <Users size={16} style={{ color: 'var(--sage)' }} strokeWidth={2} />
                   </div>
-                  <span className="font-black text-white/90 text-sm tracking-wide">{g.name}</span>
+                  <span className="font-black text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'Nunito, sans-serif' }}>{g.name}</span>
                 </div>
-                {/* Embedded compact live counter */}
-                <div className="w-full pt-3 border-t border-white/5 mt-auto">
+                <div className="w-full pt-2" style={{ borderTop: '1px solid var(--border)' }}>
                     <LiveCounter groupId={g.id} compact />
                 </div>
               </button>
@@ -327,29 +390,29 @@ export default function Groups() {
           </div>
         </div>
       )}
+      {groups.length === 0 && !loading && (
+        <div className="text-center py-8 rounded-2xl" style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-mid)' }}>
+          <p className="text-2xl mb-2">👥</p>
+          <p className="font-bold text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>You're not in any groups yet</p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Create or join one above!</p>
+        </div>
+      )}
 
-      {/* The Social Feed: Logs + Parties */}
+      {/* Group Feed */}
       <div>
+        <p className="section-label mb-3">Group Activity Feed</p>
         {loading ? (
-          <div className="text-center font-bold opacity-50 py-8">Loading feed...</div>
+          <div className="text-center py-10" style={{ color: 'var(--text-muted)' }}>Loading...</div>
+        ) : groupFeed.length === 0 ? (
+          <div className="text-center rounded-2xl py-10" style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-mid)' }}>
+            <Activity size={28} className="mx-auto mb-3" style={{ color: 'var(--text-ghost)' }} />
+            <p className="font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>No group activity yet.</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-ghost)' }}>Log something with "Groups" visibility!</p>
+          </div>
         ) : (
-          <>
-            {/* Group Activity Section */}
-            <h2 className="text-lg font-black text-white/90 mb-4 px-1">Activity From Your Groups</h2>
-            {groupFeed.length === 0 ? (
-              <div className="text-center glass-card bg-white/5 border-dashed border-white/10 mb-8 py-10 flex flex-col items-center justify-center gap-4 relative overflow-hidden">
-                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent"></div>
-                <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.05)] anim-float relative z-10">
-                  <Activity size={28} className="text-white/40" />
-                </div>
-                <p className="font-bold text-white/50 relative z-10">No recent activities from your groups.</p>
-              </div>
-            ) : (
-              <div className="space-y-4 mb-8">
-                {groupFeed.map(item => item.type === 'log' ? renderLog(item.data as ActivityLog) : renderParty(item.data as PartyPreview))}
-              </div>
-            )}
-          </>
+          <div className="space-y-4">
+            {groupFeed.map(item => item.type === 'log' ? renderLog(item.data as ActivityLog) : renderParty(item.data as PartyPreview))}
+          </div>
         )}
       </div>
 

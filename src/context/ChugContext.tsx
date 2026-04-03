@@ -32,19 +32,16 @@ export function ChugProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async (userId: string) => {
-        console.log("Fetching profile for:", userId)
         const { data } = await supabase
             .from("profiles")
             .select("*")
             .eq("id", userId)
             .single();
 
-        console.log("Fetched profile data:", data)
         if (data) setProfile(data);
     };
 
     const refreshProfile = async () => {
-        console.log("refreshProfile triggered, user is:", user?.id)
         if (user) await fetchProfile(user.id);
     };
 
@@ -58,12 +55,39 @@ export function ChugProvider({ children }: { children: ReactNode }) {
             }
         });
 
+        let channel: any
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
+            async (_event, session) => {
                 setUser(session?.user ?? null);
                 if (session?.user) {
-                    fetchProfile(session.user.id).finally(() => setLoading(false));
+                    await fetchProfile(session.user.id);
+                    setLoading(false);
+
+                    // Set up realtime listener for the profile
+                    if (channel) supabase.removeChannel(channel)
+                    channel = supabase.channel(`public:profiles:id=eq.${session.user.id}`)
+                        .on(
+                            'postgres_changes',
+                            { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${session.user.id}` },
+                            (payload) => {
+                                const newProfile = payload.new as UserProfile
+                                setProfile(prev => {
+                                    if (prev) {
+                                        if (newProfile.xp > prev.xp && (window as any).triggerXpAnimation) {
+                                            (window as any).triggerXpAnimation(newProfile.xp - prev.xp)
+                                        }
+                                        if (newProfile.level > prev.level && (window as any).triggerLevelUpAnimation) {
+                                            (window as any).triggerLevelUpAnimation()
+                                        }
+                                    }
+                                    return newProfile
+                                })
+                            }
+                        )
+                        .subscribe()
                 } else {
+                    if (channel) supabase.removeChannel(channel)
                     setProfile(null);
                     setLoading(false);
                 }
@@ -72,6 +96,7 @@ export function ChugProvider({ children }: { children: ReactNode }) {
 
         return () => {
             subscription.unsubscribe();
+            if (channel) supabase.removeChannel(channel)
         };
     }, []);
 

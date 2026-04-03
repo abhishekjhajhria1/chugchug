@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase"
 import { PartyPopper, Calendar, MapPin, Beer, ArrowLeft, Loader2, XCircle } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import LiveCounter from "../components/LiveCounter"
+import BeerCounter from "../components/BeerCounter"
 import { firebaseDb } from "../lib/firebase"
 import { ref, push, onChildAdded } from "firebase/database"
 
@@ -271,6 +272,7 @@ export default function PartyView() {
                             <h2 className="text-xl font-black uppercase tracking-wider">Live Dashboard</h2>
                         </div>
                         
+                        <BeerCounter partyId={party.id} compact />
                         <LiveCounter partyId={party.id} showLeaderboard />
 
                         <div className="glass-card bg-white/5 border border-white/10 p-4 mt-4">

@@ -1,151 +1,128 @@
-import { useState } from "react"
-import { Home, Users, Globe, User, Plus, Trophy, PartyPopper, X } from "lucide-react"
-import { NavLink, useNavigate } from "react-router-dom"
+import { Home, Users, Plus, Globe, User } from "lucide-react"
+import { NavLink, useNavigate, useLocation } from "react-router-dom"
 
 const NAV_ITEMS = [
-  { to: "/", icon: Home, label: "Home" },
-  { to: "/groups", icon: Users, label: "Groups" },
-  null, // fab placeholder
-  { to: "/world", icon: Globe, label: "World" },
-  { to: "/profile", icon: User, label: "Profile" },
+  { to: "/",       icon: Home,  label: "Home"      },
+  { to: "/groups", icon: Users, label: "Community" },
+  null, // FAB slot
+  { to: "/world",  icon: Globe, label: "World"     },
+  { to: "/profile",icon: User,  label: "Me"        },
 ] as const
 
-const MENU_ACTIONS = [
-  { to: "/log", icon: Plus, label: "Log Activity", accent: "var(--accent-mint)" },
-  { to: "/rank", icon: Trophy, label: "Leaderboard", accent: "var(--accent-gold)" },
-  { to: "/party", icon: PartyPopper, label: "Party Hub", accent: "var(--accent-rose)" },
-]
-
 export default function BottomNav() {
-  const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const isActive = (path: string) =>
+    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path)
 
   return (
     <>
-      {/* Backdrop overlay */}
-      {menuOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          style={{ background: 'rgba(0,0,0,0.40)', backdropFilter: 'blur(4px)' }}
-          onClick={() => setMenuOpen(false)}
-        />
-      )}
+      <style>{`
+        @keyframes navIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `}</style>
 
-      {/* FAB Menu */}
-      {menuOpen && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3"
-          style={{ animation: 'slideUp 0.3s cubic-bezier(0.22,0.68,0,1.1) both' }}
-        >
-          {MENU_ACTIONS.map((action, i) => (
-            <button
-              key={action.to}
-              onClick={() => { navigate(action.to); setMenuOpen(false) }}
-              className="flex items-center gap-3 px-5 py-3 rounded-2xl font-semibold text-sm"
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderTopColor: 'rgba(255,255,255,0.20)',
-                color: 'var(--text-bright)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.06)',
-                animation: `slideUp 0.3s ease both`,
-                animationDelay: `${i * 0.06}s`,
-                minWidth: 180,
-              }}
-            >
-              <action.icon size={18} strokeWidth={2} style={{ color: action.accent }} />
-              {action.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Bottom Bar */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className="fixed z-[95]"
         style={{
-          background: 'rgba(8,6,18,0.75)',
-          backdropFilter: 'blur(24px) saturate(1.3)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.3)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          bottom: 12,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "min(94vw, 420px)",
+          animation: "navIn 0.4s cubic-bezier(0.34,1.4,0.64,1) both",
         }}
       >
-        <div className="max-w-lg mx-auto flex items-center justify-around py-2 relative">
-          {NAV_ITEMS.map((item) => {
-            if (item === null) {
-              // FAB
-              return (
-                <button
-                  key="fab"
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  aria-label={menuOpen ? "Close quick actions menu" : "Open quick actions menu"}
-                  aria-expanded={menuOpen}
-                  aria-haspopup="menu"
-                  className="relative -mt-6 transition-all duration-300"
-                  style={{
-                    width: 52, height: 52,
-                    borderRadius: '50%',
-                    background: menuOpen
-                      ? 'rgba(255,255,255,0.12)'
-                      : 'linear-gradient(135deg, rgba(167,139,250,0.55), rgba(93,228,255,0.40))',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    boxShadow: menuOpen
-                      ? '0 2px 12px rgba(0,0,0,0.30)'
-                      : '0 4px 20px rgba(167,139,250,0.25), 0 0 0 4px rgba(167,139,250,0.08)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--text-bright)',
-                    transform: menuOpen ? 'rotate(45deg)' : 'none',
-                    transition: 'transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease',
-                  }}
-                >
-                  {menuOpen ? <X size={22} strokeWidth={2} /> : <Plus size={22} strokeWidth={2.5} />}
-                </button>
-              )
-            }
+        <div
+          style={{
+            background: "rgba(20,16,10,0.88)",
+            backdropFilter: "blur(32px) saturate(1.6)",
+            WebkitBackdropFilter: "blur(32px) saturate(1.6)",
+            borderRadius: 24,
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderTopColor: "rgba(255,255,255,0.12)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+            padding: "4px 6px",
+          }}
+        >
+          <div className="flex items-center justify-around" style={{ height: 58 }}>
+            {NAV_ITEMS.map((item, idx) => {
+              if (item === null) {
+                return (
+                  <button
+                    key="fab-log"
+                    onClick={() => navigate("/log")}
+                    aria-label="Log activity"
+                    className="active:scale-90 transition-transform"
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 16,
+                      background: "linear-gradient(135deg, #F5A623, #E8880A)",
+                      boxShadow: "0 4px 16px rgba(245,166,35,0.45)",
+                      border: "1px solid rgba(255,200,80,0.4)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#1A1208",
+                    }}
+                  >
+                    <Plus size={22} strokeWidth={2.5} />
+                  </button>
+                )
+              }
 
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === '/'}
-                className="flex flex-col items-center px-3 py-1 transition-all duration-200"
-              >
-                {({ isActive }) => (
-                  <>
-                    <item.icon
-                      size={22}
-                      strokeWidth={isActive ? 2.2 : 1.6}
+              const active = isActive(item.to)
+              const Icon = item.icon
+
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === "/"}
+                  className="flex flex-col items-center justify-center relative"
+                  style={{ width: 60, height: 54, borderRadius: 16, transition: "all 0.2s ease" }}
+                >
+                  <Icon
+                    size={22}
+                    strokeWidth={active ? 2.2 : 1.6}
+                    style={{
+                      color: active ? "var(--amber)" : "rgba(255,255,255,0.3)",
+                      transition: "all 0.2s ease",
+                      transform: active ? "scale(1.05)" : "scale(1)",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: active ? 800 : 500,
+                      fontFamily: "Nunito, sans-serif",
+                      marginTop: 2,
+                      color: active ? "var(--amber)" : "rgba(255,255,255,0.25)",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                  {/* Active dot indicator */}
+                  {active && (
+                    <div
                       style={{
-                        color: isActive ? 'var(--accent-aqua)' : 'var(--text-ghost)',
-                        filter: isActive ? 'drop-shadow(0 0 6px rgba(93,228,255,0.35))' : 'none',
-                        transition: 'all 0.2s ease',
+                        position: "absolute",
+                        bottom: 2,
+                        width: 4, height: 4,
+                        borderRadius: "50%",
+                        background: "var(--amber)",
+                        boxShadow: "0 0 6px rgba(245,166,35,0.8)",
                       }}
                     />
-                    <span
-                      className="text-[10px] font-semibold mt-0.5"
-                      style={{
-                        color: isActive ? 'var(--accent-aqua)' : 'var(--text-ghost)',
-                        transition: 'color 0.2s ease',
-                      }}
-                    >
-                      {item.label}
-                    </span>
-                    {isActive && (
-                      <div
-                        className="w-1 h-1 rounded-full mt-0.5"
-                        style={{
-                          background: 'var(--accent-aqua)',
-                          boxShadow: '0 0 6px var(--accent-aqua)',
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </NavLink>
-            )
-          })}
+                  )}
+                </NavLink>
+              )
+            })}
+          </div>
         </div>
       </nav>
     </>
