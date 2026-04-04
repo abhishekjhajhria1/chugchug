@@ -9,9 +9,9 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="relative min-h-dvh" style={{ background: 'var(--bg-deep)' }}>
       {/* Subtle ambient blooms — Wano Sakura and Kozuki Gold */}
-      <div className="bubbles-layer">
-        <div className="bubble" style={{ width: 250, height: 250, top: '-8%', left: '-5%', '--dur': '28s', '--del': '0s', background: 'radial-gradient(circle, rgba(216,162,94,0.06), transparent 60%)' } as React.CSSProperties} />
-        <div className="bubble" style={{ width: 200, height: 200, bottom: '5%', right: '-8%', '--dur': '24s', '--del': '-10s', background: 'radial-gradient(circle, rgba(255,183,197,0.04), transparent 60%)' } as React.CSSProperties} />
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute rounded-full" style={{ width: 250, height: 250, top: '-8%', left: '-5%', background: 'radial-gradient(circle, rgba(216,162,94,0.06), transparent 60%)' }} />
+        <div className="absolute rounded-full" style={{ width: 200, height: 200, bottom: '5%', right: '-8%', background: 'radial-gradient(circle, rgba(255,183,197,0.04), transparent 60%)' }} />
       </div>
 
       {/* Top header bar */}
