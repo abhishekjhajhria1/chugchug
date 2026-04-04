@@ -15,7 +15,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 safe-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 safe-bottom pb-2"
       style={{
         background: 'rgba(11, 17, 31, 0.95)', // Deep Wano Navy
         backdropFilter: 'blur(30px)',
@@ -34,22 +34,19 @@ export default function BottomNav() {
               <button
                 key={path}
                 onClick={() => navigate(path)}
-                className="flex flex-col items-center -mt-5 active:scale-90 transition-transform"
+                className="relative flex flex-col items-center justify-center -mt-8 active:scale-95 transition-transform"
                 aria-label={label}
               >
                 <div
-                  className="w-16 h-16 flex items-center justify-center shadow-lg relative group active:scale-95 transition-transform"
+                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
                   style={{
-                    background: 'linear-gradient(135deg, var(--amber), #8C5C21)',
-                    border: '2px solid rgba(255,255,255,0.2)',
-                    boxShadow: '0 0 20px rgba(216, 162, 94, 0.6), inset 0 0 10px rgba(0,0,0,0.5)',
-                    borderRadius: '4px', // Samurai Crest style
-                    transform: 'rotate(45deg) translateY(-10px)'
+                    background: 'linear-gradient(180deg, var(--amber), #8C5C21)',
+                    border: '4px solid #0b111f', // matches nav background to give a cutout feel
+                    boxShadow: '0 4px 15px rgba(216, 162, 94, 0.4)',
                   }}
                 >
-                  <Plus size={28} color="#111A2C" strokeWidth={3.5} style={{ transform: 'rotate(-45deg)' }} className="group-active:scale-110 transition-transform" />
+                  <Plus size={28} color="#111A2C" strokeWidth={3} />
                 </div>
-                <span className="text-[10px] uppercase font-black tracking-widest mt-2" style={{ color: 'var(--text-muted)' }}>Log</span>
               </button>
             )
           }
@@ -64,6 +61,7 @@ export default function BottomNav() {
                 minWidth: 58,
                 background: (isActive || isHome) ? 'linear-gradient(180deg, var(--coral-dim), transparent)' : 'transparent',
                 borderTop: (isActive || isHome) ? '2px solid var(--coral)' : '2px solid transparent',
+                borderBottom: '2px solid transparent', // Keep geometry consistent
                 borderRadius: '0 0 4px 4px', // Hanging scroll style
               }}
             >

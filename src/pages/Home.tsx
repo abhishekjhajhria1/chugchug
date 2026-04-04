@@ -27,7 +27,7 @@ export default function Home() {
   const responseRef = useRef<HTMLDivElement>(null);
   const BARTENDER_API = import.meta.env.VITE_BARTENDER_API?.trim() || "";
 
-  // 🌸 Ninkasi's Quick Prompts
+  // 🌸 Ninkasi's Quick Memos
   const quickPrompts = [
     { label: "🍶 Sake", prompt: "Ninkasi, recommend a legendary Sake!" },
     { label: "🌸 Soju", prompt: "What should I mix with Soju?" },
@@ -49,7 +49,6 @@ export default function Home() {
     try {
       const body: any = { 
         prompt: finalPrompt,
-        // NINKASI SYSTEM PRE-PROMPT HINT injected to backend
         system_override: "You are Ninkasi, the Mistress of Beer and an awesome, cool lady of character hailing from the Wano Arc. Reply with traditional Wano motifs, call users Samurai or Kunoichi, and be confident!"
       };
       if (profile) {
@@ -265,7 +264,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── 3. AI SUPERVISOR: Ninkasi ─── */}
+      {/* ─── 3. TAVERN SUPERVISOR: Ninkasi ─── */}
       <section
         className="overflow-hidden"
         style={{
