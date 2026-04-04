@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { supabase } from "../lib/supabase"
-import { Beer } from "lucide-react"
 
 export default function Auth() {
   const [email, setEmail] = useState("")
@@ -35,11 +34,11 @@ export default function Auth() {
       className="fixed inset-0 flex flex-col items-center justify-center p-5"
       style={{ background: 'var(--bg-deep)' }}
     >
-      {/* Warm background glow */}
+      {/* Background glow — amber */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: `
           radial-gradient(ellipse 60% 50% at 50% 0%, rgba(245,166,35,0.07) 0%, transparent 70%),
-          radial-gradient(ellipse 40% 40% at 20% 100%, rgba(76,175,125,0.05) 0%, transparent 70%)
+          radial-gradient(ellipse 40% 40% at 20% 100%, rgba(204,255,0,0.04) 0%, transparent 70%)
         `,
       }} />
 
@@ -51,33 +50,25 @@ export default function Auth() {
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid var(--border-mid)',
-          borderTopColor: 'rgba(245,166,35,0.2)',
+          borderTopColor: 'rgba(245,166,35,0.25)',
           borderRadius: 24,
           padding: '36px 28px 32px',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
         }}
       >
         {/* Logo + Title */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div
-              className="flex items-center justify-center w-14 h-14 rounded-2xl"
-              style={{
-                background: 'linear-gradient(135deg, #F5A623, #E8880A)',
-                boxShadow: '0 4px 20px rgba(245,166,35,0.5)',
-              }}
-            >
-              <Beer size={28} className="text-black" strokeWidth={2.5} />
-            </div>
+          <div className="flex items-center justify-center mb-3">
+            <span className="text-5xl">🍻</span>
           </div>
           <h1
-            className="font-black text-3xl tracking-tight mb-1"
-            style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--amber)' }}
+            className="text-3xl tracking-tight mb-1"
+            style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, color: 'var(--text-primary)' }}
           >
             ChugChug
           </h1>
           <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-            {isLogin ? "Welcome back! Ready to chug?" : "Join the party 🎉"}
+            {isLogin ? "Welcome back! 🙌" : "Join the party — it's free 🎉"}
           </p>
         </div>
 
@@ -129,11 +120,11 @@ export default function Auth() {
             <div
               className="rounded-xl px-4 py-3 anim-slide"
               style={{
-                background: 'var(--danger-dim)',
-                border: '1px solid rgba(229,83,75,0.25)',
+                background: 'var(--coral-dim)',
+                border: '1px solid rgba(255,107,107,0.25)',
               }}
             >
-              <p className="text-sm font-semibold" style={{ color: '#F4845F' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--coral)' }}>
                 ⚠️ {error}
               </p>
             </div>
@@ -152,7 +143,7 @@ export default function Auth() {
             onClick={() => { setIsLogin(!isLogin); setError("") }}
             className="w-full py-3 text-sm font-bold transition-colors"
             style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--amber)')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--amber-light)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
           >
             {isLogin ? "Don't have an account? Sign up →" : "Already have one? Sign in →"}
@@ -160,7 +151,7 @@ export default function Auth() {
         </div>
 
         <p className="text-center text-xs mt-6 font-medium" style={{ color: 'var(--text-ghost)' }}>
-          Track sessions · Compete · Discover
+          Track drinks · Compete · Discover · Party 🎊
         </p>
       </div>
     </div>

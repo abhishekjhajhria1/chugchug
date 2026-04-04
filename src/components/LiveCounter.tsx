@@ -73,7 +73,7 @@ export default function LiveCounter({ partyId, groupId, showLeaderboard, compact
           <h3 className="font-bold">Live Counter</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-black accent-gold" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <span className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>
             {totalCount}
           </span>
           <span className="text-xs font-medium" style={{ color: 'var(--text-ghost)' }}>total</span>
@@ -83,8 +83,8 @@ export default function LiveCounter({ partyId, groupId, showLeaderboard, compact
       {showLeaderboard && activeEntries.length > 0 && (
         <div className="space-y-3 mt-6">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp size={16} className="neon-lime" />
-            <span className="text-xs font-black uppercase tracking-widest text-white/90">
+            <TrendingUp size={16} style={{ color: 'var(--acid)' }} />
+            <span className="text-xs font-black uppercase tracking-widest" style={{ color: 'var(--text-primary)' }}>
               Live Leaderboard
             </span>
           </div>
@@ -95,17 +95,17 @@ export default function LiveCounter({ partyId, groupId, showLeaderboard, compact
                 animationDelay: `${i * 0.05}s`,
               }}>
               {/* Highlight bar for #1 */}
-              {i === 0 && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 shadow-[0_0_10px_#fbbf24]"></div>}
+              {i === 0 && <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: 'var(--amber)', boxShadow: 'var(--amber-glow)' }}></div>}
 
               <div className="flex items-center gap-3 relative z-10">
-                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shadow-lg ${i === 0 ? 'bg-amber-400 text-black' : 'bg-white/10 text-white border border-white/10'}`}>
+                <span className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black" style={{ background: i === 0 ? 'var(--amber)' : 'var(--bg-surface)', color: i === 0 ? '#050505' : 'var(--text-secondary)', border: i !== 0 ? '1px solid var(--border)' : 'none' }}>
                   #{i + 1}
                 </span>
-                <span className={`font-black text-base ${i === 0 ? 'text-amber-400' : 'text-white/90'}`}>{entry.username}</span>
+                <span className="font-black text-base" style={{ color: i === 0 ? 'var(--amber)' : 'var(--text-primary)' }}>{entry.username}</span>
               </div>
               <div className="flex items-center gap-1 bg-black/40 px-3 py-1 rounded-full border border-white/5 relative z-10">
-                <span className="font-black text-lg neon-amber">{entry.count}</span>
-                <span className="text-[10px] text-white/50">🍺</span>
+                <span className="font-black text-lg" style={{ color: 'var(--amber)' }}>{entry.count}</span>
+                <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>🍺</span>
               </div>
             </div>
           ))}

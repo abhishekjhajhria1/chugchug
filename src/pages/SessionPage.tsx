@@ -105,10 +105,10 @@ export default function SessionPage() {
             {/* Visual Blast */}
             {showBlast && (
                 <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center anim-pop">
-                    <div className="absolute inset-0 bg-amber-400/20 backdrop-blur-sm animate-pulse" />
+                    <div className="absolute inset-0 animate-pulse" style={{ background: 'rgba(245,166,35,0.15)', backdropFilter: 'blur(4px)' }} />
                     <div className="relative text-center">
                         <div className="text-6xl mb-4 animate-bounce">🍺💨</div>
-                        <h2 className="text-3xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] uppercase">
+                        <h2 className="text-3xl font-black uppercase" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)', textShadow: '0 0 20px rgba(245,166,35,0.6)' }}>
                             {lastBuzz?.username} FINISHED!
                         </h2>
                     </div>
@@ -138,24 +138,26 @@ export default function SessionPage() {
                 {/* I'm Done Alert Button */}
                 <button 
                     onClick={handleBuzz}
-                    className="w-full max-w-[280px] py-4 rounded-3xl bg-linear-to-r from-rose-500 to-rose-600 text-white font-black text-sm uppercase tracking-widest shadow-[0_0_30px_rgba(244,63,94,0.4)] hover:shadow-[0_0_40px_rgba(244,63,94,0.6)] active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="w-full max-w-[280px] py-4 rounded-3xl text-sm uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, var(--coral), #D94242)', color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 800, boxShadow: 'var(--coral-glow)' }}
                 >
                     <Zap size={20} fill="currentColor" /> I'm Done! (Broadcast)
                 </button>
             </div>
             
             {/* Join/Invite QR */}
-            <div className="glass-card glow-violet border-white/5 bg-black/20 mt-8 p-6 text-center">
-                <h3 className="text-xs font-black text-white/60 uppercase tracking-widest mb-4">Invite to Session</h3>
+            <div className="glass-card mt-8 p-6 text-center" style={{ borderColor: 'rgba(245,166,35,0.15)' }}>
+                <h3 className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>Invite to Session</h3>
                 <div className="bg-white p-3 rounded-2xl inline-block shadow-2xl mb-4 transform transition-transform hover:scale-105 duration-300">
                     <QRCodeSVG value={joinUrl} size={140} fgColor="#1a1530" bgColor="transparent" />
                 </div>
-                <p className="text-[10px] font-bold text-white/30 uppercase max-w-[200px] mx-auto leading-relaxed mb-4">
+                <p className="text-[10px] font-bold uppercase max-w-[200px] mx-auto leading-relaxed mb-4" style={{ color: 'var(--text-muted)' }}>
                     Friends scanning this will instantly join your Live Party dashboard.
                 </p>
                 <button 
                   onClick={() => setIsScanning(true)}
-                  className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors border border-white/10"
+                  className="w-full py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
+                  style={{ background: 'var(--bg-raised)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
                 >
                     <ScanLine size={16} /> Scan to Join
                 </button>

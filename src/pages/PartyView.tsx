@@ -117,7 +117,7 @@ export default function PartyView() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 neon-pink">
+            <div className="flex flex-col items-center justify-center h-64" style={{ color: 'var(--amber)' }}>
                 <Loader2 className="animate-spin w-12 h-12 mb-4" />
                 <p className="font-bold">Locating Event...</p>
             </div>
@@ -127,7 +127,7 @@ export default function PartyView() {
     if (!party) {
         return (
             <div className="space-y-6 text-center pt-10">
-                <h1 className="text-3xl font-black text-white/90">Party Not Found</h1>
+                <h1 className="text-3xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Party Not Found</h1>
                 <p className="font-bold opacity-70">This event may have been cancelled or the link is invalid.</p>
                 <button onClick={() => navigate('/party')} className="glass-btn-secondary mx-auto block mt-8">
                     Back to Party Hub
@@ -142,7 +142,7 @@ export default function PartyView() {
                 <div className="w-20 h-20 bg-white/8 rounded-full border border-white/15 mx-auto flex items-center justify-center text-white/40 mb-4 shadow-lg shadow-black/20">
                     <XCircle size={40} strokeWidth={2} />
                 </div>
-                <h1 className="text-3xl font-black text-white/90">Event {party.status}</h1>
+                <h1 className="text-3xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Event {party.status}</h1>
                 <p className="font-bold text-white/90 opacity-70">This party has concluded and is no longer accepting RSVPs.</p>
                 <div className="mt-8 flex justify-center">
                     <button onClick={() => navigate('/party')} className="glass-btn-secondary text-white/90 border-white/15">
@@ -155,22 +155,22 @@ export default function PartyView() {
 
     return (
         <div className="space-y-6 pb-24 max-w-lg mx-auto">
-            <button onClick={() => navigate('/party')} className="flex items-center gap-2 font-bold text-sm text-white/90 opacity-70 hover:opacity-100 transition-opacity">
+            <button onClick={() => navigate('/party')} className="flex items-center gap-2 font-bold text-sm transition-opacity" style={{ color: 'var(--text-muted)' }}>
                 <ArrowLeft size={16} strokeWidth={2} /> Back to Parties
             </button>
 
-            <div className="glass-card bg-white/5 border border-white/15 shadow-lg shadow-black/20 p-6 relative overflow-hidden">
+            <div className="glass-card p-6 relative overflow-hidden">
                 {/* Decorative corner element */}
-                <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber-400/30 rounded-full flex items-end justify-start p-4 border border-white/15">
-                    <PartyPopper size={24} className="text-white/90 transform rotate-12" strokeWidth={2} />
+                <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full flex items-end justify-start p-4" style={{ background: 'var(--amber-dim)', border: '1px solid var(--border)' }}>
+                    <PartyPopper size={24} style={{ color: 'var(--amber)' }} className="transform rotate-12" strokeWidth={2} />
                 </div>
 
                 <div className="pr-12">
-                    <span className={`inline-block px-3 py-1 bg-white/5 text-xs font-black uppercase tracking-widest rounded-full border border-white/15 mb-3 ${party.privacy_level === 'hidden' ? 'bg-pink-500/30 text-white' : 'bg-green-300/20'}`}>
+                    <span className="inline-block px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full mb-3" style={{ background: party.privacy_level === 'hidden' ? 'var(--coral-dim)' : 'var(--acid-dim)', border: '1px solid var(--border)', color: party.privacy_level === 'hidden' ? 'var(--coral)' : 'var(--acid)' }}>
                         {party.privacy_level}
                     </span>
-                    <h1 className="text-4xl font-black text-white/90 leading-tight mb-2">{party.title}</h1>
-                    <p className="font-bold text-lg text-white/90 opacity-80">Hosted by <span className="neon-pink">{party.profiles?.username}</span></p>
+                    <h1 className="text-4xl font-black leading-tight mb-2" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{party.title}</h1>
+                    <p className="font-bold text-lg" style={{ color: 'var(--text-muted)' }}>Hosted by <span style={{ color: 'var(--amber)' }}>{party.profiles?.username}</span></p>
                 </div>
 
                 {/* Floating Reactions Container */}
@@ -186,15 +186,15 @@ export default function PartyView() {
                 </div>
 
                 {party.description && (
-                    <div className="mt-6 p-4 bg-green-300/20/20 rounded-xl border border-green-400/30">
-                        <p className="font-bold text-white/90 leading-relaxed">"{party.description}"</p>
+                    <div className="mt-6 p-4 rounded-xl" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)' }}>
+                        <p className="font-bold leading-relaxed" style={{ color: 'var(--text-primary)' }}>"{party.description}"</p>
                     </div>
                 )}
 
                 <div className="mt-8 space-y-4">
                     <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-pink-500/30/20 border border-pink-500/30 flex items-center justify-center shrink-0">
-                            <Calendar size={20} className="neon-pink" strokeWidth={2} />
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(255,107,107,0.2)' }}>
+                            <Calendar size={20} style={{ color: 'var(--coral)' }} strokeWidth={2} />
                         </div>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-widest text-white/90 opacity-50 mb-1">When</p>
@@ -203,8 +203,8 @@ export default function PartyView() {
                     </div>
 
                     <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-amber-400/30/20 border border-amber-400/30 flex items-center justify-center shrink-0">
-                            <MapPin size={20} className="text-[#cd7f32]" strokeWidth={2} />
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(245,166,35,0.2)' }}>
+                            <MapPin size={20} style={{ color: 'var(--amber)' }} strokeWidth={2} />
                         </div>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-widest text-white/90 opacity-50 mb-1">Where</p>
@@ -214,8 +214,8 @@ export default function PartyView() {
 
                     {(party.booze_details || party.snacks_details) && (
                         <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-green-300/20/20 border border-green-400/30 flex items-center justify-center shrink-0">
-                                <Beer size={20} className="neon-lime" strokeWidth={2} />
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)' }}>
+                                <Beer size={20} style={{ color: 'var(--acid)' }} strokeWidth={2} />
                             </div>
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-widest text-white/90 opacity-50 mb-1">Menu</p>
@@ -240,15 +240,16 @@ export default function PartyView() {
                                 <button
                                     onClick={handleRSVP}
                                     disabled={actionLoading}
-                                    className="glass-btn w-full bg-pink-500/30! text-white py-4! text-xl flex justify-center items-center gap-2"
+                                    className="glass-btn w-full" style={{ fontSize: 18, padding: '16px 24px' }}
                                 >
                                     {actionLoading ? <Loader2 className="animate-spin" /> : "I'm Interested!"}
                                 </button>
                             ) : (
-                                <div className={`p-4 rounded-xl border border-white/15 text-center font-black text-lg ${rsvpStatus === 'accepted' ? 'bg-green-300/20 text-white/90' :
-                                    rsvpStatus === 'rejected' ? 'bg-pink-500/30 text-white' :
-                                        'bg-amber-400/30 text-white/90'
-                                    }`}>
+                                <div className="p-4 rounded-xl text-center font-black text-lg" style={{
+                                    background: rsvpStatus === 'accepted' ? 'var(--acid-dim)' : rsvpStatus === 'rejected' ? 'var(--coral-dim)' : 'var(--amber-dim)',
+                                    color: rsvpStatus === 'accepted' ? 'var(--acid)' : rsvpStatus === 'rejected' ? 'var(--coral)' : 'var(--amber)',
+                                    border: '1px solid var(--border)',
+                                }}>
                                     Status: {rsvpStatus.toUpperCase()}
                                     {rsvpStatus === 'interested' && <p className="text-sm font-bold opacity-70 mt-1 uppercase">Waiting for Host Approval</p>}
                                 </div>

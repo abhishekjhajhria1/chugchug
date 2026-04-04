@@ -40,6 +40,8 @@ export default function GroupChat() {
   const [submittingExpense, setSubmittingExpense] = useState(false)
   const [groupMembers, setGroupMembers] = useState<{id: string, username: string}[]>([])
   const [selectedSplits, setSelectedSplits] = useState<Set<string>>(new Set())
+  const [splitMode, setSplitMode] = useState<'equal' | 'drink'>('equal')
+  const [todayCounts, setTodayCounts] = useState<Record<string, number>>({})
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -75,6 +77,25 @@ export default function GroupChat() {
     }
     fetchGroupData()
   }, [groupId])
+
+  useEffect(() => {
+    if (!showExpenseModal || !groupId) return
+    const fetchCounts = async () => {
+      const today = new Date().toISOString().split('T')[0]
+      const { data } = await supabase
+        .from('beer_counts')
+        .select('user_id, count')
+        .in('user_id', groupMembers.map(m => m.id))
+        .eq('date', today)
+      
+      if (data) {
+        const counts: Record<string, number> = {}
+        data.forEach(d => counts[d.user_id] = d.count)
+        setTodayCounts(counts)
+      }
+    }
+    fetchCounts()
+  }, [showExpenseModal, groupId, groupMembers])
 
   useEffect(() => {
     if (!groupId) return
@@ -193,14 +214,32 @@ export default function GroupChat() {
 
       if (expenseError) throw expenseError
 
-      // 2. Insert Splits (Split evenly among selected)
-      const splitAmount = parseFloat((amountNum / selectedSplits.size).toFixed(2))
-      const splitInserts = Array.from(selectedSplits).map(memberId => ({
-        expense_id: expenseData.id,
-        user_id: memberId,
-        amount_owed: splitAmount,
-        is_settled: memberId === user.id // Payer is already settled with themselves
-      }))
+      // 2. Insert Splits
+      let splitInserts: any[] = []
+      
+      if (splitMode === 'equal') {
+        const splitAmount = parseFloat((amountNum / selectedSplits.size).toFixed(2))
+        splitInserts = Array.from(selectedSplits).map(memberId => ({
+          expense_id: expenseData.id,
+          user_id: memberId,
+          amount_owed: splitAmount,
+          is_settled: memberId === user.id
+        }))
+      } else {
+        let totalDrinks = 0
+        Array.from(selectedSplits).forEach(memberId => totalDrinks += (todayCounts[memberId] || 0))
+        
+        splitInserts = Array.from(selectedSplits).map(memberId => {
+          const userDrinks = todayCounts[memberId] || 0
+          const shareRatio = totalDrinks > 0 ? (userDrinks / totalDrinks) : (1 / selectedSplits.size)
+          return {
+            expense_id: expenseData.id,
+            user_id: memberId,
+            amount_owed: parseFloat((amountNum * shareRatio).toFixed(2)),
+            is_settled: memberId === user.id
+          }
+        })
+      }
 
       const { error: splitError } = await supabase.from("expense_splits").insert(splitInserts)
       if (splitError) throw splitError
@@ -290,7 +329,7 @@ export default function GroupChat() {
           <ArrowLeft size={18} strokeWidth={2} />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-black truncate" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>{groupName || "Chat"}</h1>
+          <h1 className="text-lg font-black truncate" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{groupName || "Chat"}</h1>
           <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>Group Chat</p>
         </div>
         <div className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(244,132,95,0.25)', color: 'var(--coral)' }}>
@@ -303,15 +342,15 @@ export default function GroupChat() {
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full opacity-50">
             <Loader2 className="animate-spin mb-3 neon-amber" size={32} />
-            <p className="font-bold text-white/90">Loading messages...</p>
+            <p className="font-bold" style={{ color: 'var(--text-muted)' }}>Loading messages...</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full opacity-50 text-center">
-            <div className="w-20 h-20 bg-amber-400/30/30 rounded-full border border-white/15 flex items-center justify-center mb-4">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ background: 'var(--amber-dim)', border: '1px solid var(--border)' }}>
               <span className="text-3xl">💬</span>
             </div>
-            <p className="font-black text-white/90 text-lg">No messages yet!</p>
-            <p className="font-bold text-sm text-white/90/60 mt-1">Be the first to say something 🎉</p>
+            <p className="font-black text-lg" style={{ color: 'var(--text-primary)' }}>No messages yet!</p>
+            <p className="font-bold text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Be the first to say something 🎉</p>
           </div>
         ) : (
           messages.map((msg, idx) => {
@@ -322,16 +361,19 @@ export default function GroupChat() {
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} ${showAvatar ? "mt-3" : "mt-1"}`}>
                 <div className={`max-w-[80%] ${isMe ? "items-end" : "items-start"} flex flex-col`}>
                   {showAvatar && !isMe && (
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/90/50 mb-1 ml-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 ml-3" style={{ color: 'var(--text-muted)' }}>
                       {msg.username}
                     </p>
                   )}
                   <div
-                    className={`rounded-2xl px-4 py-2.5 border border-white/15 shadow-lg shadow-black/20 ${
-                      isMe
-                        ? "bg-amber-400/30 text-white/90 rounded-br-sm"
-                        : "bg-white/5 text-white/90 rounded-bl-sm"
+                    className={`rounded-2xl px-4 py-2.5 ${
+                      isMe ? 'rounded-br-sm' : 'rounded-bl-sm'
                     }`}
+                    style={{
+                      background: isMe ? 'var(--amber-dim)' : 'var(--bg-raised)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-primary)',
+                    }}
                   >
                     {msg.imageUrl && (
                       <img
@@ -343,16 +385,17 @@ export default function GroupChat() {
                     )}
                     
                     {msg.type === 'expense' ? (
-                      <div className="bg-white/90 rounded-xl p-3 border border-white/15">
+                      <div className="rounded-xl p-3" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
                         <div className="flex items-center gap-2 mb-1">
-                          <Receipt size={16} className="neon-lime" strokeWidth={2} />
-                          <span className="font-black text-sm text-white/90">Paid ${msg.expenseAmount}</span>
+                          <Receipt size={16} style={{ color: 'var(--acid)' }} strokeWidth={2} />
+                          <span className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>Paid ${msg.expenseAmount}</span>
                         </div>
-                        <p className="font-bold text-sm text-white/90/80 leading-snug">{msg.expenseDescription}</p>
+                        <p className="font-bold text-sm leading-snug" style={{ color: 'var(--text-secondary)' }}>{msg.expenseDescription}</p>
                         {!isMe && (
                           <button 
                             onClick={() => navigate(`/group/${groupId}/balances`)}
-                            className="mt-2 w-full text-[10px] font-black uppercase bg-green-400/30 text-white py-1 rounded-lg border border-white/15 active:scale-95 transition-transform hover:-translate-y-0.5 shadow-lg shadow-black/20"
+                            className="mt-2 w-full text-[10px] font-black uppercase py-1 rounded-lg active:scale-95 transition-transform"
+                            style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.15)' }}
                           >
                             View Balances
                           </button>
@@ -380,7 +423,7 @@ export default function GroupChat() {
             <img src={imagePreview} alt="Attach" className="h-20 rounded-xl border border-white/15 object-cover" />
             <button
               onClick={clearImage}
-              className="absolute -top-2 -right-2 p-1 bg-white/5 rounded-full border border-white/15 shadow-lg shadow-black/20"
+              className="absolute -top-2 -right-2 p-1 rounded-full" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
             >
               <X size={12} strokeWidth={2} />
             </button>
@@ -400,14 +443,16 @@ export default function GroupChat() {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="p-2.5 bg-green-300/20 rounded-full border border-white/15 shadow-lg shadow-black/20 text-white/90 shrink-0 transition-transform active:scale-95 hover:scale-105"
+          className="p-2.5 rounded-full shrink-0 transition-transform active:scale-95"
+          style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)', color: 'var(--acid)' }}
         >
           {uploadingImage ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} strokeWidth={2} />}
         </button>
 
         <button
           onClick={() => setShowExpenseModal(true)}
-          className="p-2.5 bg-green-400/30 rounded-full border border-white/15 shadow-lg shadow-black/20 text-white/90 shrink-0 transition-transform active:scale-95 hover:scale-105"
+          className="p-2.5 rounded-full shrink-0 transition-transform active:scale-95"
+          style={{ background: 'var(--amber-dim)', border: '1px solid rgba(245,166,35,0.2)', color: 'var(--amber)' }}
           title="Log Expense"
         >
           <Receipt size={18} strokeWidth={2} />
@@ -427,7 +472,8 @@ export default function GroupChat() {
         <button
           onClick={sendMessage}
           disabled={(!newMessage.trim() && !imageFile) || sending}
-          className="p-2.5 bg-amber-400/30 rounded-full border border-white/15 shadow-lg shadow-black/20 text-white/90 shrink-0 transition-transform active:scale-95 hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
+          className="p-2.5 rounded-full shrink-0 transition-transform active:scale-95 disabled:opacity-40"
+          style={{ background: 'var(--amber-dim)', border: '1px solid rgba(245,166,35,0.2)', color: 'var(--amber)' }}
         >
           {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} strokeWidth={2} />}
         </button>
@@ -438,31 +484,37 @@ export default function GroupChat() {
         <div className="fixed inset-0 z-100 bg-black/60 flex items-center justify-center p-4 animate-fadeInScale" onClick={() => setShowExpenseModal(false)}>
           <div className="bg-white/5 rounded-3xl border border-white/15 shadow-lg shadow-black/20 p-5 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center">
-              <h3 className="font-black text-xl text-white/90 flex items-center gap-2"><Receipt className="neon-lime" /> Add Expense</h3>
-              <button onClick={() => setShowExpenseModal(false)} className="text-white/90/50 hover:text-white/90">
+              <h3 className="font-black text-xl flex items-center gap-2" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}><Receipt style={{ color: 'var(--acid)' }} /> Add Expense</h3>
+              <button onClick={() => setShowExpenseModal(false)} style={{ color: 'var(--text-muted)' }}>
                 <X size={20} strokeWidth={2} />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="font-bold text-xs text-white/90 uppercase tracking-widest mb-1 block">Total Amount ($)</label>
-                <input type="number" min="0" step="0.01" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} placeholder="0.00" className="glass-input w-full text-xl font-black neon-lime" />
+                <label className="font-bold text-xs uppercase tracking-widest mb-1 block" style={{ color: 'var(--text-secondary)' }}>Total Amount ($)</label>
+                <input type="number" min="0" step="0.01" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} placeholder="0.00" className="glass-input w-full text-xl font-black" style={{ color: 'var(--acid)' }} />
               </div>
 
               <div>
-                <label className="font-bold text-xs text-white/90 uppercase tracking-widest mb-1 block">Description</label>
+                <label className="font-bold text-xs uppercase tracking-widest mb-1 block" style={{ color: 'var(--text-secondary)' }}>Description</label>
                 <input type="text" value={expenseDesc} onChange={e => setExpenseDesc(e.target.value)} placeholder="Uber, Drinks, Pizza..." className="glass-input w-full" maxLength={100} />
               </div>
 
               <div>
-                <label className="font-bold text-xs text-white/90 uppercase tracking-widest mb-2 block">Split With (Equally)</label>
+                <div className="flex items-center justify-between mb-2">
+                   <label className="font-bold text-xs uppercase tracking-widest block" style={{ color: 'var(--text-secondary)' }}>Split Method</label>
+                   <div className="flex bg-black/20 rounded-lg p-1 border border-white/10">
+                      <button onClick={() => setSplitMode('equal')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'equal' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Equally</button>
+                      <button onClick={() => setSplitMode('drink')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'drink' ? 'bg-amber-500/20 text-amber-500' : 'text-white/40'}`}>DrinkSplit</button>
+                   </div>
+                </div>
                 <div className="max-h-40 overflow-y-auto space-y-2 border border-white/15/10 rounded-xl p-2 bg-white/3">
                   {groupMembers.map(member => (
                     <label key={member.id} className="flex items-center gap-3 cursor-pointer p-1">
                       <input 
                         type="checkbox" 
-                        className="w-5 h-5 accent-[#60D394]"
+                        className="w-5 h-5" style={{ accentColor: 'var(--acid)' }}
                         checked={selectedSplits.has(member.id)}
                         onChange={(e) => {
                           const newSplits = new Set(selectedSplits)
@@ -471,7 +523,14 @@ export default function GroupChat() {
                           setSelectedSplits(newSplits)
                         }}
                       />
-                      <span className="font-bold text-sm text-white/90">{member.id === user?.id ? "You" : member.username}</span>
+                      <div className="flex-1 flex justify-between items-center">
+                        <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{member.id === user?.id ? "You" : member.username}</span>
+                        {splitMode === 'drink' && (
+                          <span className="text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: 'var(--amber-dim)', color: 'var(--amber)' }}>
+                            {todayCounts[member.id] || 0} drinks
+                          </span>
+                        )}
+                      </div>
                     </label>
                   ))}
                 </div>
@@ -480,7 +539,7 @@ export default function GroupChat() {
               <button 
                 onClick={submitExpense}
                 disabled={submittingExpense || !expenseAmount || !expenseDesc || selectedSplits.size === 0}
-                className="glass-btn w-full bg-green-400/30! flex items-center justify-center gap-2 mt-2"
+                className="glass-btn w-full flex items-center justify-center gap-2 mt-2"
               >
                 {submittingExpense ? <Loader2 className="animate-spin" size={20} /> : <Receipt size={20} />}
                 Split It Let's Go

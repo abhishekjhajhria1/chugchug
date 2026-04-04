@@ -72,14 +72,14 @@ export default function ClinkOverlay() {
             {/* The Raven / Potion / Magic Drop Animation */}
             <div className="relative z-10 flex flex-col items-center justify-center animate-bounce">
                 <div className="relative">
-                    <Zap className="text-[#FF5F00] drop-shadow-[0_0_30px_#FF5F00] mix-blend-screen" size={120} strokeWidth={1} style={{ filter: 'drop-shadow(0 0 20px #FF5F00)'}} />
-                    <Sparkles className="text-purple-400 absolute -top-4 -right-4 animate-spin-slow drop-shadow-[0_0_15px_#A855F7]" size={48} />
+                    <Zap className="text-[var(--amber)] drop-shadow-[0_0_30px_var(--amber)] mix-blend-screen" size={120} strokeWidth={1} style={{ filter: 'drop-shadow(0 0 20px var(--amber))'}} />
+                    <Sparkles className="text-amber-400 absolute -top-4 -right-4 animate-spin-slow drop-shadow-[0_0_15px_#F5A623]" size={48} />
                 </div>
                 
-                <h1 className="mt-8 text-5xl font-black text-white uppercase tracking-[0.2em] drop-shadow-[0_0_20px_#FF5F00] animate-pulse glow-text" style={{ textShadow: '0 0 20px #ff5f00, 0 0 40px #ff5f00' }}>
+                <h1 className="mt-8 text-5xl font-black text-[var(--amber)] uppercase tracking-[0.2em] drop-shadow-[0_0_20px_var(--amber)] animate-pulse glow-text" style={{ textShadow: '0 0 20px var(--amber), 0 0 40px var(--amber)' }}>
                     THE CLINK!
                 </h1>
-                <p className="mt-2 text-white/80 font-bold uppercase tracking-widest text-sm bg-black/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/10">
+                <p className="mt-2 text-[var(--text-secondary)] font-bold uppercase tracking-widest text-sm px-4 py-2 rounded-full backdrop-blur-md border border-[var(--border)]" style={{ background: 'var(--bg-mid)' }}>
                     Connection Established
                 </p>
             </div>

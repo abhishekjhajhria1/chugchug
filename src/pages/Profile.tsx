@@ -67,7 +67,7 @@ export default function Profile() {
     setSavingLog(false)
   }
 
-  if (!profile) return <div className="p-8 text-center font-bold" style={{ color: 'var(--text-muted)' }}>Loading...</div>
+  const p = profile || { id: '', username: 'Resolving Rank...', level: 1, xp: 0, bio: '', city: '', country: '', stealth_mode: false, privacy_settings: {} }
 
   const catColors: Record<string, string> = {
     drink: 'var(--amber)', snack: 'var(--coral)', cigarette: 'var(--sage)',
@@ -77,7 +77,7 @@ export default function Profile() {
     drink: '🍻', snack: '🍟', cigarette: '🚬', gym: '💪', detox: '🧘', other: '📝'
   }
 
-  const levelColor = (profile.level || 1) >= 25 ? 'var(--indigo)' : (profile.level || 1) >= 10 ? 'var(--amber)' : 'var(--sage)'
+  const levelColor = (p.level || 1) >= 25 ? 'var(--acid)' : (p.level || 1) >= 10 ? 'var(--amber)' : 'var(--coral)'
 
   return (
     <div className="space-y-5 pb-24">
@@ -106,31 +106,31 @@ export default function Profile() {
               border: `3px solid ${levelColor}`,
               boxShadow: `0 0 20px ${levelColor}40`,
               color: levelColor,
-              fontFamily: 'Nunito, sans-serif',
+              fontFamily: 'Syne, sans-serif',
             }}
           >
-            {profile.username?.[0]?.toUpperCase() || '?'}
+            {p.username?.[0]?.toUpperCase() || '?'}
             {/* Level badge */}
             <div
               className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black"
               style={{ background: levelColor, color: '#1A1208', border: '2px solid var(--bg-deep)' }}
             >
-              {profile.level ?? 1}
+              {p.level ?? 1}
             </div>
           </div>
         </div>
 
-        <h2 className="text-xl font-black mb-1" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>
-          {profile.username}
+        <h2 className="text-xl font-black mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
+          {p.username}
         </h2>
 
-        {profile.bio && !isEditing && (
-          <p className="text-sm font-medium mb-3 italic" style={{ color: 'var(--text-secondary)' }}>"{profile.bio}"</p>
+        {p.bio && !isEditing && (
+          <p className="text-sm font-medium mb-3 italic" style={{ color: 'var(--text-secondary)' }}>"{p.bio}"</p>
         )}
 
-        {(profile.city || profile.country) && !isEditing && (
+        {(p.city || p.country) && !isEditing && (
           <p className="text-xs font-medium mb-3 flex items-center justify-center gap-1" style={{ color: 'var(--text-muted)' }}>
-            <MapPin size={11} /> {[profile.city, profile.country].filter(Boolean).join(', ')}
+            <MapPin size={11} /> {[p.city, p.country].filter(Boolean).join(', ')}
           </p>
         )}
 
@@ -138,12 +138,12 @@ export default function Profile() {
         {!isEditing && (
           <div className="grid grid-cols-3 gap-3 mt-4">
             {[
-              { label: 'Level', value: profile.level ?? 1, color: levelColor },
-              { label: 'Total XP', value: profile.xp ?? 0, color: 'var(--amber)' },
+              { label: 'Level', value: p.level ?? 1, color: levelColor },
+              { label: 'Total XP', value: p.xp ?? 0, color: 'var(--amber)' },
               { label: 'Logs', value: activities.length, color: 'var(--coral)' },
             ].map(stat => (
-              <div key={stat.label} className="rounded-xl py-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
-                <p className="text-xl font-black" style={{ color: stat.color, fontFamily: 'Nunito, sans-serif' }}>{stat.value}</p>
+              <div key={stat.label} className="rounded-sm py-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                <p className="text-xl font-black" style={{ color: stat.color, fontFamily: 'Syne, sans-serif' }}>{stat.value}</p>
                 <p className="text-[10px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
               </div>
             ))}
@@ -157,14 +157,14 @@ export default function Profile() {
               <QrCode size={18} /> My Connection QR
             </button>
             {sessionFriends.length > 0 && (
-              <div className="rounded-xl p-3 text-left" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+              <div className="rounded-sm p-3 text-left" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <UsersIcon size={14} style={{ color: 'var(--coral)' }} />
                   <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Active Session Friends</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {sessionFriends.map((sf: any) => {
-                    const name = sf.user_a === profile.id ? sf.user_b_profile?.username : sf.user_a_profile?.username
+                    const name = sf.user_a === p.id ? sf.user_b_profile?.username : sf.user_a_profile?.username
                     return (
                       <div key={sf.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid rgba(244,132,95,0.2)' }}>
                         <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -201,7 +201,7 @@ export default function Profile() {
             </div>
 
             {/* Privacy settings */}
-            <div className="rounded-xl p-4 space-y-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+            <div className="rounded-sm p-4 space-y-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
               <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Privacy Settings</p>
               {[
                 { key: 'beer_counter', label: 'Beer Counter', options: [['public','Public'],['group','Group Only'],['private','Private']] },
@@ -238,12 +238,12 @@ export default function Profile() {
         )}
       </div>
 
-      <QRCodeModal isOpen={showMyQR} onClose={() => setShowMyQR(false)} mode="display" personalId={profile.id} />
+      <QRCodeModal isOpen={showMyQR} onClose={() => setShowMyQR(false)} mode="display" personalId={p.id} />
 
       {/* ── Activity Log ── */}
       {!isEditing && (
         <div>
-          <h2 className="font-black text-lg mb-3" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>
+          <h2 className="font-black text-lg mb-3" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
             Your Activity Log
           </h2>
           {activities.length === 0 ? (
@@ -258,7 +258,7 @@ export default function Profile() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
+                        className="w-9 h-9 rounded-sm flex items-center justify-center text-lg"
                         style={{ background: `${catColors[act.category] || 'var(--text-muted)'}18`, border: `1px solid ${catColors[act.category] || 'var(--border)'}30` }}
                       >
                         {catEmoji[act.category] || '📝'}

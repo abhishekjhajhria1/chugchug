@@ -157,46 +157,46 @@ export default function GroupBalances() {
       </div>
 
       <div className="glass-card">
-        <h2 className="text-lg font-black flex items-center gap-2 mb-2" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>
+        <h2 className="text-lg font-black flex items-center gap-2 mb-2" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
           <Receipt strokeWidth={2} style={{ color: 'var(--amber)' }} /> Who Owes Who
         </h2>
         <p className="font-bold text-sm mb-6" style={{ color: 'var(--text-muted)' }}>{groupName}</p>
 
         {loading ? (
-          <div className="text-center font-bold text-white/90/50 py-10">
+          <div className="text-center font-bold py-10" style={{ color: 'var(--text-muted)' }}>
             <Loader2 className="animate-spin mx-auto mb-2" size={32} />
             Crunching the numbers...
           </div>
         ) : debts.length === 0 ? (
-          <div className="bg-white/5 rounded-2xl border border-white/15 p-6 text-center shadow-lg shadow-black/20">
-            <div className="w-16 h-16 bg-green-300/20 rounded-full mx-auto flex items-center justify-center border border-white/15 shadow-lg shadow-black/20 mb-3">
+          <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)' }}>
               <span className="text-2xl">🤝</span>
             </div>
-            <p className="font-black text-xl text-white/90">You are all settled up!</p>
-            <p className="font-bold text-sm text-white/90/60 mt-1">No outstanding balances in this group.</p>
+            <p className="font-black text-xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>You are all settled up!</p>
+            <p className="font-bold text-sm mt-1" style={{ color: 'var(--text-muted)' }}>No outstanding balances in this group.</p>
           </div>
         ) : (
           <div className="space-y-4">
             {debts.map((debt, index) => {
               const iAmDebtor = debt.fromId === user?.id
               const iAmCreditor = debt.toId === user?.id
-              
-              const isMeInvolved = iAmDebtor || iAmCreditor
-              const bgColor = iAmDebtor ? "bg-pink-500/30/10 border-pink-500/30" : iAmCreditor ? "bg-green-300/20/20 border-green-400/30" : "bg-white/5 border-white/15/20"
 
               return (
-                <div key={index} className={`rounded-xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${bgColor} ${isMeInvolved ? 'shadow-lg shadow-black/20 border-white/15' : ''}`}>
+                <div key={index} className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{
+                  background: iAmDebtor ? 'var(--coral-dim)' : iAmCreditor ? 'var(--acid-dim)' : 'var(--bg-raised)',
+                  border: `1px solid ${iAmDebtor ? 'rgba(255,107,107,0.2)' : iAmCreditor ? 'rgba(204,255,0,0.15)' : 'var(--border)'}`,
+                }}>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="font-black text-lg text-white/90">
+                    <p className="font-black text-lg" style={{ color: 'var(--text-primary)' }}>
                         {iAmDebtor ? "You" : debt.fromName}
                       </p>
-                      <span className="font-bold text-xs text-white/90/50 uppercase tracking-widest">owes</span>
-                      <p className="font-black text-lg text-white/90">
+                      <span className="font-bold text-xs uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>owes</span>
+                      <p className="font-black text-lg" style={{ color: 'var(--text-primary)' }}>
                         {iAmCreditor ? "You" : debt.toName}
                       </p>
                     </div>
-                    <p className={`font-black text-2xl ${iAmDebtor ? 'neon-pink' : 'neon-lime'}`}>
+                    <p className="font-black text-2xl" style={{ fontFamily: 'Syne, sans-serif', color: iAmDebtor ? 'var(--coral)' : 'var(--acid)' }}>
                       ${debt.amount.toFixed(2)}
                     </p>
                   </div>
@@ -205,7 +205,7 @@ export default function GroupBalances() {
                     <button 
                       onClick={() => handleSettleUp(debt.toId, debt.amount)}
                       disabled={settlingWith === debt.toId}
-                      className="glass-btn-secondary py-2! bg-green-400/30 text-white border-white/15 flex items-center justify-center gap-2 shrink-0"
+                      className="glass-btn-secondary py-2 flex items-center justify-center gap-2 shrink-0" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', borderColor: 'rgba(204,255,0,0.15)' }}
                     >
                       {settlingWith === debt.toId ? <Loader2 size={16} className="animate-spin" /> : <Handshake size={16} strokeWidth={2} />}
                       Settle Up

@@ -136,7 +136,7 @@ export default function Log() {
         >
           <CheckCircle2 size={44} style={{ color: 'var(--sage)' }} strokeWidth={2} />
         </div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>
+        <h2 className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
           Logged! 🎉
         </h2>
         <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
@@ -161,14 +161,14 @@ export default function Log() {
           <button
             key={cat.id}
             onClick={() => setCategory(cat.id)}
-            className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all active:scale-95"
+            className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-sm transition-all active:scale-95"
             style={{
               background: category === cat.id ? cat.bg : 'var(--bg-surface)',
               border: `2px solid ${category === cat.id ? cat.color + '50' : 'var(--border)'}`,
             }}
           >
             <span className="text-2xl">{cat.icon}</span>
-            <span className="text-[10px] font-bold" style={{ color: category === cat.id ? cat.color : 'var(--text-muted)', fontFamily: 'Nunito, sans-serif' }}>
+            <span className="text-[10px] font-bold" style={{ color: category === cat.id ? cat.color : 'var(--text-muted)', fontFamily: 'Syne, sans-serif' }}>
               {cat.label}
             </span>
           </button>
@@ -204,20 +204,20 @@ export default function Log() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-10 h-10 rounded-xl font-black text-xl flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-sm font-black text-xl flex items-center justify-center transition-colors"
               style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-mid)', color: 'var(--text-secondary)' }}
             >
               −
             </button>
             <div
               className="flex-1 text-center font-black text-3xl"
-              style={{ color: selectedCat.color, fontFamily: 'Nunito, sans-serif' }}
+              style={{ color: selectedCat.color, fontFamily: 'Syne, sans-serif' }}
             >
               {quantity}
             </div>
             <button
               onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-10 rounded-xl font-black text-xl flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-sm font-black text-xl flex items-center justify-center transition-colors"
               style={{ background: selectedCat.bg, border: `1px solid ${selectedCat.color}40`, color: selectedCat.color }}
             >
               +
@@ -227,7 +227,7 @@ export default function Log() {
 
         {/* Recipe toggle (drink/snack) */}
         {(category === 'drink' || category === 'snack') && (
-          <div className="rounded-xl p-3 space-y-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+          <div className="rounded-sm p-3 space-y-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -292,7 +292,7 @@ export default function Log() {
           <input type="file" accept="image/*" capture="environment" hidden ref={fileInputRef} onChange={handlePhotoSelect} />
 
           {photoPreview ? (
-            <div className="relative w-full h-40 rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-mid)' }}>
+            <div className="relative w-full h-40 rounded-sm overflow-hidden" style={{ border: '1px solid var(--border-mid)' }}>
               <img src={photoPreview} alt="Proof" className="w-full h-full object-cover" />
               <button
                 onClick={() => { setPhoto(null); setPhotoPreview(null) }}
@@ -305,7 +305,7 @@ export default function Log() {
           ) : (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-24 rounded-xl flex flex-col items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95"
+              className="w-full h-24 rounded-sm flex flex-col items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95"
               style={{ background: 'var(--bg-raised)', border: '2px dashed var(--border-mid)', color: 'var(--text-muted)' }}
             >
               <Camera size={24} strokeWidth={1.5} />

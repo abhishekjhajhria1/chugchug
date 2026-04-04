@@ -240,23 +240,23 @@ export default function Groups() {
   }
 
   const renderLog = (log: ActivityLog) => {
-    const catColors: Record<string, string> = { drink: '#FFD166', snack: '#FF9F1C', cigarette: '#A0E8AF', gym: '#118AB2', detox: '#06D6A0' }
+    const catColors: Record<string, string> = { drink: 'var(--amber)', snack: 'var(--coral)', cigarette: 'var(--acid)', gym: 'var(--amber)', detox: 'var(--acid)' }
     const badgeColor = catColors[log.category] || '#CCC'
 
     return (
-      <div key={`log-${log.id}`} className="glass-card bg-white/5 animate-fadeInScale">
+      <div key={`log-${log.id}`} className="glass-card anim-enter">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full border border-white/15 shadow-lg shadow-black/20" style={{ backgroundColor: badgeColor }} />
+          <div className="w-8 h-8 rounded-full" style={{ backgroundColor: badgeColor, border: '1px solid var(--border)' }} />
           <div>
-            <p className="text-sm font-bold text-white/90 leading-none">{log.profiles?.username}</p>
-            <p className="text-[10px] uppercase font-black tracking-widest opacity-50">{log.category}</p>
+            <p className="text-sm font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{log.profiles?.username}</p>
+            <p className="text-[10px] uppercase font-black tracking-widest" style={{ color: 'var(--text-muted)' }}>{log.category}</p>
           </div>
         </div>
-        <h3 className="font-black text-xl text-white/90 leading-none mb-1">{log.item_name}</h3>
-        <p className="font-bold neon-pink text-sm">Amount: {log.quantity}</p>
+        <h3 className="font-black text-xl leading-none mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{log.item_name}</h3>
+        <p className="font-bold text-sm" style={{ color: 'var(--amber)' }}>Amount: {log.quantity}</p>
 
         {log.photo_url && (
-          <div className="mt-2 rounded-xl overflow-hidden border border-white/10">
+          <div className="mt-2 rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
             <img src={supabase.storage.from('photos').getPublicUrl(log.photo_url).data.publicUrl} className="w-full h-32 object-cover" />
             {log.photo_metadata && (
                 <PhotoMetadata 
@@ -274,19 +274,19 @@ export default function Groups() {
 
   const renderParty = (party: PartyPreview) => {
     return (
-      <div key={`party-${party.id}`} className="glass-card bg-pink-500/10 border-pink-500/30 animate-fadeInScale cursor-pointer" onClick={() => navigate(`/party/${party.id}`)}>
+      <div key={`party-${party.id}`} className="glass-card anim-enter cursor-pointer" style={{ borderColor: 'rgba(255,107,107,0.15)' }} onClick={() => navigate(`/party/${party.id}`)}>
         <div className="flex items-center gap-2 mb-2">
-          <PartyPopper size={24} className="neon-pink" />
+          <PartyPopper size={24} style={{ color: 'var(--coral)' }} />
           <div>
-            <p className="font-black text-lg text-white/90 leading-none">{party.title}</p>
-            <p className="text-xs font-bold opacity-60">Host: {party.profiles?.username}</p>
+            <p className="font-black text-lg leading-none" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{party.title}</p>
+            <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>Host: {party.profiles?.username}</p>
           </div>
         </div>
         <div className="space-y-1 mt-3">
-          <p className="text-sm font-bold flex items-center gap-2"><Calendar size={14} className="neon-lime" /> {new Date(party.event_date).toLocaleDateString()}</p>
-          <p className="text-sm font-bold flex items-center gap-2"><MapPin size={14} className="neon-pink" /> {party.address}</p>
+          <p className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}><Calendar size={14} style={{ color: 'var(--acid)' }} /> {new Date(party.event_date).toLocaleDateString()}</p>
+          <p className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}><MapPin size={14} style={{ color: 'var(--coral)' }} /> {party.address}</p>
         </div>
-        <button className="w-full mt-3 glass-btn-secondary text-xs! border-pink-500/30 neon-pink">View Party Details</button>
+        <button className="w-full mt-3 glass-btn-secondary text-xs" style={{ borderColor: 'rgba(255,107,107,0.2)', color: 'var(--coral)' }}>View Party Details</button>
       </div>
     )
   }
@@ -335,9 +335,9 @@ export default function Groups() {
 
       {/* Modals for Create/Join */}
       {modalMode === 'create' && (
-        <div className="glass-card bg-amber-400/20 border-amber-400/30 relative mb-6">
-          <button onClick={() => { setModalMode(null); setNewInviteCode("") }} className="absolute top-2 right-2 p-1 text-white/90/50 hover:text-white/90"><X size={20} strokeWidth={2} /></button>
-          <h2 className="text-xl font-black mb-4">Create a Group</h2>
+        <div className="glass-card relative mb-6" style={{ borderColor: 'rgba(245,166,35,0.2)' }}>
+          <button onClick={() => { setModalMode(null); setNewInviteCode("") }} className="absolute top-2 right-2 p-1" style={{ color: 'var(--text-muted)' }}><X size={20} strokeWidth={2} /></button>
+          <h2 className="text-xl font-black mb-4" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Create a Group</h2>
           {!newInviteCode ? (
             <div className="space-y-3">
               <input value={groupName} onChange={e => setGroupName(e.target.value)} placeholder="Awesome Crew" className="glass-input w-full" />
@@ -346,7 +346,7 @@ export default function Groups() {
           ) : (
             <div className="text-center">
               <p className="font-bold mb-2">Share this code with friends:</p>
-              <p className="font-black text-3xl neon-pink tracking-widest bg-white/5 rounded-xl border border-white/15 py-3 mb-4 select-all">{newInviteCode}</p>
+              <p className="font-black text-3xl tracking-widest py-3 mb-4 select-all rounded-xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)', background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>{newInviteCode}</p>
               <button onClick={() => { setModalMode(null); setNewInviteCode("") }} className="glass-btn-secondary w-full">Done</button>
             </div>
           )}
@@ -354,9 +354,9 @@ export default function Groups() {
       )}
 
       {modalMode === 'join' && (
-        <div className="glass-card bg-green-300/10 border-green-400/30 relative mb-6">
-          <button onClick={() => setModalMode(null)} className="absolute top-2 right-2 p-1 text-white/90/50 hover:text-white/90"><X size={20} strokeWidth={2} /></button>
-          <h2 className="text-xl font-black mb-4">Join a Group</h2>
+        <div className="glass-card relative mb-6" style={{ borderColor: 'rgba(204,255,0,0.15)' }}>
+          <button onClick={() => setModalMode(null)} className="absolute top-2 right-2 p-1" style={{ color: 'var(--text-muted)' }}><X size={20} strokeWidth={2} /></button>
+          <h2 className="text-xl font-black mb-4" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Join a Group</h2>
           <div className="space-y-3">
             <input value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="Enter 7-char code" className="glass-input w-full uppercase" maxLength={7} />
             <button onClick={handleJoinGroup} className="glass-btn w-full bg-green-400/30!">Join</button>
@@ -380,7 +380,7 @@ export default function Groups() {
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--sage-dim)' }}>
                     <Users size={16} style={{ color: 'var(--sage)' }} strokeWidth={2} />
                   </div>
-                  <span className="font-black text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'Nunito, sans-serif' }}>{g.name}</span>
+                  <span className="font-black text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif' }}>{g.name}</span>
                 </div>
                 <div className="w-full pt-2" style={{ borderTop: '1px solid var(--border)' }}>
                     <LiveCounter groupId={g.id} compact />
@@ -398,12 +398,10 @@ export default function Groups() {
         </div>
       )}
 
-      {/* Group Feed */}
       <div>
         <p className="section-label mb-3">Group Activity Feed</p>
-        {loading ? (
-          <div className="text-center py-10" style={{ color: 'var(--text-muted)' }}>Loading...</div>
-        ) : groupFeed.length === 0 ? (
+        
+        {groupFeed.length === 0 && !loading ? (
           <div className="text-center rounded-2xl py-10" style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-mid)' }}>
             <Activity size={28} className="mx-auto mb-3" style={{ color: 'var(--text-ghost)' }} />
             <p className="font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>No group activity yet.</p>
@@ -412,6 +410,7 @@ export default function Groups() {
         ) : (
           <div className="space-y-4">
             {groupFeed.map(item => item.type === 'log' ? renderLog(item.data as ActivityLog) : renderParty(item.data as PartyPreview))}
+            {loading && <div className="text-center py-6 text-xs font-bold uppercase tracking-widest opacity-50" style={{ color: 'var(--amber)' }}>Fetching Scrolls...</div>}
           </div>
         )}
       </div>

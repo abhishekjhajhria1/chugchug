@@ -192,7 +192,7 @@ export default function Party() {
             style={{
               background: view === id ? 'var(--amber-dim)' : 'transparent',
               color: view === id ? 'var(--amber)' : 'var(--text-muted)',
-              fontFamily: 'Nunito, sans-serif',
+              fontFamily: 'Syne, sans-serif',
               borderRight: i < 3 ? '1px solid var(--border)' : 'none',
             }}
           >
@@ -212,24 +212,24 @@ export default function Party() {
         <div className="space-y-4">
           {parties.length === 0 && <p className="text-center font-bold opacity-50 mt-10">No upcoming parties found.</p>}
           {parties.map(p => (
-            <div key={p.id} className="glass-card bg-white/5 border-pink-500/30">
+            <div key={p.id} className="glass-card" style={{ borderColor: 'rgba(255,107,107,0.15)' }}>
               <div className="flex justify-between items-start mb-2">
-                <h2 className="font-black text-xl text-white/90">{p.title}</h2>
-                <span className="bg-amber-400/30 px-2 py-0.5 rounded-full border border-white/15 font-black text-xs transform rotate-3">
+                <h2 className="font-black text-xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{p.title}</h2>
+                <span className="px-2 py-0.5 rounded-full font-black text-xs transform rotate-3" style={{ background: 'var(--amber-dim)', border: '1px solid var(--border)', color: 'var(--amber)' }}>
                   {p.entry_fee}
                 </span>
               </div>
-              <p className="text-sm font-bold text-white/90 opacity-70 mb-3">Host: <Link to={`/profile/${p.host_id}`} className="hover:neon-pink hover:opacity-100 transition-colors">{p.profiles?.username}</Link></p>
+              <p className="text-sm font-bold mb-3" style={{ color: 'var(--text-muted)' }}>Host: <Link to={`/profile/${p.host_id}`} className="transition-colors" style={{ color: 'var(--amber)' }}>{p.profiles?.username}</Link></p>
 
               <div className="space-y-1 mb-4">
-                <p className="text-sm font-bold flex items-center gap-2"><Calendar size={16} className="neon-lime" /> {new Date(p.event_date).toLocaleDateString()}</p>
-                <p className="text-sm font-bold flex items-center gap-2"><MapPin size={16} className="neon-pink" /> {p.address}</p>
+                <p className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}><Calendar size={16} style={{ color: 'var(--acid)' }} /> {new Date(p.event_date).toLocaleDateString()}</p>
+                <p className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}><MapPin size={16} style={{ color: 'var(--coral)' }} /> {p.address}</p>
                 {(p.booze_details || p.snacks_details) && (
                   <p className="text-sm font-bold flex items-center gap-2"><Beer size={16} className="neon-amber" /> {p.booze_details} | {p.snacks_details}</p>
                 )}
               </div>
 
-              <button onClick={() => handleInterest(p.id)} className="glass-btn-secondary w-full border-green-400/30 neon-lime">
+              <button onClick={() => handleInterest(p.id)} className="glass-btn w-full" style={{ fontSize: 13 }}>
                 I'm Interested
               </button>
             </div>
@@ -239,8 +239,8 @@ export default function Party() {
 
       {/* CREATE VIEW */}
       {view === 'create' && (
-        <div className="glass-card bg-pink-500/30/10 border-pink-500/30 space-y-4">
-          <h2 className="text-2xl font-black text-white/90 mb-4">Plan a Rager</h2>
+        <div className="glass-card space-y-4" style={{ borderColor: 'rgba(255,107,107,0.15)' }}>
+          <h2 className="text-2xl font-black mb-4" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Plan a Rager</h2>
 
           <div className="space-y-3">
             <input type="text" placeholder="Party Title (e.g. Summer Smash)" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="glass-input w-full" />
@@ -267,7 +267,7 @@ export default function Party() {
             <input type="text" placeholder="Snacks Details (Pizza, Chips?)" value={form.snacks_details} onChange={e => setForm({ ...form, snacks_details: e.target.value })} className="glass-input w-full" />
           </div>
 
-          <button onClick={handleCreate} disabled={loading} className="glass-btn w-full bg-pink-500/30! text-white mt-4">
+          <button onClick={handleCreate} disabled={loading} className="glass-btn w-full mt-4">
             {loading ? "Creating..." : "Publish Event"}
           </button>
         </div>
@@ -276,13 +276,13 @@ export default function Party() {
       {/* MANAGE VIEW */}
       {view === 'manage' && (
         <div className="space-y-6">
-          <h2 className="text-xl font-black text-white/90">Your Hosted Events</h2>
+          <h2 className="text-xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Your Hosted Events</h2>
           {hostedParties.length === 0 && <p className="text-center font-bold opacity-50 mt-10">You haven't hosted any parties yet.</p>}
           {hostedParties.map(p => (
-            <div key={p.id} className="glass-card bg-green-300/20/20 border-green-400/30">
+            <div key={p.id} className="glass-card" style={{ borderColor: 'rgba(204,255,0,0.15)' }}>
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-black text-xl text-white/90">{p.title}</h3>
-                <span className={`text-xs font-black uppercase px-2 py-1 rounded-full border border-white/15 ${p.privacy_level === 'hidden' ? 'bg-pink-500/30 text-white' : 'bg-white/5 text-white/90'}`}>
+                <h3 className="font-black text-xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{p.title}</h3>
+                <span className="text-xs font-black uppercase px-2 py-1 rounded-full" style={{ background: p.privacy_level === 'hidden' ? 'var(--coral-dim)' : 'var(--bg-raised)', border: '1px solid var(--border)', color: p.privacy_level === 'hidden' ? 'var(--coral)' : 'var(--text-secondary)' }}>
                   {p.privacy_level}
                 </span>
               </div>
@@ -294,7 +294,7 @@ export default function Party() {
                 <button onClick={() => copyInviteLink(p.id)} className="glass-btn-secondary flex-1 text-xs py-2 bg-white/5 flex items-center justify-center gap-1">
                   🔗 Copy Link
                 </button>
-                <button onClick={() => handleEndParty(p.id)} className="glass-btn-secondary flex-1 text-xs py-2 bg-pink-500/30 text-white border-pink-500/30 flex items-center justify-center gap-1">
+                <button onClick={() => handleEndParty(p.id)} className="glass-btn-secondary flex-1 text-xs py-2 flex items-center justify-center gap-1" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', borderColor: 'rgba(255,107,107,0.2)' }}>
                   ✖ End
                 </button>
               </div>
@@ -305,24 +305,24 @@ export default function Party() {
               </div>
 
               {/* Guest List Render */}
-              <div className="bg-white/5 rounded-xl border border-white/15 shadow-lg shadow-black/20 p-3 space-y-2">
-                <h4 className="font-bold text-sm tracking-widest text-white/90 uppercase mb-2 border-b-2 border-dashed border-white/15/20 pb-1">Guest List ({p.party_guests?.length || 0})</h4>
+              <div className="rounded-xl p-3 space-y-2" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                <h4 className="font-bold text-sm tracking-widest uppercase mb-2 pb-1" style={{ color: 'var(--text-muted)', borderBottom: '1px dashed var(--border)' }}>Guest List ({p.party_guests?.length || 0})</h4>
 
                 {(!p.party_guests || p.party_guests.length === 0) ? (
                   <p className="text-xs font-bold opacity-50 text-center py-2">No RSVPs yet.</p>
                 ) : (
                   p.party_guests.map(g => (
-                    <div key={g.user_id} className="flex justify-between items-center pb-2 border-b-2 border-dashed border-white/15/10 last:border-0">
+                    <div key={g.user_id} className="flex justify-between items-center pb-2 last:border-0" style={{ borderBottom: '1px dashed var(--border)' }}>
                       <div>
-                        <Link to={`/profile/${g.user_id}`} className="font-bold text-white/90 hover:neon-pink transition-colors">{g.profiles?.username}</Link>
-                        <span className={`ml-2 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-white/15 ${g.status === 'accepted' ? 'bg-green-300/20' : g.status === 'rejected' ? 'bg-pink-500/30 text-white' : 'bg-amber-400/30'}`}>
+                        <Link to={`/profile/${g.user_id}`} className="font-bold transition-colors" style={{ color: 'var(--text-primary)' }}>{g.profiles?.username}</Link>
+                        <span className="ml-2 text-[10px] font-black uppercase px-2 py-0.5 rounded-full" style={{ background: g.status === 'accepted' ? 'var(--acid-dim)' : g.status === 'rejected' ? 'var(--coral-dim)' : 'var(--amber-dim)', color: g.status === 'accepted' ? 'var(--acid)' : g.status === 'rejected' ? 'var(--coral)' : 'var(--amber)', border: '1px solid var(--border)' }}>
                           {g.status}
                         </span>
                       </div>
                       {g.status === 'interested' && (
                         <div className="flex gap-2">
-                          <button onClick={() => updateGuestStatus(p.id, g.user_id, 'accepted')} className="p-1.5 bg-green-300/20 rounded border border-white/15 shadow-lg shadow-black/20 hover:-translate-y-0.5 transition-transform"><CheckCircle2 size={16} /></button>
-                          <button onClick={() => updateGuestStatus(p.id, g.user_id, 'rejected')} className="p-1.5 bg-pink-500/30 text-white rounded border border-white/15 shadow-lg shadow-black/20 hover:-translate-y-0.5 transition-transform"><XCircle size={16} /></button>
+                          <button onClick={() => updateGuestStatus(p.id, g.user_id, 'accepted')} className="p-1.5 rounded transition-transform active:scale-90" style={{ background: 'var(--acid-dim)', border: '1px solid var(--border)' }}><CheckCircle2 size={16} style={{ color: 'var(--acid)' }} /></button>
+                          <button onClick={() => updateGuestStatus(p.id, g.user_id, 'rejected')} className="p-1.5 rounded transition-transform active:scale-90" style={{ background: 'var(--coral-dim)', border: '1px solid var(--border)' }}><XCircle size={16} style={{ color: 'var(--coral)' }} /></button>
                         </div>
                       )}
                     </div>
@@ -337,23 +337,23 @@ export default function Party() {
       {/* HISTORY VIEW */}
       {view === 'history' && (
         <div className="space-y-6">
-          <h2 className="text-xl font-black text-white/90">Your Past Events</h2>
+          <h2 className="text-xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Your Past Events</h2>
           {pastParties.length === 0 && <p className="text-center font-bold opacity-50 mt-10">No past parties saved in history.</p>}
           {pastParties.map(p => (
-            <div key={p.id} className="glass-card bg-white/5 border-white/10 opacity-80">
+            <div key={p.id} className="glass-card" style={{ opacity: 0.7 }}>
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-black text-xl text-white/90 line-through">{p.title}</h3>
-                <span className="text-xs font-black uppercase px-2 py-1 rounded-full border border-white/15 bg-gray-300 text-white/60">
+                <h3 className="font-black text-xl line-through" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{p.title}</h3>
+                <span className="text-xs font-black uppercase px-2 py-1 rounded-full" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
                   {p.status}
                 </span>
               </div>
-              <p className="text-sm font-bold text-white/90 opacity-70 mb-2 border-b-2 border-dashed border-white/10 pb-2">
+              <p className="text-sm font-bold mb-2 pb-2" style={{ color: 'var(--text-muted)', borderBottom: '1px dashed var(--border)' }}>
                 <Calendar size={14} className="inline mr-1" /> {new Date(p.event_date).toLocaleDateString()}
               </p>
 
               <div className="space-y-1 mt-2">
-                <p className="text-xs font-bold text-white/50">Total RSVPs: {p.party_guests?.length || 0}</p>
-                <p className="text-xs font-bold text-white/50">Location: {p.address}</p>
+                <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>Total RSVPs: {p.party_guests?.length || 0}</p>
+                <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>Location: {p.address}</p>
               </div>
             </div>
           ))}

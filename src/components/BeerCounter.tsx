@@ -299,7 +299,7 @@ export default function BeerCounter({ compact, partyId, groupId, onSessionLogged
               background: count > 0 ? 'var(--amber-dim)' : 'transparent',
               boxShadow: count > 0 ? '0 0 40px rgba(245,166,35,0.15), inset 0 0 30px rgba(245,166,35,0.05)' : 'none',
             }}>
-            <span className="text-[80px] font-black tracking-tighter leading-none" style={{ fontFamily: 'Nunito, sans-serif', color: 'var(--text-primary)' }}>
+            <span className="text-[80px] font-black tracking-tighter leading-none" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
               {count}
             </span>
             <span className="text-xs font-bold uppercase tracking-widest mt-2" style={{ color: 'var(--text-muted)' }}>TAP TO CHUG</span>

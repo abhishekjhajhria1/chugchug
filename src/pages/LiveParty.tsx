@@ -169,10 +169,10 @@ export default function LiveParty() {
             {/* Visual Blast Animation */}
             {showBlast && (
                 <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center anim-pop">
-                    <div className="absolute inset-0 bg-amber-400/20 backdrop-blur-sm animate-pulse" />
+                    <div className="absolute inset-0 animate-pulse" style={{ background: 'rgba(245,166,35,0.15)', backdropFilter: 'blur(4px)' }} />
                     <div className="relative text-center">
                         <div className="text-6xl mb-4 animate-bounce">🍺💨</div>
-                        <h2 className="text-3xl font-black text-white drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] uppercase">
+                        <h2 className="text-3xl font-black uppercase" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)', textShadow: '0 0 20px rgba(245,166,35,0.6)' }}>
                             {lastBuzz?.username} FINISHED!
                         </h2>
                     </div>
@@ -189,37 +189,38 @@ export default function LiveParty() {
                 </div>
             </div>
 
-            <div className="glass-card glow-rose border-rose-500/30 text-center p-8 flex flex-col items-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-rose-500/10 to-transparent pointer-events-none"></div>
+            <div className="glass-card text-center p-8 flex flex-col items-center relative overflow-hidden" style={{ borderColor: 'rgba(255,107,107,0.2)' }}>
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(255,107,107,0.08), transparent)' }}></div>
                 
-                <h2 className="text-2xl font-black mb-1 relative z-10 text-white/90">
-                    CODE: <span className="text-rose-400 tracking-wider">{partyId}</span>
+                <h2 className="text-2xl font-black mb-1 relative z-10" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
+                    CODE: <span style={{ color: 'var(--coral)', letterSpacing: '0.1em' }}>{partyId}</span>
                 </h2>
-                <p className="text-sm font-bold text-rose-200/60 mb-8 relative z-10 uppercase tracking-widest">
+                <p className="text-sm font-bold mb-8 relative z-10 uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
                     Scan to join session
                 </p>
                 
-                <div className="bg-white p-4 rounded-3xl border border-white/20 shadow-[0_0_40px_rgba(244,63,94,0.3)] relative z-10 transform transition-transform hover:scale-105 duration-300">
+                <div className="bg-white p-4 rounded-3xl relative z-10 transform transition-transform hover:scale-105 duration-300" style={{ border: '2px solid var(--border)', boxShadow: 'var(--coral-glow)' }}>
                     <QRCodeSVG value={joinUrl} size={200} level="H" fgColor="#1a1530" bgColor="transparent" />
                 </div>
             </div>
 
-            <div className="glass-card glow-gold border-amber-500/20 bg-black/40 backdrop-blur-xl">
+            <div className="glass-card" style={{ borderColor: 'rgba(245,166,35,0.15)' }}>
                 <BeerCounter compact partyId={partyId} />
                 
                 {/* I'm Done Broadcast Button */}
                 <div className="px-3 pb-2 pt-1">
                     <button 
                         onClick={handleBuzz}
-                        className="w-full py-4 rounded-xl bg-linear-to-r from-rose-500 to-rose-600 text-white font-black text-sm uppercase tracking-widest shadow-[0_0_20px_rgba(244,63,94,0.3)] hover:shadow-[0_0_30px_rgba(244,63,94,0.5)] active:scale-95 transition-all flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-xl text-sm uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2"
+                        style={{ background: 'linear-gradient(135deg, var(--coral), #D94242)', color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 800, boxShadow: 'var(--coral-glow)' }}
                     >
                         <Zap size={18} fill="currentColor" /> I'm Done! (Broadcast)
                     </button>
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-white/10 px-2 pb-2">
-                    <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
-                        <PartyPopper size={12} className="text-pink-400" /> Session Leaderboard
+                    <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 ml-1 flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                        <PartyPopper size={12} style={{ color: 'var(--coral)' }} /> Session Leaderboard
                     </h3>
                     <LiveCounter partyId={partyId} showLeaderboard />
                 </div>
@@ -230,10 +231,10 @@ export default function LiveParty() {
                    <Share2 size={12}/> Broadcast Party Stats
                </h3>
                <div className="flex flex-col gap-3">
-                   <button onClick={handleShareGroup} disabled={sharing} className="w-full glass-btn bg-violet-500/20 text-violet-300 border-violet-500/30 py-3.5 flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(139,92,246,0.2)]">
+                   <button onClick={handleShareGroup} disabled={sharing} className="w-full glass-btn py-3.5 flex justify-center items-center gap-2">
                        <Globe size={18} /> Share as Group (World Forum)
                    </button>
-                   <button onClick={handleShareIndividually} disabled={sharing} className="w-full glass-btn-secondary bg-emerald-500/10 text-emerald-400 border-emerald-500/20 py-3 flex justify-center items-center gap-2">
+                   <button onClick={handleShareIndividually} disabled={sharing} className="w-full glass-btn-secondary py-3 flex justify-center items-center gap-2" style={{ color: 'var(--acid)', borderColor: 'rgba(204,255,0,0.15)' }}>
                        <Users size={18} /> Share Individually (Activity Feed)
                    </button>
                </div>

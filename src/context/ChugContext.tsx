@@ -32,13 +32,22 @@ export function ChugProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     const fetchProfile = async (userId: string) => {
-        const { data } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", userId)
-            .single();
+        try {
+            const { data, error } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", userId)
+                .single();
 
-        if (data) setProfile(data);
+            if (error) {
+                console.error("Error fetching profile:", error);
+                // Return gracefully instead of crashing
+                return;
+            }
+            if (data) setProfile(data);
+        } catch (e) {
+            console.error("Fatal exception in fetchProfile:", e);
+        }
     };
 
     const refreshProfile = async () => {
@@ -46,10 +55,11 @@ export function ChugProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabase.auth.getSession().then(async ({ data: { session } }) => {
             setUser(session?.user ?? null);
             if (session?.user) {
-                fetchProfile(session.user.id);
+                await fetchProfile(session.user.id);
+                setLoading(false);
             } else {
                 setLoading(false);
             }
