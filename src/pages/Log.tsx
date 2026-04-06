@@ -22,7 +22,7 @@ export default function Log() {
   const [category, setCategory] = useState<ActivityCategory>('drink')
   const [itemName, setItemName] = useState("")
   const [quantity, setQuantity] = useState<number>(1)
-  const [privacy, setPrivacy] = useState<'public' | 'groups' | 'private' | 'hidden'>('groups')
+  const [privacy, setPrivacy] = useState<'public' | 'groups' | 'private' | 'hidden'>('public')
 
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([])
   const [selectedGroup, setSelectedGroup] = useState<string>('')
@@ -91,11 +91,13 @@ export default function Log() {
         detox_notes: category === 'detox' ? detoxNotes : undefined
       }
 
+      const finalPrivacy = (privacy === 'groups' && !selectedGroup) ? 'private' : privacy
+
       const { error } = await supabase.from("activity_logs").insert({
         user_id: user.id, category, item_name: itemName, quantity,
         xp_earned: xpEarned, photo_url: photoUrl,
-        photo_metadata: mergedMetadata, privacy_level: privacy,
-        group_id: privacy === 'groups' ? (selectedGroup || null) : null
+        photo_metadata: mergedMetadata, privacy_level: finalPrivacy,
+        group_id: finalPrivacy === 'groups' ? selectedGroup : null
       })
       if (error) throw error
 

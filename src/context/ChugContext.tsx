@@ -31,20 +31,30 @@ export function ChugProvider({ children }: { children: ReactNode }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchProfile = async (userId: string) => {
+    const fetchProfile = async (userId: string, retries = 3) => {
         try {
-            const { data, error } = await supabase
-                .from("profiles")
-                .select("*")
-                .eq("id", userId)
-                .single();
+            for (let i = 0; i < retries; i++) {
+                const { data, error } = await supabase
+                    .from("profiles")
+                    .select("*")
+                    .eq("id", userId)
+                    .single();
 
-            if (error) {
-                console.error("Error fetching profile:", error);
-                // Return gracefully instead of crashing
-                return;
+                if (error) {
+                    if (error.code === 'PGRST116' && i < retries - 1) {
+                        // Race condition on signup: wait 500ms and retry
+                        await new Promise(r => setTimeout(r, 500));
+                        continue;
+                    }
+                    console.error("Error fetching profile:", error);
+                    return;
+                }
+                
+                if (data) {
+                    setProfile(data);
+                    return;
+                }
             }
-            if (data) setProfile(data);
         } catch (e) {
             console.error("Fatal exception in fetchProfile:", e);
         }

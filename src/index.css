@@ -7,7 +7,81 @@
 
 /* ──────────────── DESIGN TOKENS ──────────────── */
 :root {
-  /* ── THE GRAND LINE (Indigo / Navy base) ── */
+  /* ── WANO LIGHT THEME (Vibrant, Colorful) ── */
+  --bg-deep:    #F7F3EB; /* Rice paper / parchment base */
+  --bg-mid:     #F0E8D9;
+  --bg-surface: #FFFFFF;
+  --bg-raised:  #FEFCF7;
+  --bg-overlay: rgba(247, 243, 235, 0.88);
+
+  /* ── KOZUKI GOLD (Primary / UI Elements) ── */
+  --amber:       #D88E30;
+  --amber-light: #F0B155;
+  --amber-dim:   rgba(216, 142, 48, 0.15);
+  --amber-glow:  0 0 24px rgba(216, 142, 48, 0.35);
+
+  /* ── TORII RED (Secondary / Errors) ── */
+  --coral:       #D83C3C;
+  --coral-light: #F3485E;
+  --coral-dim:   rgba(216, 60, 60, 0.15);
+  --coral-glow:  0 0 24px rgba(216, 60, 60, 0.35);
+
+  /* ── MATCHA GREEN (Success / XP) ── */
+  --acid:        #5F9662;
+  --acid-light:  #6BC472;
+  --acid-dim:    rgba(95, 150, 98, 0.15);
+  --acid-glow:   0 0 24px rgba(95, 150, 98, 0.35);
+  
+  /* ── Legacy Aliases ── */
+  --primary:      var(--amber);
+  --primary-light:var(--amber-light);
+  --primary-dim:  var(--amber-dim);
+  --primary-glow: var(--amber-glow);
+  --mint:         var(--acid);
+  --pink:         var(--coral);
+  --gold:         var(--amber);
+  --blue:         #1E7AB8; /* Wano Sky Blue */
+
+  /* ── Borders ── */
+  --border:     rgba(0, 0, 0, 0.08);
+  --border-mid: rgba(0, 0, 0, 0.15);
+  --border-focus:rgba(216, 142, 48, 0.4);
+
+  /* ── Text ── */
+  --text-primary:   #1A1208; 
+  --text-secondary: #4A3C2B;
+  --text-muted:     #73614F;
+  --text-ghost:     #9A8A78;
+
+  /* ── Card (Katana Edged) ── */
+  --card-bg:     rgba(255, 255, 255, 0.85);
+  --card-blur:   18px;
+  --card-radius: 4px; /* Sharp katana edges! */
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.08); /* Soft shadow for light mode */
+  --input-bg:    rgba(255, 255, 255, 0.7);
+
+  /* Back-compat aliases for old index.css variables */
+  --amber-light-alias: var(--amber-light);
+  --sage:        var(--acid);
+  --sage-light:  var(--acid-light);
+  --sage-dim:    var(--acid-dim);
+  --coral-alias: var(--coral);
+  --coral-dim-alias: var(--coral-dim);
+  --indigo:      var(--blue);
+  --indigo-dim:  rgba(30, 122, 184, 0.15);
+  --border-warm: rgba(216, 142, 48, 0.15);
+
+  --glass-bg:           var(--card-bg);
+  --glass-border:       var(--border);
+  --glass-border-strong:var(--border-mid);
+  --glass-fill:         var(--card-bg);
+  --glass-fill-elevated:var(--bg-raised);
+  --glass-fill-hover:   rgba(255, 255, 255, 0.9);
+  --glass-fill-inset:   var(--input-bg);
+}
+
+.dark {
+  /* ── WANO DARK THEME (The Grand Line / Night Festival) ── */
   --bg-deep:    #0B111F;
   --bg-mid:     #111A2C;
   --bg-surface: #182338;

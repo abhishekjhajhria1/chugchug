@@ -121,11 +121,11 @@ export default function Home() {
     { label: "Host Sesh",   to: "/session",    color: 'var(--amber)', bg: 'var(--amber-dim)',  emoji: "🏮" },
     { label: "Log Drink",   to: "/log",        color: 'var(--acid)',  bg: 'var(--acid-dim)',   emoji: "✍️" },
     { label: "Live Party",  to: "/live-party", color: 'var(--coral)', bg: 'var(--coral-dim)',  emoji: "🎊" },
+    { label: "Splitwise",   to: "/groups",     color: 'var(--acid)',  bg: 'var(--acid-dim)',   emoji: "💸" },
     { label: "My Crew",     to: "/groups",     color: 'var(--amber)', bg: 'var(--amber-dim)',  emoji: "👥" },
     { label: "Taverns",     to: "/party",      color: 'var(--coral)', bg: 'var(--coral-dim)',  emoji: "🏯" },
     { label: "Explore",     to: "/world",      color: 'var(--acid)',  bg: 'var(--acid-dim)',   emoji: "🗺️" },
     { label: "Shogun Rank", to: "/rank",       color: 'var(--amber)', bg: 'var(--amber-dim)',  emoji: "👑" },
-    { label: "Friends",     to: "/social",     color: 'var(--coral)', bg: 'var(--coral-dim)',  emoji: "🤝" },
   ];
 
   return (

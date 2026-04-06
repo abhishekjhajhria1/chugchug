@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { supabase } from "./lib/supabase"
 import type { Session } from "@supabase/supabase-js"
 import Layout from "./components/Layout"
@@ -20,8 +20,9 @@ import ConnectPage from "./pages/ConnectPage"
 import Rank from "./pages/Rank"
 import LiveParty from "./pages/LiveParty"
 import SessionPage from "./pages/SessionPage"
-import Social from "./pages/Social"
+
 import ManaByteOverlay from "./components/ManaByteOverlay"
+import Landing from "./pages/Landing"
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -37,7 +38,12 @@ function App() {
   }, [])
 
   if (!session) {
-    return <Auth />
+    return (
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Landing />} />
+      </Routes>
+    )
   }
 
   return (
@@ -59,7 +65,9 @@ function App() {
         <Route path="/rank"                element={<Rank />} />
         <Route path="/live-party/:partyId?"element={<LiveParty />} />
         <Route path="/session"             element={<SessionPage />} />
-        <Route path="/social"              element={<Social />} />
+        <Route path="/social"              element={<Navigate to="/groups" replace />} />
+        <Route path="/auth"                element={<Navigate to="/" replace />} />
+        <Route path="*"                    element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
     </Layout>

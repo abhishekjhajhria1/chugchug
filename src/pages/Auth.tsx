@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { supabase } from "../lib/supabase"
+import { useNavigate } from "react-router-dom"
+import { ArrowLeft } from "lucide-react"
 
 export default function Auth() {
   const [email, setEmail] = useState("")
@@ -8,6 +10,7 @@ export default function Auth() {
   const [username, setUsername] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const navigate = useNavigate()
 
   const handleAuth = async () => {
     setLoading(true)
@@ -31,14 +34,22 @@ export default function Auth() {
 
   return (
     <div
-      className="fixed inset-0 flex flex-col items-center justify-center p-5"
+      className="fixed inset-0 flex flex-col items-center justify-center p-5 transition-colors duration-500"
       style={{ background: 'var(--bg-deep)' }}
     >
+      <button 
+        onClick={() => navigate('/')} 
+        className="absolute top-6 left-6 p-2 rounded-full active:scale-95 transition-all outline-none"
+        style={{ color: 'var(--text-secondary)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
+      >
+        <ArrowLeft size={20} />
+      </button>
+
       {/* Background glow — amber */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: `
-          radial-gradient(ellipse 60% 50% at 50% 0%, rgba(245,166,35,0.07) 0%, transparent 70%),
-          radial-gradient(ellipse 40% 40% at 20% 100%, rgba(204,255,0,0.04) 0%, transparent 70%)
+          radial-gradient(ellipse 60% 50% at 50% 0%, var(--amber-dim) 0%, transparent 70%),
+          radial-gradient(ellipse 40% 40% at 20% 100%, var(--acid-dim) 0%, transparent 70%)
         `,
       }} />
 
@@ -50,10 +61,10 @@ export default function Auth() {
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid var(--border-mid)',
-          borderTopColor: 'rgba(245,166,35,0.25)',
+          borderTopColor: 'var(--amber-dim)',
           borderRadius: 24,
           padding: '36px 28px 32px',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+          boxShadow: 'var(--card-shadow)',
         }}
       >
         {/* Logo + Title */}
