@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Loader2, BookOpen, ArrowRight, Swords, Skull
+  Loader2, BookOpen, ArrowRight, Swords, Skull, Beer, LogIn
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useChug } from "../context/ChugContext";
@@ -26,6 +26,11 @@ export default function Home() {
   const [chatError, setChatError] = useState("");
   const responseRef = useRef<HTMLDivElement>(null);
   const BARTENDER_API = import.meta.env.VITE_BARTENDER_API?.trim() || "";
+
+  // --- SESSION STATE ---
+  const [activeSession, setActiveSession] = useState<{ id: string; join_code: string } | null>(null);
+  const [joinCodeInput, setJoinCodeInput] = useState("");
+  const [sessionCreating, setSessionCreating] = useState(false);
 
   // 🌸 Ninkasi's Quick Memos
   const quickPrompts = [
@@ -115,18 +120,72 @@ export default function Home() {
     fetchData();
   }, [user, profile]);
 
+  // Check for active session
+  useEffect(() => {
+    if (!user) return;
+    const checkActiveSession = async () => {
+      const { data } = await supabase
+        .from('drinking_sessions')
+        .select('id, join_code')
+        .eq('creator_id', user.id)
+        .eq('status', 'active')
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (data) setActiveSession(data);
+    };
+    checkActiveSession();
+  }, [user]);
 
+  const generateJoinCode = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  };
+
+  const handleStartSession = async () => {
+    if (!user) return;
+    setSessionCreating(true);
+    const code = generateJoinCode();
+    const { data, error } = await supabase.from('drinking_sessions').insert({
+      creator_id: user.id,
+      join_code: code,
+      status: 'active',
+    }).select('id, join_code').single();
+    if (data && !error) {
+      await supabase.from('session_participants').insert({ session_id: data.id, user_id: user.id });
+      navigate(`/session/${data.id}`);
+    } else {
+      alert('Failed to create session');
+    }
+    setSessionCreating(false);
+  };
+
+  const handleJoinSession = async () => {
+    const code = joinCodeInput.trim().toUpperCase();
+    if (!code || code.length < 4) return alert('Enter a valid join code');
+    const { data } = await supabase
+      .from('drinking_sessions')
+      .select('id')
+      .eq('join_code', code)
+      .eq('status', 'active')
+      .single();
+    if (data) {
+      navigate(`/session/${data.id}`);
+    } else {
+      alert('No active session found with this code');
+    }
+  };
 
   const xpForNextLevel = (profile?.level || 1) * 100;
   const xpProgress = Math.min(((profile?.xp || 0) % xpForNextLevel) / xpForNextLevel * 100, 100);
 
   const quickActions = [
-    { label: "Host Sesh", to: "/session", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "🏮" },
     { label: "Log Drink", to: "/log", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "✍️" },
-    { label: "Live Party", to: "/live-party", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🎊" },
-    { label: "Splitwise", to: "/groups", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "💸" },
     { label: "My Crew", to: "/groups", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👥" },
     { label: "Taverns", to: "/party", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🏯" },
+    { label: "Splitwise", to: "/groups", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "💸" },
     { label: "Explore", to: "/world", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "🗺️" },
     { label: "Shogun Rank", to: "/rank", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👑" },
   ];
@@ -242,7 +301,71 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ─── 2. KATANA GRID QUICK ACTIONS ─── */}
+      {/* ─── 2. DRINKING SESSION (Start / Join / Resume) ─── */}
+      <section>
+        {activeSession ? (
+          <button
+            onClick={() => navigate(`/session/${activeSession.id}`)}
+            className="w-full p-4 rounded-[4px] flex items-center gap-4 active:scale-[0.98] transition-transform relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(209,32,32,0.15), rgba(216,162,94,0.1))',
+              border: '1px solid rgba(209,32,32,0.3)',
+              borderLeft: '4px solid var(--coral)',
+            }}
+          >
+            <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--coral)', boxShadow: '0 0 12px rgba(209,32,32,0.5)' }} />
+            <div className="flex-1 text-left">
+              <p className="text-sm font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--coral)' }}>Active Session</p>
+              <p className="text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>Code: {activeSession.join_code} · Tap to resume</p>
+            </div>
+            <ArrowRight size={18} style={{ color: 'var(--coral)' }} />
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <button
+              onClick={handleStartSession}
+              disabled={sessionCreating}
+              className="w-full p-4 rounded-[4px] flex items-center gap-4 active:scale-[0.98] transition-transform"
+              style={{
+                background: 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.05))',
+                border: '1px solid rgba(216,162,94,0.3)',
+                borderLeft: '4px solid var(--amber)',
+              }}
+            >
+              <Beer size={22} style={{ color: 'var(--amber)' }} />
+              <div className="flex-1 text-left">
+                <p className="text-sm font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>
+                  {sessionCreating ? 'Creating...' : 'Start Drinking Session'}
+                </p>
+                <p className="text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>Get a code. Friends join with it.</p>
+              </div>
+              <ArrowRight size={18} style={{ color: 'var(--amber)' }} />
+            </button>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={joinCodeInput}
+                onChange={e => setJoinCodeInput(e.target.value.toUpperCase())}
+                placeholder="JOIN CODE"
+                maxLength={6}
+                className="glass-input flex-1 text-center font-black tracking-[0.2em] uppercase"
+                style={{ fontFamily: 'Syne, sans-serif', fontSize: 14 }}
+              />
+              <button
+                onClick={handleJoinSession}
+                disabled={joinCodeInput.length < 4}
+                className="px-5 rounded-[4px] font-black text-xs uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-30"
+                style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)', color: 'var(--acid)' }}
+              >
+                <LogIn size={14} /> Join
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ─── 3. KATANA GRID QUICK ACTIONS ─── */}
       <section>
         <p className="section-label mb-3 border-l-2 pl-2" style={{ borderColor: 'var(--coral)' }}>What is your decree? 📜</p>
         <div className="grid grid-cols-4 gap-2">

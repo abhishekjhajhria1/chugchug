@@ -18,8 +18,7 @@ import World from "./pages/World"
 import GroupBalances from "./pages/GroupBalances"
 import ConnectPage from "./pages/ConnectPage"
 import Rank from "./pages/Rank"
-import LiveParty from "./pages/LiveParty"
-import SessionPage from "./pages/SessionPage"
+import SessionView from "./pages/SessionView"
 
 import ManaByteOverlay from "./components/ManaByteOverlay"
 import Landing from "./pages/Landing"
@@ -84,8 +83,9 @@ function App() {
         <Route path="/group/:id/balances"  element={<GroupBalances />} />
         <Route path="/connect/:id"         element={<ConnectPage />} />
         <Route path="/rank"                element={<Rank />} />
-        <Route path="/live-party/:partyId?"element={<LiveParty />} />
-        <Route path="/session"             element={<SessionPage />} />
+        <Route path="/session/:id"         element={<SessionView />} />
+        {/* Redirect old routes */}
+        <Route path="/live-party/:partyId?"element={<Navigate to="/" replace />} />
         <Route path="/social"              element={<Navigate to="/groups" replace />} />
         <Route path="/auth"                element={<Navigate to="/" replace />} />
         <Route path="*"                    element={<Navigate to="/" replace />} />
