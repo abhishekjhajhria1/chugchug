@@ -1,12 +1,10 @@
 import { type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
-import { useChug } from "../context/ChugContext"
 import { useTheme } from "../context/ThemeContext"
 import { Moon, Sun } from "lucide-react"
 
 export default function Layout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
-  const { profile } = useChug()
   const { theme, toggleTheme } = useTheme()
 
   return (
@@ -56,29 +54,6 @@ export default function Layout({ children }: { children: ReactNode }) {
           >
             {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-
-          {/* XP chip */}
-          {profile && (
-            <button
-              onClick={() => navigate("/profile")}
-              className="flex items-center gap-2 px-3 py-1.5 active:scale-95 transition-transform"
-              style={{
-                background: 'var(--amber-dim)',
-                border: '1px solid rgba(216,142,48,0.3)',
-                borderRadius: '4px', // Slightly softer cut for Wano unified aesthetic
-              }}
-            >
-              <div className="w-5 h-5 flex items-center justify-center text-[10px] font-black" style={{ background: 'var(--amber)', color: '#FFFFFF', borderRadius: '2px' }}>
-                {profile.username?.[0]?.toUpperCase() || '?'}
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline" style={{ color: 'var(--amber)' }}>
-                Lv.{profile.level}
-              </span>
-              <span className="text-[10px] font-black tracking-wider" style={{ color: 'var(--text-primary)' }}>
-                {profile.xp} XP
-              </span>
-            </button>
-          )}
         </div>
       </header>
 

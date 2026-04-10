@@ -2,10 +2,11 @@ import { useEffect, useState, useRef, useCallback } from "react"
 import { supabase } from "../lib/supabase"
 import { generateInviteCode } from "../utils/InviteCode"
 import { useNavigate } from "react-router-dom"
-import { Plus, Users, PartyPopper, Calendar, MapPin, X, Activity, UserPlus, UserCheck, Flame, Zap, ArrowRight, UserX, QrCode, ScanLine, GlassWater } from "lucide-react"
+import { Plus, Users, PartyPopper, Calendar, MapPin, X, Activity, UserPlus, UserCheck, Flame, Zap, ArrowRight, UserX, QrCode, ScanLine, GlassWater, Wine, Smartphone, Loader2 } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import LiveCounter from "../components/LiveCounter"
 import PhotoMetadata from "../components/PhotoMetadata"
+import NinkasiChat from "../components/NinkasiChat"
 import type { ActivityLog } from "./GroupFeed"
 import { QRCodeSVG } from "qrcode.react"
 import QRScanner from "../components/QRScanner"
@@ -39,7 +40,7 @@ export default function Groups() {
   const { user } = useChug()
   const navigate = useNavigate()
 
-  const [activeTab, setActiveTab] = useState<'crews' | 'buddies' | 'requests' | 'discover'>('crews')
+  const [activeTab, setActiveTab] = useState<'crews' | 'buddies' | 'requests' | 'discover' | 'ninkasi'>('crews')
 
   // --- CREWS STATE ---
   const [groups, setGroups] = useState<Group[]>([])
@@ -59,6 +60,13 @@ export default function Groups() {
   const [showQR, setShowQR] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
 
+  // --- NFC STATE ---
+  const [hasNfc] = useState(() => typeof window !== 'undefined' && 'NDEFReader' in window)
+  const [nfcMode, setNfcMode] = useState<'idle' | 'writing' | 'scanning' | 'success' | 'error'>('idle')
+  const [nfcMessage, setNfcMessage] = useState('')
+  const [showNfcModal, setShowNfcModal] = useState(false)
+  const nfcAbortRef = useRef<AbortController | null>(null)
+
   // --- FETCH CREWS ---
   const fetchCrewsData = useCallback(async () => {
     if (!user) return
@@ -71,7 +79,7 @@ export default function Groups() {
 
     const groupIds: string[] = []
     let groupUserIds: string[] = []
-    
+
     if (memberData && memberData.length > 0) {
       const gList = memberData.map(m => Array.isArray(m.groups) ? m.groups[0] : m.groups).filter(Boolean) as unknown as Group[]
       setGroups(gList)
@@ -137,24 +145,24 @@ export default function Groups() {
     setLoading(true)
     try {
       if (activeTab === 'buddies') {
-        const { data } = await supabase.rpc('get_friends', { user_uuid: user.id })
-        if (data) setFriends(data)
-      } else if (activeTab === 'discover') {
-        const { data } = await supabase.rpc('get_past_partiers', { user_uuid: user.id })
-        if (data) setSuggestions(data)
-      } else if (activeTab === 'requests') {
-        const { data } = await supabase
+        const { data: friendsData } = await supabase.rpc('get_friends', { user_uuid: user.id })
+        if (friendsData) setFriends(friendsData)
+        
+        const { data: requestsData } = await supabase
           .from('friendships')
           .select('id, user_1, user_2, status, profiles!friendships_action_user_id_fkey(id, username, avatar_url)')
           .or(`user_1.eq.${user.id},user_2.eq.${user.id}`)
           .eq('status', 'pending')
           .neq('action_user_id', user.id)
-        if (data) {
-          setRequests(data.map(r => ({
+        if (requestsData) {
+          setRequests(requestsData.map(r => ({
             id: r.id, user_1: r.user_1, user_2: r.user_2, status: r.status,
             profiles: Array.isArray(r.profiles) ? r.profiles[0] : r.profiles
           })) as FriendRequest[])
         }
+      } else if (activeTab === 'discover') {
+        const { data } = await supabase.rpc('get_past_partiers', { user_uuid: user.id })
+        if (data) setSuggestions(data)
       }
     } catch (error) { console.error(error) }
     finally { setLoading(false) }
@@ -238,8 +246,105 @@ export default function Groups() {
       await handleSendRequest(decodedText)
       alert("Friend request sent!")
     } else if (decodedText.includes('/connect/')) {
-        window.location.href = decodedText;
+      window.location.href = decodedText;
     } else { alert("Invalid user QR code.") }
+  }
+
+  // --- NFC HANDLERS ---
+  const stopNfc = () => {
+    if (nfcAbortRef.current) {
+      nfcAbortRef.current.abort()
+      nfcAbortRef.current = null
+    }
+  }
+
+  const handleNfcWrite = async () => {
+    if (!user || !hasNfc) return
+    stopNfc()
+    setNfcMode('writing')
+    setNfcMessage('Hold your phone against your friend\'s...')
+    setShowNfcModal(true)
+
+    try {
+      const ndef = new (window as any).NDEFReader()
+      const controller = new AbortController()
+      nfcAbortRef.current = controller
+
+      const profileUrl = `${window.location.origin}/connect/${user.id}`
+      await ndef.write(
+        { records: [{ recordType: 'url', data: profileUrl }] },
+        { signal: controller.signal }
+      )
+      setNfcMode('success')
+      setNfcMessage('Profile shared! \uD83C\uDF89')
+    } catch (err: any) {
+      if (err.name === 'AbortError') return
+      setNfcMode('error')
+      setNfcMessage(err.message || 'NFC write failed')
+    }
+  }
+
+  const handleNfcScan = async () => {
+    if (!hasNfc) return
+    stopNfc()
+    setNfcMode('scanning')
+    setNfcMessage('Tap an NFC tag or your friend\'s phone...')
+    setShowNfcModal(true)
+
+    try {
+      const ndef = new (window as any).NDEFReader()
+      const controller = new AbortController()
+      nfcAbortRef.current = controller
+
+      await ndef.scan({ signal: controller.signal })
+
+      ndef.addEventListener('reading', ({ message }: any) => {
+        for (const record of message.records) {
+          if (record.recordType === 'url') {
+            const decoder = new TextDecoder()
+            const url = decoder.decode(record.data)
+            if (url.includes('/connect/')) {
+              stopNfc()
+              setNfcMode('success')
+              setNfcMessage('Friend found! Redirecting...')
+              setTimeout(() => {
+                setShowNfcModal(false)
+                window.location.href = url
+              }, 800)
+              return
+            }
+          }
+          // Also check text records for raw user IDs
+          if (record.recordType === 'text') {
+            const decoder = new TextDecoder()
+            const text = decoder.decode(record.data)
+            if (text.length === 36 && text.includes('-')) {
+              stopNfc()
+              setNfcMode('success')
+              setNfcMessage('Friend found! Sending request...')
+              handleSendRequest(text).then(() => {
+                setNfcMessage('Request sent! \uD83C\uDF89')
+                setTimeout(() => setShowNfcModal(false), 1200)
+              })
+              return
+            }
+          }
+        }
+        setNfcMode('error')
+        setNfcMessage('Not a ChugChug profile tag.')
+      }, { signal: controller.signal })
+    } catch (err: any) {
+      if (err.name === 'AbortError') return
+      setNfcMode('error')
+      setNfcMessage(err.message || 'NFC scan failed')
+    }
+  }
+
+  const closeNfcModal = () => {
+    stopNfc()
+    setShowNfcModal(false)
+    setNfcMode('idle')
+    setNfcMessage('')
   }
 
   useEffect(() => {
@@ -301,22 +406,27 @@ export default function Groups() {
           <Users size={22} style={{ color: 'var(--amber)' }} /> The Crew
         </h1>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowQR(true)} className="p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+          <button onClick={() => setShowQR(true)} className="p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }} title="Show QR">
             <QrCode size={18} />
           </button>
-          <button onClick={() => setIsScanning(true)} className="p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+          <button onClick={() => setIsScanning(true)} className="p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }} title="Scan QR">
             <ScanLine size={18} />
           </button>
+          {hasNfc && (
+            <button onClick={handleNfcWrite} className="p-2 rounded-full transition-colors" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)', color: 'var(--acid)' }} title="Share via NFC">
+              <Smartphone size={18} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* TABS */}
       <div className="flex rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)' }}>
         {([
-          { id: 'crews' as const,    label: 'Crews',   icon: Users,     color: 'var(--amber)' },
-          { id: 'buddies' as const,  label: 'Buddies', icon: UserCheck, color: 'var(--acid)' },
-          { id: 'requests' as const, label: 'Requests',icon: UserPlus,  color: 'var(--coral)' },
-          { id: 'discover' as const, label: 'Discover',icon: Flame,     color: 'var(--coral-light)' },
+          { id: 'crews' as const, label: 'Crews', icon: Users, color: 'var(--amber)' },
+          { id: 'buddies' as const, label: 'Buddies', icon: UserCheck, color: 'var(--acid)' },
+          { id: 'discover' as const, label: 'Discover', icon: Flame, color: 'var(--coral-light)' },
+          { id: 'ninkasi' as const, label: 'Ninkasi', icon: Wine, color: '#c850c0' },
         ]).map(({ id, label, icon: Icon, color }, i) => (
           <button
             key={id}
@@ -331,8 +441,8 @@ export default function Groups() {
             }}
           >
             <Icon size={16} /> {label}
-            {id === 'requests' && requests.length > 0 && activeTab !== 'requests' && (
-              <span className="absolute top-1 right-2 flex h-2 w-2">
+            {id === 'buddies' && requests.length > 0 && activeTab !== 'buddies' && (
+              <span className="absolute top-2 right-2 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: 'var(--coral)' }}></span>
                 <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: 'var(--coral)' }}></span>
               </span>
@@ -405,7 +515,7 @@ export default function Groups() {
                       <span className="font-black text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif' }}>{g.name}</span>
                     </div>
                     <div className="w-full pt-2" style={{ borderTop: '1px solid var(--border)' }}>
-                        <LiveCounter groupId={g.id} compact />
+                      <LiveCounter groupId={g.id} compact />
                     </div>
                   </button>
                 ))}
@@ -435,65 +545,74 @@ export default function Groups() {
         </div>
       )}
 
-      {/* --- BUDDIES TAB CONTENT --- */}
+      {/* --- BUDDIES & REQUESTS TAB CONTENT --- */}
       {activeTab === 'buddies' && (
-        <div className="anim-enter space-y-3">
-          {friends.length === 0 && !loading ? (
-            <div className="text-center py-16 font-bold uppercase tracking-widest text-sm" style={{ color: 'var(--text-muted)' }}>
-              No accepted friends yet. <br/>
-              <button onClick={() => setActiveTab('discover')} className="mt-4 underline underline-offset-4" style={{ color: 'var(--amber)' }}>Find People</button>
-            </div>
-          ) : (
-            friends.map(f => (
-              <div key={f.friend_id} className="flex flex-col p-3 rounded-2xl transition-colors gap-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/profile/${f.friend_id}`)}>
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(245,166,35,0.2)' }}>
-                      {f.avatar_url ? <img src={f.avatar_url} className="w-full h-full object-cover" /> : <UserCheck size={20} style={{ color: 'var(--amber)' }} />}
+        <div className="anim-enter space-y-6">
+          
+          {/* Pending Requests (pinned to top) */}
+          {requests.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--coral)' }} />
+                <h2 className="text-xs uppercase font-black tracking-widest" style={{ color: 'var(--coral)' }}>Pending Requests</h2>
+              </div>
+              {requests.map(r => (
+                <div key={r.id} className="flex flex-col sm:flex-row gap-3 items-center justify-between p-4 rounded-[4px]" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="w-12 h-12 rounded-[4px] flex items-center justify-center overflow-hidden" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
+                      {r.profiles.avatar_url ? <img src={r.profiles.avatar_url} className="w-full h-full object-cover" /> : <UserPlus size={20} style={{ color: 'var(--coral)' }} />}
                     </div>
                     <div>
-                      <p className="font-bold" style={{ color: 'var(--text-primary)' }}>{f.username}</p>
-                      <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: 'var(--acid)' }}>Lvl {f.level} • {f.xp} XP</p>
+                      <p className="font-bold" style={{ color: 'var(--text-primary)' }}>{r.profiles.username}</p>
+                      <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: 'var(--coral)' }}>Wants to connect</p>
                     </div>
                   </div>
-                  <button onClick={() => handleRemoveFriend(f.friend_id)} className="p-2.5 rounded-xl transition-colors" style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)' }}>
-                    <UserX size={16} />
-                  </button>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <button onClick={() => handleAccept(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-[4px]" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.3)' }}>Accept</button>
+                    <button onClick={() => handleDecline(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-[4px]" style={{ background: 'var(--bg-deep)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>Decline</button>
+                  </div>
                 </div>
-                {/* Send Drink Ping! */}
-                <button onClick={() => handlePingDrink(f.friend_id, f.username)} className="glass-btn-secondary w-full py-2 text-xs flex justify-center items-center gap-2" style={{ borderColor: 'rgba(245,166,35,0.3)', color: 'var(--amber)' }}>
-                  <GlassWater size={14} /> Ping for a Drink!
-                </button>
-              </div>
-            ))
+              ))}
+            </div>
           )}
-        </div>
-      )}
 
-      {/* --- REQUESTS TAB CONTENT --- */}
-      {activeTab === 'requests' && (
-        <div className="anim-enter space-y-3">
-          {requests.length === 0 && !loading ? (
-            <div className="text-center py-16 font-bold uppercase tracking-widest text-sm" style={{ color: 'var(--text-muted)' }}>No pending requests.</div>
-          ) : (
-            requests.map(r => (
-              <div key={r.id} className="flex flex-col sm:flex-row gap-4 items-center justify-between p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, var(--coral-dim), transparent)', border: '1px solid rgba(255,107,107,0.2)' }}>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(255,107,107,0.2)' }}>
-                    {r.profiles.avatar_url ? <img src={r.profiles.avatar_url} className="w-full h-full object-cover" /> : <UserPlus size={20} style={{ color: 'var(--coral)' }} />}
-                  </div>
-                  <div>
-                    <p className="font-bold" style={{ color: 'var(--text-primary)' }}>{r.profiles.username}</p>
-                    <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: 'var(--coral)' }}>Wants to connect</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <button onClick={() => handleAccept(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-xl" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.2)' }}>Accept</button>
-                  <button onClick={() => handleDecline(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-xl" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)' }}>Decline</button>
-                </div>
+          {/* Your Crew */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <UserCheck size={14} style={{ color: 'var(--acid)' }} />
+              <h2 className="text-xs uppercase font-black tracking-widest" style={{ color: 'var(--text-primary)' }}>Your Crew</h2>
+            </div>
+            {friends.length === 0 && !loading ? (
+              <div className="text-center py-16 font-bold uppercase tracking-widest text-sm" style={{ color: 'var(--text-muted)' }}>
+                No accepted friends yet. <br />
+                <button onClick={() => setActiveTab('discover')} className="mt-4 underline underline-offset-4" style={{ color: 'var(--amber)' }}>Find People</button>
               </div>
-            ))
-          )}
+            ) : (
+              <div className="grid grid-cols-1 gap-3">
+                {friends.map(f => (
+                  <div key={f.friend_id} className="flex flex-col p-4 rounded-[4px] transition-colors gap-3" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/profile/${f.friend_id}`)}>
+                        <div className="w-12 h-12 rounded-[4px] flex items-center justify-center overflow-hidden" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)' }}>
+                          {f.avatar_url ? <img src={f.avatar_url} className="w-full h-full object-cover" /> : <UserCheck size={20} style={{ color: 'var(--amber)' }} />}
+                        </div>
+                        <div>
+                          <p className="font-bold" style={{ color: 'var(--text-primary)' }}>{f.username}</p>
+                          <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: 'var(--acid)' }}>Lvl {f.level} • {f.xp} XP</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleRemoveFriend(f.friend_id)} className="p-2.5 rounded-[4px] transition-colors" style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-mid)' }}>
+                        <UserX size={16} />
+                      </button>
+                    </div>
+                    <button onClick={() => handlePingDrink(f.friend_id, f.username)} className="w-full py-2.5 rounded-[4px] text-[10px] uppercase font-black tracking-widest flex justify-center items-center gap-2 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)' }}>
+                      <GlassWater size={14} /> Ping for a Drink!
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -502,12 +621,12 @@ export default function Groups() {
         <div className="anim-enter space-y-4">
           <div className="text-center mb-6">
             <span className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(245,166,35,0.2)', color: 'var(--amber)' }}>
-              <Flame size={12}/> Based on Past Parties
+              <Flame size={12} /> Based on Past Parties
             </span>
           </div>
           {suggestions.length === 0 && !loading ? (
             <div className="text-center py-10 font-bold uppercase tracking-widest text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              No suggestions right now. <br/>
+              No suggestions right now. <br />
               <span className="text-[10px]" style={{ color: 'var(--amber)' }}>Host more Live Parties to meet people!</span>
             </div>
           ) : (
@@ -516,15 +635,15 @@ export default function Groups() {
                 <div key={s.suggested_id} className="flex flex-col p-4 rounded-2xl group" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)' }}>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'var(--bg-surface)' }}>
-                      {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--text-muted)' }}><UserCheck size={16}/></div>}
+                      {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--text-muted)' }}><UserCheck size={16} /></div>}
                     </div>
                     <div className="min-w-0">
                       <p className="font-bold truncate text-sm" style={{ color: 'var(--text-primary)' }}>{s.username}</p>
-                      <p className="text-[10px] uppercase tracking-wider font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}><Zap size={10}/> Partied {s.interaction_count} times</p>
+                      <p className="text-[10px] uppercase tracking-wider font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}><Zap size={10} /> Partied {s.interaction_count} times</p>
                     </div>
                   </div>
                   <button onClick={() => handleSendRequest(s.suggested_id)} className="w-full py-2.5 text-[10px] uppercase tracking-widest font-black rounded-xl flex items-center justify-center gap-2" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-                    Send Request <ArrowRight size={14}/>
+                    Send Request <ArrowRight size={14} />
                   </button>
                 </div>
               ))}
@@ -532,7 +651,7 @@ export default function Groups() {
           )}
         </div>
       )}
-      
+
       {loading && (
         <div className="flex justify-center py-6">
           <Zap size={24} className="animate-spin" style={{ color: 'var(--amber)', opacity: 0.5 }} />
@@ -555,7 +674,66 @@ export default function Groups() {
         </div>
       )}
 
+      {/* --- NINKASI TAB --- */}
+      {activeTab === 'ninkasi' && (
+        <div className="anim-enter">
+          <NinkasiChat onBack={() => setActiveTab('crews')} />
+        </div>
+      )}
+
       {isScanning && <QRScanner title="Scan Friend Code" onScan={handleQRScan} onClose={() => setIsScanning(false)} />}
+
+      {/* --- NFC MODAL --- */}
+      {showNfcModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 anim-fade" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
+          <div className="p-8 rounded-[4px] max-w-sm w-full relative flex flex-col items-center gap-6 anim-enter" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', boxShadow: '0 16px 64px rgba(0,0,0,0.6)' }}>
+            <button onClick={closeNfcModal} className="absolute top-4 right-4 p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)' }}>
+              <X size={16} />
+            </button>
+
+            <div className="text-center space-y-4">
+              {/* Animated icon */}
+              <div className="w-20 h-20 mx-auto rounded-[4px] flex items-center justify-center relative" style={{
+                background: nfcMode === 'success' ? 'var(--acid-dim)' : nfcMode === 'error' ? 'var(--coral-dim)' : 'var(--amber-dim)',
+                border: `1px solid ${nfcMode === 'success' ? 'rgba(204,255,0,0.3)' : nfcMode === 'error' ? 'rgba(209,32,32,0.3)' : 'rgba(216,162,94,0.3)'}`,
+              }}>
+                {(nfcMode === 'writing' || nfcMode === 'scanning') && (
+                  <Loader2 size={36} className="animate-spin" style={{ color: 'var(--amber)' }} />
+                )}
+                {nfcMode === 'success' && (
+                  <span className="text-4xl">✅</span>
+                )}
+                {nfcMode === 'error' && (
+                  <span className="text-4xl">❌</span>
+                )}
+              </div>
+
+              <h3 className="text-xl font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
+                {nfcMode === 'writing' ? 'NFC Share' : nfcMode === 'scanning' ? 'NFC Scan' : nfcMode === 'success' ? 'Done!' : 'Error'}
+              </h3>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>{nfcMessage}</p>
+
+              {/* Action buttons */}
+              {nfcMode !== 'writing' && nfcMode !== 'scanning' && (
+                <div className="flex gap-3 w-full pt-2">
+                  <button onClick={handleNfcWrite} className="flex-1 py-3 rounded-[4px] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)' }}>
+                    Share My Profile
+                  </button>
+                  <button onClick={handleNfcScan} className="flex-1 py-3 rounded-[4px] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)', color: 'var(--acid)' }}>
+                    Scan a Friend
+                  </button>
+                </div>
+              )}
+
+              {(nfcMode === 'writing' || nfcMode === 'scanning') && (
+                <button onClick={closeNfcModal} className="w-full py-3 rounded-[4px] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)', color: 'var(--text-muted)' }}>
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

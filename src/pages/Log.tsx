@@ -101,7 +101,7 @@ export default function Log() {
       })
       if (error) throw error
 
-      await supabase.rpc('add_xp', { user_id_param: user.id, xp_to_add: xpEarned })
+      supabase.rpc('add_xp', { user_id_param: user.id, xp_to_add: xpEarned }).then(res => { if (res.error) console.error(res.error) })
 
       if (isRecipe && recipeDetails && BARTENDER_API) {
         fetch(`${BARTENDER_API}/embed_recipe`, {

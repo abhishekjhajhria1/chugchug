@@ -143,7 +143,6 @@ export default function BeerCounter({ compact, partyId, groupId, onSessionLogged
 
   const handleReset = async () => {
     if (!user) return
-    if (!confirm("Are you sure you want to end this session and reset your counter to 0?")) return
     hasInteractedRef.current = true
     
     setCount(0)

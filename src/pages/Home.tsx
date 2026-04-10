@@ -47,18 +47,21 @@ export default function Home() {
     setChatError("");
     setReferencedRecipes([]);
     try {
-      const body: any = { 
+      const body: any = {
         prompt: finalPrompt,
-        system_override: "You are Ninkasi, the Mistress of Beer and an awesome, cool lady of character hailing from the Wano Arc. Reply with traditional Wano motifs, call users Samurai or Kunoichi, and be confident!"
+        mode: "recipe",
       };
       if (profile) {
         body.user_context = {
+          user_id: profile.id,
           username: profile.username,
           level: profile.level,
           xp: profile.xp,
+          city: profile.city || null,
+          country: profile.country || null,
         };
       }
-      const res = await fetch(`${BARTENDER_API}/ask`, {
+      const res = await fetch(`${BARTENDER_API}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -89,7 +92,7 @@ export default function Home() {
 
         if (rankRes.status === 'fulfilled' && rankRes.value.data) setRanks(rankRes.value.data as RankUser[]);
         if (badgeRes.status === 'fulfilled' && badgeRes.value.data) setBadges(badgeRes.value.data.flatMap((b: any) => b.badges).filter(Boolean) as Badge[]);
-        
+
         if (recipeRes.status === 'fulfilled' && recipeRes.value.data) {
           const uniq: Recipe[] = [];
           const names = new Set<string>();
@@ -102,11 +105,11 @@ export default function Home() {
           setRecipes(uniq.slice(0, 5));
         }
 
-        if (profile && profile.level <= 1 && profile.xp === 0) {
+        if (profile && profile.level <= 1 && profile.xp === 0 && !localStorage.getItem('chugchug_onboarded')) {
           setShowOnboarding(true);
         }
-      } catch (e) { 
-        console.error("Home feed fetch error bounds hit:", e); 
+      } catch (e) {
+        console.error("Home feed fetch error bounds hit:", e);
       }
     };
     fetchData();
@@ -118,14 +121,14 @@ export default function Home() {
   const xpProgress = Math.min(((profile?.xp || 0) % xpForNextLevel) / xpForNextLevel * 100, 100);
 
   const quickActions = [
-    { label: "Host Sesh",   to: "/session",    color: 'var(--amber)', bg: 'var(--amber-dim)',  emoji: "🏮" },
-    { label: "Log Drink",   to: "/log",        color: 'var(--acid)',  bg: 'var(--acid-dim)',   emoji: "✍️" },
-    { label: "Live Party",  to: "/live-party", color: 'var(--coral)', bg: 'var(--coral-dim)',  emoji: "🎊" },
-    { label: "Splitwise",   to: "/groups",     color: 'var(--acid)',  bg: 'var(--acid-dim)',   emoji: "💸" },
-    { label: "My Crew",     to: "/groups",     color: 'var(--amber)', bg: 'var(--amber-dim)',  emoji: "👥" },
-    { label: "Taverns",     to: "/party",      color: 'var(--coral)', bg: 'var(--coral-dim)',  emoji: "🏯" },
-    { label: "Explore",     to: "/world",      color: 'var(--acid)',  bg: 'var(--acid-dim)',   emoji: "🗺️" },
-    { label: "Shogun Rank", to: "/rank",       color: 'var(--amber)', bg: 'var(--amber-dim)',  emoji: "👑" },
+    { label: "Host Sesh", to: "/session", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "🏮" },
+    { label: "Log Drink", to: "/log", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "✍️" },
+    { label: "Live Party", to: "/live-party", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🎊" },
+    { label: "Splitwise", to: "/groups", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "💸" },
+    { label: "My Crew", to: "/groups", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👥" },
+    { label: "Taverns", to: "/party", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🏯" },
+    { label: "Explore", to: "/world", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "🗺️" },
+    { label: "Shogun Rank", to: "/rank", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👑" },
   ];
 
   return (
@@ -142,7 +145,7 @@ export default function Home() {
           }}
         >
           <button
-            onClick={() => setShowOnboarding(false)}
+            onClick={() => { localStorage.setItem('chugchug_onboarded', '1'); setShowOnboarding(false); }}
             className="absolute top-3 right-3 text-xs px-2 py-1 rounded transition-colors"
             style={{ color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)' }}
           >
@@ -185,7 +188,7 @@ export default function Home() {
             ))}
           </div>
 
-          <button onClick={() => { setShowOnboarding(false); navigate("/log"); }} className="glass-btn w-full mt-2">
+          <button onClick={() => { localStorage.setItem('chugchug_onboarded', '1'); setShowOnboarding(false); navigate("/log"); }} className="glass-btn w-full mt-2">
             Log Your First Drink 🍶
           </button>
         </div>
@@ -204,7 +207,7 @@ export default function Home() {
         <div className="absolute top-0 right-0 p-3 opacity-20 pointer-events-none">
           <Swords size={120} style={{ color: 'var(--amber)' }} />
         </div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-3">
             <div>
@@ -248,8 +251,8 @@ export default function Home() {
               key={action.label}
               onClick={() => navigate(action.to)}
               className="flex flex-col items-center justify-center gap-1.5 p-3 active:scale-95 transition-transform"
-              style={{ 
-                background: action.bg, 
+              style={{
+                background: action.bg,
                 border: `1px solid ${action.color}40`,
                 borderRight: `3px solid ${action.color}`,
                 borderRadius: '2px'
@@ -348,7 +351,7 @@ export default function Home() {
               className="px-4 py-2 transition-all active:scale-90 disabled:opacity-30 flex gap-2 items-center"
               style={{ background: 'var(--coral)', color: 'white', borderRadius: '2px', fontWeight: '900' }}
             >
-               SEND <ArrowRight size={14}/>
+              SEND <ArrowRight size={14} />
             </button>
           </div>
           <div ref={responseRef} />
@@ -377,12 +380,12 @@ export default function Home() {
             ))}
           </div>
           <button
-             onClick={() => navigate("/rank")}
-             className="w-full mt-4 text-[9px] uppercase tracking-widest font-black py-2.5 flex items-center justify-center gap-1 transition-colors"
-             style={{ background: 'var(--bg-raised)', color: 'var(--text-secondary)', border: '1px solid var(--border-mid)', borderRadius: '2px' }}
-           >
-             View All Ranks
-           </button>
+            onClick={() => navigate("/rank")}
+            className="w-full mt-4 text-[9px] uppercase tracking-widest font-black py-2.5 flex items-center justify-center gap-1 transition-colors"
+            style={{ background: 'var(--bg-raised)', color: 'var(--text-secondary)', border: '1px solid var(--border-mid)', borderRadius: '2px' }}
+          >
+            View All Ranks
+          </button>
         </section>
 
         <section className="p-4 relative overflow-hidden" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '4px' }}>
@@ -402,12 +405,12 @@ export default function Home() {
             ))}
           </div>
           <button
-             onClick={() => navigate("/log")}
-             className="w-full mt-4 text-[9px] uppercase tracking-widest font-black py-2.5 flex items-center justify-center gap-1 transition-colors"
-             style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid rgba(209,32,32,0.2)', borderRadius: '2px' }}
-           >
-             Scribe Recipe
-           </button>
+            onClick={() => navigate("/log")}
+            className="w-full mt-4 text-[9px] uppercase tracking-widest font-black py-2.5 flex items-center justify-center gap-1 transition-colors"
+            style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid rgba(209,32,32,0.2)', borderRadius: '2px' }}
+          >
+            Scribe Recipe
+          </button>
         </section>
       </div>
 
@@ -421,7 +424,7 @@ export default function Home() {
 
         {badges.length === 0 ? (
           <div className="text-center py-6" style={{ background: 'var(--bg-deep)', border: '1px dashed var(--border-mid)', borderRadius: '2px' }}>
-            <Skull size={24} className="mx-auto mb-2 opacity-50" style={{ color: 'var(--text-ghost)' }}/>
+            <Skull size={24} className="mx-auto mb-2 opacity-50" style={{ color: 'var(--text-ghost)' }} />
             <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">No Bounties Claimed</p>
             <button
               onClick={() => navigate("/log")}

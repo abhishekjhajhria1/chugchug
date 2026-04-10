@@ -47,7 +47,7 @@ export default function PhotoUpload({ groupId, userId, onUploadComplete, compact
   if (compact) {
     return (
       <>
-        <input ref={inputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelect} />
+        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
         <button
           onClick={() => inputRef.current?.click()}
           aria-label="Attach photo"
@@ -80,7 +80,7 @@ export default function PhotoUpload({ groupId, userId, onUploadComplete, compact
 
   return (
     <div className="glass-card glow-mint">
-      <input ref={inputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelect} />
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
 
       {!preview ? (
         <button

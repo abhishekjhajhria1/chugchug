@@ -26,16 +26,37 @@ import Landing from "./pages/Landing"
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session)
+    // Single auth listener — no parallel getSession() call to avoid lock contention
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      setReady(true)
     })
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
+    // Fallback: if no event fires within 2 seconds, consider auth resolved (no session)
+    const timeout = setTimeout(() => {
+      setReady(true)
+    }, 2000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [])
+
+  // Show nothing until auth state is resolved — prevents flash
+  if (!ready) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--bg-deep)' }}>
+        <div className="text-center">
+          <div className="text-5xl mb-3">🍻</div>
+          <p className="text-sm font-bold" style={{ color: 'var(--text-muted)', fontFamily: 'Syne, sans-serif' }}>Loading ChugChug...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!session) {
     return (

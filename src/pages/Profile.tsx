@@ -5,7 +5,7 @@ import { useChug } from "../context/ChugContext"
 import QRCodeModal from "../components/QRCodeModal"
 
 export default function Profile() {
-  const { profile, refreshProfile } = useChug()
+  const { user, profile, refreshProfile } = useChug()
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({ bio: "", college: "", city: "", country: "", stealth_mode: false })
   const [saving, setSaving] = useState(false)
@@ -33,16 +33,21 @@ export default function Profile() {
     if (!profile) return
     setSaving(true)
     const { error } = await supabase.from("profiles").update({ ...editForm, privacy_settings: privacySettings }).eq("id", profile.id)
-    if (error) alert("Error saving: " + error.message)
-    else { await refreshProfile(); setIsEditing(false) }
     setSaving(false)
+    if (error) {
+      alert("Error saving: " + error.message)
+    } else {
+      setIsEditing(false)
+      // Refresh in background — don't block the UI
+      refreshProfile().catch(console.error)
+    }
   }
 
   useEffect(() => {
     const fetchData = async () => {
       if (!profile) return
       const [{ data: actData }, { data: grpData }] = await Promise.all([
-        supabase.from("activity_logs").select(`*, log_appraisals(vote_type, xp_awarded)`).eq("user_id", profile.id).order("created_at", { ascending: false }),
+        supabase.from("activity_logs").select(`*, log_appraisals(vote_type, appraiser_id)`).eq("user_id", profile.id).order("created_at", { ascending: false }),
         supabase.from("group_members").select(`groups (id, name)`).eq("user_id", profile.id)
       ])
       if (actData) setActivities(actData as any)
@@ -67,7 +72,7 @@ export default function Profile() {
     setSavingLog(false)
   }
 
-  const p = profile || { id: '', username: 'Resolving Rank...', level: 1, xp: 0, bio: '', city: '', country: '', stealth_mode: false, privacy_settings: {} }
+  const p = profile || { id: user?.id || '', username: user?.email?.split('@')[0] || 'Traveler', level: 1, xp: 0, bio: '', city: '', country: '', stealth_mode: false, privacy_settings: {} }
 
   const catColors: Record<string, string> = {
     drink: 'var(--amber)', snack: 'var(--coral)', cigarette: 'var(--sage)',

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
-import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, X, HandCoins, Loader2, PartyPopper } from "lucide-react"
+import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, X, HandCoins, Loader2, PartyPopper, Beer } from "lucide-react"
 import { Link } from "react-router-dom"
 import BeerCounter from "../components/BeerCounter"
 import LiveCounter from "../components/LiveCounter"
@@ -52,6 +52,7 @@ export default function GroupFeed() {
     const [submittingSplit, setSubmittingSplit] = useState(false)
     const [splitMode, setSplitMode] = useState<'equal' | 'drink'>('equal')
     const [todayCounts, setTodayCounts] = useState<Record<string, number>>({})
+    const [showSessionModal, setShowSessionModal] = useState(false)
 
     const fetchGroupData = useCallback(async () => {
         if (!id) return
@@ -284,68 +285,89 @@ export default function GroupFeed() {
                 </button>
             </div>
 
-            {/* Quick Actions / Info Row */}
-            <div className="flex gap-4">
-               {/* Invite Code */}
-               <div className="flex-1 rounded-xl p-3 text-center text-sm font-bold flex flex-col justify-center" style={{ background: 'var(--bg-raised)', border: '1px dashed var(--border)', color: 'var(--text-secondary)' }}>
-                   <span className="mb-1 uppercase tracking-widest text-[10px]" style={{ color: 'var(--text-muted)' }}>Invite Code</span>
-                   <span className="select-all cursor-pointer text-xl tracking-widest rounded inline-block mx-auto px-4 py-1" style={{ color: 'var(--amber)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>{group?.invite_code || "..."}</span>
-               </div>
+                        {/* Quick Actions / Info Row */}
+            <div className="grid grid-cols-2 gap-2 my-4">
+                {/* Invite Code */}
+                <div onClick={() => { navigator.clipboard.writeText(group?.invite_code || ''); alert('Code Copied!') }} className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 cursor-pointer relative overflow-hidden group/tile" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+                    <span className="text-[10px] uppercase font-bold tracking-widest leading-none z-10" style={{ color: 'var(--text-muted)' }}>Invite Code</span>
+                    <span className="text-xl font-black tracking-widest mt-1 z-10" style={{ color: 'var(--amber)', fontFamily: 'Syne, sans-serif' }}>{group?.invite_code || "---"}</span>
+                    <div className="absolute top-0 right-0 p-1 opacity-5 group-hover/tile:opacity-10 transition-opacity"><Users size={60} /></div>
+                </div>
 
-                {/* Balances Quick Action */}
-               <div className="flex-1 flex flex-col gap-2 justify-center">
-                   <button 
-                       onClick={() => setShowSplitModal(true)}
-                       className="glass-btn-secondary text-xs py-2 flex items-center justify-center gap-1"
-                       style={{ background: 'var(--amber-dim)', color: 'var(--amber)', borderColor: 'rgba(245,166,35,0.2)' }}
-                   >
-                       <HandCoins size={14} strokeWidth={2} /> Add Split
-                   </button>
-                   <button 
-                       onClick={() => navigate(`/group/${id}/balances`)}
-                       className="glass-btn-secondary text-xs py-2 flex items-center justify-center gap-1"
-                   >
-                       <Crown size={14} strokeWidth={2} /> View Balances
-                   </button>
-                   <button 
-                       onClick={async () => {
-                           if (!user || !id) return
+                {/* Start Party */}
+                <button onClick={async () => {
+                           if (!user || !id) return;
                            const { data, error } = await supabase.from('parties').insert({
                                host_id: user.id, title: `${group?.name || 'Group'} Party`, description: 'Group party!',
                                address: 'TBD', privacy_level: 'invite_only', group_id: id,
                                event_date: new Date().toISOString(), status: 'active'
-                           }).select().single()
-                           if (data) navigate(`/party/${data.id}`)
-                           if (error) alert(error.message)
+                           }).select().single();
+                           if (data) navigate(`/party/${data.id}`);
+                           if (error) alert(error.message);
                        }}
-                       className="glass-btn-secondary text-xs py-2 flex items-center justify-center gap-1"
-                       style={{ background: 'var(--coral-dim)', color: 'var(--coral)', borderColor: 'rgba(255,107,107,0.2)' }}
-                   >
-                       <PartyPopper size={14} strokeWidth={2} /> Start Party
-                   </button>
-               </div>
+                       className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile" 
+                       style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
+                    <PartyPopper size={24} style={{ color: 'var(--coral)' }} className="z-10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest z-10" style={{ color: 'var(--coral)' }}>Start Party</span>
+                    <div className="absolute bottom-0 left-0 p-1 opacity-10 group-hover/tile:opacity-20 transition-opacity"><PartyPopper size={60} /></div>
+                </button>
+
+                {/* Add Split */}
+                <button 
+                    onClick={() => setShowSplitModal(true)} 
+                    className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile" 
+                    style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)' }}>
+                    <HandCoins size={24} style={{ color: 'var(--amber)' }} className="z-10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest z-10" style={{ color: 'var(--amber)' }}>Add Split</span>
+                    <div className="absolute bottom-0 right-0 p-1 opacity-10 group-hover/tile:opacity-20 transition-opacity"><HandCoins size={60} /></div>
+                </button>
+
+                {/* View Balances */}
+                <button 
+                    onClick={() => navigate(`/group/${id}/balances`)} 
+                    className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile" 
+                    style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+                    <Crown size={24} style={{ color: 'var(--text-secondary)' }} className="z-10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest z-10" style={{ color: 'var(--text-secondary)' }}>Balances</span>
+                    <div className="absolute top-0 left-0 p-1 opacity-5 group-hover/tile:opacity-10 transition-opacity"><Crown size={60} /></div>
+                </button>
             </div>
 
-            {/* Live Drinking Session Section */}
-            <div className="relative group overflow-hidden rounded-3xl p-[1px] my-6">
-               {/* Animated border glow */}
-               <div className="absolute inset-0 animate-[spin_4s_linear_infinite] opacity-50" style={{ background: 'linear-gradient(to right, var(--acid), var(--amber), var(--coral))' }} />
-               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent z-0" />
-               
-               <div className="relative z-10 bg-black/80 backdrop-blur-xl rounded-[23px] p-5 h-full space-y-4">
-                  <div className="flex items-center justify-between">
-                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--acid)', boxShadow: 'var(--acid-glow)' }} />
-                        <h2 className="font-black text-xl uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Active Session</h2>
-                     </div>
-                     <span className="text-[10px] px-2 py-1 rounded font-bold uppercase tracking-widest" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>Live</span>
-                  </div>
-                  
-                  {/* The actual counter components */}
-                  <BeerCounter groupId={id} compact onSessionLogged={fetchGroupData} />
-               </div>
-            </div>
-            {/* Solo Live Leaderboard tile (auto-hides when empty) */}
+            {/* Live Drinking Session Button */}
+            <button
+                onClick={() => setShowSessionModal(true)}
+                className="w-full flex items-center justify-between p-4 rounded-[4px] my-4 transition-transform active:scale-95 wano-fade relative overflow-hidden"
+                style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)', borderLeft: '4px solid var(--amber)' }}
+            >
+                <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-10 h-10 rounded-[2px] flex items-center justify-center" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(245,166,35,0.3)', color: 'var(--amber)' }}>
+                        <Beer size={20} />
+                    </div>
+                    <div className="text-left">
+                        <h2 className="font-black text-lg uppercase tracking-widest leading-none mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Live Session</h2>
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Tap to update count</span>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2 relative z-10">
+                    <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: 'var(--acid)', boxShadow: 'var(--acid-glow)' }} />
+                    <span className="text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-[2px]" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-mid)', color: 'var(--text-secondary)' }}>LIVE</span>
+                </div>
+                <div className="absolute right-0 top-0 opacity-5 pointer-events-none -mr-4"><Beer size={80} /></div>
+            </button>
+
+            {/* Session Modal */}
+            {showSessionModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md anim-fade-in touch-none">
+                    <div className="w-full max-w-sm relative anim-scale-in">
+                        <button onClick={() => setShowSessionModal(false)} className="absolute -top-12 right-0 p-2 text-white/50 hover:text-white rounded-full bg-black/50 border border-white/10 z-[60]">
+                            <X size={24} />
+                        </button>
+                        <BeerCounter groupId={id} onSessionLogged={() => { fetchGroupData(); setShowSessionModal(false); }} />
+                    </div>
+                </div>
+            )}
+
+{/* Solo Live Leaderboard tile (auto-hides when empty) */}
             <LiveCounter groupId={id} showLeaderboard />
 
             {/* Splitwise Modal */}

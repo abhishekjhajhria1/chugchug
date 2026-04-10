@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { supabase } from "../lib/supabase"
+// @ts-ignore
+import exifr from 'exifr/dist/lite.esm.mjs'
 import { useChug } from "../context/ChugContext"
 import { MapPin, Clock, Smartphone, Shield, CheckCircle2 } from "lucide-react"
 

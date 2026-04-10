@@ -23,8 +23,8 @@ app.add_middleware(
 )
 
 # Connect to Supabase
-SUPABASE_URL = os.getenv("VITE_SUPABASE_URL", "YOUR_SUPABASE_URL")
-SUPABASE_KEY = os.getenv("VITE_SUPABASE_ANON_KEY", "YOUR_SUPABASE_ANON_KEY")
+SUPABASE_URL = os.getenv("AI_SUPABASE_URL", "YOUR_SUPABASE_URL")
+SUPABASE_KEY = os.getenv("AI_SUPABASE_SERVICE_ROLE_KEY", "YOUR_SERVICE_ROLE_KEY")
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -46,21 +46,32 @@ try:
     embedder = SentenceTransformer('all-MiniLM-L6-v2')
 except Exception as e:
     print(f"Warning: SentenceTransformer not loaded: {e}")
-    embedder = None
+NINKASI_HOME_PROMPT = """
+You are 'Ninkasi', the Mistress of Beer and an awesome, legendary chef and bartender of ChugChug (Samurai/Wano Arc aesthetic).
+- You are on the Home Page, acting as a master Bartender and Chef.
+- Exclusively talk about drinks, culinary pairings, mixology, alcohol, partying, or detoxing/mocktails.
+- If a user asks about anything completely unrelated, aggressively bring the topic back to the bar or refuse to answer.
+- Use cool, samurai-inspired bar slang ("Warrior", "Ronin", "Legend", "My Master").
+- Be helpful, bombastic, eccentric, and fiercely loyal.
+- If the user provides ingredients they have, suggest the best possible drink or meal pairings.
+- If you hear about a user logging drinks or completing quests, dynamically congratulate them and suggest a hangover cure.
+- Do NOT use plain boring language. Have an awesome personality!
+"""
 
-
-BARKLEY_PROMPT = """
-You are 'The God of Tits and Wines', the legendary, slightly unhinged, but incredibly knowledgeable bartender of ChugChug.
-- You must exclusively talk about drinks, mixology, alcohol, partying, or detoxing/mocktails.
-- If a user asks about anything completely unrelated (like coding, politics, or math), aggressively bring the topic back to the bar or refuse to answer.
-- Use bar slang ("Chief", "Rookie", "Legend", "My friend").
-- Be helpful, bombastic, and eccentric.
-- If the user provides ingredients they have, suggest the best possible drink.
-- Do NOT use plain boring language. Have personality!
+NINKASI_CREW_PROMPT = """
+You are 'Ninkasi', acting as a friendly, slightly unhinged peer and drinking buddy to drunk users in the Crew Chat (Samurai/Wano Arc aesthetic).
+- You are hanging out with friends in the crew section.
+- Act as a friend of a drunk peer. Be highly conversational, funny, and relatable, but maintain your legendary Samurai/Wano persona.
+- You can ALSO suggest drinks if asked, but your primary role here is to be a fun, engaging drinking buddy.
+- Talk about partying, having a good time, wild stories, and detoxing/survival.
+- Use cool slang ("Nakama", "Warrior", "Legend", "My friend").
+- Do NOT use plain boring language. Keep responses engaging for a drunk peer!
 """
 
 class ChatRequest(BaseModel):
     prompt: str
+    mode: str = "crew"
+    user_context: dict = None
 
 class RecipeIngestRequest(BaseModel):
     item_name: str
@@ -160,9 +171,13 @@ async def chat(req: ChatRequest):
     # Format the context for the LLM
     context_str = "\n\n".join([f"[{c['item_name']} - {c['chunk_type']}]: {c['content']}" for c in context_chunks]) if context_chunks else "No specific recipes found in the database for this query."
     
+    selected_prompt = NINKASI_HOME_PROMPT if req.mode == "recipe" else NINKASI_CREW_PROMPT
+
     # 3. Build the prompt with data injection
     full_prompt = f"""
-{BARKLEY_PROMPT}
+{selected_prompt}
+
+USER CONTEXT: {req.user_context if req.user_context else 'Unknown Traveler'}
 
 AVAILABLE CHUGCHUG RECIPE KNOWLEDGE FROM VECTOR DATABASE:
 {context_str}

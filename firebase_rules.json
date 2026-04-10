@@ -1,0 +1,47 @@
+{
+  "rules": {
+    "parties": {
+      "$partyId": {
+        "counters": {
+          "$userId": {
+            ".read": true,
+            ".write": "auth != null && auth.uid === $userId"
+          }
+        },
+        "last_buzz": {
+          ".read": true,
+          ".write": "auth != null"
+        },
+        "reactions": {
+          ".read": true,
+          ".write": "auth != null"
+        }
+      }
+    },
+    "chats": {
+      "$groupId": {
+        "messages": {
+          ".read": true,
+          ".write": "auth != null",
+          ".indexOn": ["timestamp"]
+        }
+      }
+    },
+    "live_counters": {
+      "groups": {
+        "$groupId": {
+          "$userId": {
+            ".read": true,
+            ".write": "auth != null && auth.uid === $userId"
+          }
+        }
+      }
+    },
+    "clinks": {
+      "$userId": {
+        ".read": true,
+        ".write": "auth != null"
+      }
+    }
+  }
+}

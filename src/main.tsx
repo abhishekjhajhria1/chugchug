@@ -5,15 +5,18 @@ import App from "./App"
 import "./index.css"
 import { ChugProvider } from "./context/ChugContext"
 import { ThemeProvider } from "./context/ThemeContext"
+import ErrorBoundary from "./components/ErrorBoundary"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider>
-        <ChugProvider>
-          <App />
-        </ChugProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ThemeProvider>
+          <ChugProvider>
+            <App />
+          </ChugProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   </React.StrictMode>
 )
