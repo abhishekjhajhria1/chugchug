@@ -3,7 +3,7 @@ import { useChug } from "../context/ChugContext"
 import { supabase } from "../lib/supabase"
 import { firebaseDb } from "../lib/firebase"
 import { ref, set, onValue, off } from "firebase/database"
-import { Beer, Minus, Zap, Clock, Timer, Copy, Share2, X } from "lucide-react"
+import { Beer, Minus, Clock, Timer, Copy, Share2, X } from "lucide-react"
 
 interface Participant {
   userId: string

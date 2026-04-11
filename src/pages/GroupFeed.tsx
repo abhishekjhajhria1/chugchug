@@ -55,7 +55,6 @@ export default function GroupFeed() {
     const [submittingSplit, setSubmittingSplit] = useState(false)
     const [splitMode, setSplitMode] = useState<'equal' | 'drink'>('equal')
     const [todayCounts, setTodayCounts] = useState<Record<string, number>>({})
-    const [showSessionModal, setShowSessionModal] = useState(false)
 
     const fetchGroupData = useCallback(async () => {
         if (!id) return
