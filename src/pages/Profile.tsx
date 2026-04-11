@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
-import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown } from "lucide-react"
+import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays } from "lucide-react"
 import { useChug } from "../context/ChugContext"
+import { useTheme } from "../context/ThemeContext"
+import type { Theme } from "../context/ThemeContext"
 import QRCodeModal from "../components/QRCodeModal"
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useChug()
+  const { theme, setTheme } = useTheme()
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState({ bio: "", college: "", city: "", country: "", stealth_mode: false })
   const [saving, setSaving] = useState(false)
@@ -155,9 +158,44 @@ export default function Profile() {
           </div>
         )}
 
-        {/* QR button */}
+        {/* Theme Toggle */}
+        {!isEditing && (
+          <div className="mt-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-center" style={{ color: 'var(--text-ghost)' }}>
+              App Theme
+            </p>
+            <div className="flex gap-2">
+              {[
+                { id: 'dark' as Theme, label: '🎌 Wano Arc', desc: 'Dark · Samurai' },
+                { id: 'light' as Theme, label: '☀️ Wano Day', desc: 'Light · Clean' },
+                { id: 'verdant' as Theme, label: '🌿 Verdant', desc: 'Earthy · Calm' },
+              ].map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setTheme(t.id)}
+                  className="flex-1 py-2.5 px-2 rounded-sm text-center transition-all active:scale-95"
+                  style={{
+                    background: theme === t.id ? 'var(--amber-dim)' : 'var(--bg-raised)',
+                    border: theme === t.id ? '2px solid var(--amber)' : '1px solid var(--border)',
+                    borderRadius: 'var(--card-radius)',
+                  }}
+                >
+                  <div className="text-xs font-bold" style={{ color: theme === t.id ? 'var(--amber)' : 'var(--text-primary)' }}>
+                    {t.label}
+                  </div>
+                  <div className="text-[8px] mt-0.5" style={{ color: 'var(--text-ghost)' }}>{t.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Calendar + QR buttons */}
         {!isEditing && (
           <div className="mt-4 space-y-3">
+            <button onClick={() => window.location.href = '/calendar'} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(124,154,116,0.25)', color: 'var(--acid)' }}>
+              <CalendarDays size={18} /> Drinking Calendar
+            </button>
             <button onClick={() => setShowMyQR(true)} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(245,166,35,0.25)', color: 'var(--amber)' }}>
               <QrCode size={18} /> My Connection QR
             </button>

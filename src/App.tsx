@@ -19,6 +19,7 @@ import GroupBalances from "./pages/GroupBalances"
 import ConnectPage from "./pages/ConnectPage"
 import Rank from "./pages/Rank"
 import SessionView from "./pages/SessionView"
+import Calendar from "./pages/Calendar"
 
 import ManaByteOverlay from "./components/ManaByteOverlay"
 import Landing from "./pages/Landing"
@@ -84,6 +85,7 @@ function App() {
         <Route path="/connect/:id"         element={<ConnectPage />} />
         <Route path="/rank"                element={<Rank />} />
         <Route path="/session/:id"         element={<SessionView />} />
+        <Route path="/calendar"             element={<Calendar />} />
         {/* Redirect old routes */}
         <Route path="/live-party/:partyId?"element={<Navigate to="/" replace />} />
         <Route path="/social"              element={<Navigate to="/groups" replace />} />

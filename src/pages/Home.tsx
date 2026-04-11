@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
-  Loader2, BookOpen, ArrowRight, Swords, Skull, Beer, LogIn
+  Loader2, BookOpen, ArrowRight, Swords, Skull, Beer, LogIn,
+  ChevronLeft, ChevronRight, Flame
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useChug } from "../context/ChugContext";
@@ -26,6 +27,11 @@ export default function Home() {
   const [chatError, setChatError] = useState("");
   const responseRef = useRef<HTMLDivElement>(null);
   const BARTENDER_API = import.meta.env.VITE_BARTENDER_API?.trim() || "";
+
+  // --- MONTHLY CALENDAR STATE ---
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+  const [monthLogs, setMonthLogs] = useState<Map<string, { drinks: number; categories: string[] }>>(new Map());
 
   // --- SESSION STATE ---
   const [activeSession, setActiveSession] = useState<{ id: string; join_code: string } | null>(null);
@@ -120,6 +126,36 @@ export default function Home() {
     fetchData();
   }, [user, profile]);
 
+  // Fetch month's logs for calendar
+  useEffect(() => {
+    if (!user) return;
+    const fetchMonthLogs = async () => {
+      const start = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-01`;
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      const end = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}T23:59:59`;
+
+      const { data } = await supabase
+        .from('activity_logs')
+        .select('category, quantity, created_at')
+        .eq('user_id', user.id)
+        .gte('created_at', start)
+        .lte('created_at', end);
+
+      if (data) {
+        const map = new Map<string, { drinks: number; categories: string[] }>();
+        for (const row of data) {
+          const key = row.created_at.split('T')[0];
+          if (!map.has(key)) map.set(key, { drinks: 0, categories: [] });
+          const day = map.get(key)!;
+          if (row.category === 'drink') day.drinks += row.quantity;
+          if (!day.categories.includes(row.category)) day.categories.push(row.category);
+        }
+        setMonthLogs(map);
+      }
+    };
+    fetchMonthLogs();
+  }, [user, calMonth, calYear]);
+
   // Check for active session
   useEffect(() => {
     if (!user) return;
@@ -181,11 +217,79 @@ export default function Home() {
   const xpForNextLevel = (profile?.level || 1) * 100;
   const xpProgress = Math.min(((profile?.xp || 0) % xpForNextLevel) / xpForNextLevel * 100, 100);
 
+  // Monthly calendar computed values
+  const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const CAT_EMOJI: Record<string, string> = { drink: '🍻', snack: '🍟', cigarette: '🚬', gym: '💪', detox: '🧘', water: '💧' };
+
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const firstDayOfWeek = (() => { const d = new Date(calYear, calMonth, 1).getDay(); return d === 0 ? 6 : d - 1; })();
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Build month grid cells
+  const monthGridCells = useMemo(() => {
+    const cells: (number | null)[] = [];
+    for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
+    for (let i = 1; i <= daysInMonth; i++) cells.push(i);
+    while (cells.length % 7 !== 0) cells.push(null);
+    return cells;
+  }, [calYear, calMonth, firstDayOfWeek, daysInMonth]);
+
+  // Week stats (this week)
+  const weekStats = useMemo(() => {
+    const today = new Date();
+    const dow = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+    let drinks = 0, dryDays = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(d.getDate() + i);
+      const key = d.toISOString().split('T')[0];
+      if (key > todayStr) break;
+      const log = monthLogs.get(key);
+      if (log && log.drinks > 0) drinks += log.drinks;
+      else dryDays++;
+    }
+    return { drinks, dryDays };
+  }, [monthLogs, todayStr]);
+
+  // Dry streak (calculated from this month's data going backwards from today)
+  const currentDryStreak = useMemo(() => {
+    let streak = 0;
+    const d = new Date();
+    while (true) {
+      const key = d.toISOString().split('T')[0];
+      const log = monthLogs.get(key);
+      if (log && log.drinks > 0) break;
+      streak++;
+      d.setDate(d.getDate() - 1);
+      // Don't go before the month
+      if (d.getMonth() !== calMonth || d.getFullYear() !== calYear) break;
+    }
+    return streak;
+  }, [monthLogs, calMonth, calYear]);
+
+  const monthDrinks = useMemo(() => {
+    let total = 0;
+    monthLogs.forEach(v => total += v.drinks);
+    return total;
+  }, [monthLogs]);
+
+  const handleCalPrev = () => {
+    if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); }
+    else setCalMonth(m => m - 1);
+  };
+  const handleCalNext = () => {
+    if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); }
+    else setCalMonth(m => m + 1);
+  };
+
   const quickActions = [
     { label: "Log Drink", to: "/log", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "✍️" },
     { label: "My Crew", to: "/groups", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👥" },
     { label: "Taverns", to: "/party", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🏯" },
-    { label: "Splitwise", to: "/groups", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "💸" },
+    { label: "Analytics", to: "/calendar", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "📊" },
     { label: "Explore", to: "/world", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "🗺️" },
     { label: "Shogun Rank", to: "/rank", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👑" },
   ];
@@ -300,6 +404,134 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* ─── 1.5 FULL MONTHLY CALENDAR ─── */}
+      <section
+        className="overflow-hidden"
+        style={{
+          background: 'var(--card-bg)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--card-radius)',
+        }}
+      >
+        {/* Weekly stats strip */}
+        <div
+          className="flex items-center justify-between px-4 py-2.5"
+          style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-raised)' }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black flex items-center gap-1" style={{ color: 'var(--amber)' }}>
+              🍻 {weekStats.drinks} <span className="font-medium" style={{ color: 'var(--text-ghost)' }}>this week</span>
+            </span>
+            <span className="text-[10px] font-black flex items-center gap-1" style={{ color: 'var(--acid)' }}>
+              🌿 {weekStats.dryDays} <span className="font-medium" style={{ color: 'var(--text-ghost)' }}>dry</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Flame size={12} style={{ color: 'var(--coral)' }} />
+            <span className="text-[10px] font-black" style={{ color: 'var(--coral)' }}>{currentDryStreak}d streak</span>
+          </div>
+        </div>
+
+        {/* Month nav */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <button onClick={handleCalPrev} className="p-1.5 active:scale-90 transition-transform" style={{ color: 'var(--text-secondary)' }}>
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            onClick={() => navigate('/calendar')}
+            className="text-sm font-black uppercase tracking-widest flex items-center gap-1.5 active:scale-95 transition-transform"
+            style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}
+          >
+            {MONTH_NAMES[calMonth]} {calYear}
+            <ArrowRight size={12} style={{ color: 'var(--amber)', opacity: 0.6 }} />
+          </button>
+          <button onClick={handleCalNext} className="p-1.5 active:scale-90 transition-transform" style={{ color: 'var(--text-secondary)' }}>
+            <ChevronRight size={18} />
+          </button>
+        </div>
+
+        {/* Day headers */}
+        <div className="grid grid-cols-7 px-3">
+          {DAY_LABELS.map(d => (
+            <div key={d} className="text-center py-1">
+              <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-ghost)' }}>{d}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Date cells */}
+        <div className="grid grid-cols-7 gap-1 px-3 pb-3">
+          {monthGridCells.map((day, i) => {
+            if (day === null) return <div key={`e-${i}`} />;
+            const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isToday = dateStr === todayStr;
+            const isPast = dateStr <= todayStr;
+            const log = monthLogs.get(dateStr);
+            const hasDrinks = log && log.drinks > 0;
+            const hasDetox = log?.categories.includes('detox');
+            const hasGym = log?.categories.includes('gym');
+
+            let cellBg = 'transparent';
+            if (hasDetox) cellBg = 'var(--acid-dim)';
+            else if (hasGym) cellBg = 'var(--indigo-dim)';
+            else if (hasDrinks && log.drinks >= 6) cellBg = 'var(--coral-dim)';
+            else if (hasDrinks) cellBg = 'var(--amber-dim)';
+            else if (isPast && !log) cellBg = 'rgba(124,154,116,0.06)';
+
+            return (
+              <button
+                key={dateStr}
+                onClick={() => navigate('/log', { state: { prefillDate: dateStr } })}
+                className="flex flex-col items-center justify-center py-1.5 active:scale-90 transition-all relative"
+                style={{
+                  background: cellBg,
+                  border: isToday ? '2px solid var(--amber)' : '1px solid transparent',
+                  borderRadius: 'var(--card-radius)',
+                  minHeight: 44,
+                }}
+              >
+                <span
+                  className="text-xs font-bold"
+                  style={{ color: isToday ? 'var(--amber)' : isPast ? 'var(--text-primary)' : 'var(--text-ghost)' }}
+                >
+                  {day}
+                </span>
+                {log ? (
+                  <div className="flex gap-0.5 mt-0.5">
+                    {log.categories.slice(0, 2).map(c => (
+                      <span key={c} className="text-[8px]">{CAT_EMOJI[c] || '📝'}</span>
+                    ))}
+                  </div>
+                ) : isPast ? (
+                  <span className="text-[7px] mt-0.5" style={{ color: 'var(--text-ghost)', opacity: 0.5 }}>·</span>
+                ) : null}
+                {hasDrinks && (
+                  <span className="text-[7px] font-black" style={{ color: 'var(--amber)' }}>{log.drinks}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Month summary footer */}
+        <div
+          className="flex items-center justify-center gap-5 px-4 py-2"
+          style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-raised)' }}
+        >
+          <span className="text-[9px] font-bold" style={{ color: 'var(--amber)' }}>
+            🍻 {monthDrinks} drinks this month
+          </span>
+          <span className="text-[9px] font-bold" style={{ color: 'var(--text-ghost)' }}>·</span>
+          <button
+            onClick={() => navigate('/calendar')}
+            className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1 active:scale-95 transition-transform"
+            style={{ color: 'var(--amber)' }}
+          >
+            Full Analytics <ArrowRight size={10} />
+          </button>
+        </div>
+      </section>
 
       {/* ─── 2. DRINKING SESSION (Start / Join / Resume) ─── */}
       <section>

@@ -5,14 +5,23 @@ import { evaluateAndAwardBadges } from "../lib/progression"
 import { Camera, CheckCircle2, ChevronDown } from "lucide-react"
 import { extractPhotoMetadata } from "../components/PhotoMetadata"
 
-type ActivityCategory = 'drink' | 'cigarette' | 'snack' | 'gym' | 'detox'
+type ActivityCategory = 'drink' | 'cigarette' | 'snack' | 'gym' | 'detox' | 'water'
 
 const CATEGORIES: { id: ActivityCategory; label: string; icon: string; color: string; bg: string }[] = [
   { id: 'drink',     label: 'Drink',  icon: '🍻', color: 'var(--amber)', bg: 'var(--amber-dim)' },
+  { id: 'water',     label: 'Water',  icon: '💧', color: 'var(--blue)',  bg: 'var(--indigo-dim)' },
   { id: 'snack',     label: 'Snack',  icon: '🍟', color: 'var(--coral)', bg: 'var(--coral-dim)' },
   { id: 'cigarette', label: 'Smoke',  icon: '🚬', color: 'var(--sage)',  bg: 'var(--sage-dim)'  },
   { id: 'gym',       label: 'Gym',    icon: '💪', color: 'var(--indigo)', bg: 'var(--indigo-dim)' },
   { id: 'detox',     label: 'Detox',  icon: '🧘', color: 'var(--sage)',  bg: 'var(--sage-dim)'  },
+]
+
+const MOOD_TAGS = [
+  { emoji: '😄', label: 'Social' },
+  { emoji: '😌', label: 'Chill' },
+  { emoji: '😤', label: 'Stress' },
+  { emoji: '🎉', label: 'Party' },
+  { emoji: '😴', label: 'Tired' },
 ]
 
 export default function Log() {
@@ -31,6 +40,7 @@ export default function Log() {
   const [consumedMyself, setConsumedMyself] = useState(true)
   const [recipeDetails, setRecipeDetails] = useState("")
   const [detoxNotes, setDetoxNotes] = useState("")
+  const [moodTag, setMoodTag] = useState<string | null>(null)
 
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
@@ -88,7 +98,8 @@ export default function Log() {
         is_recipe: (category === 'drink' || category === 'snack') ? isRecipe : undefined,
         consumed_myself: (category === 'drink' || category === 'snack') ? consumedMyself : undefined,
         recipe_details: isRecipe ? recipeDetails : undefined,
-        detox_notes: category === 'detox' ? detoxNotes : undefined
+        detox_notes: category === 'detox' ? detoxNotes : undefined,
+        mood_tag: moodTag || undefined,
       }
 
       const finalPrivacy = (privacy === 'groups' && !selectedGroup) ? 'private' : privacy
@@ -122,6 +133,7 @@ export default function Log() {
         setSuccess(false); setItemName(""); setQuantity(1);
         setIsRecipe(false); setConsumedMyself(true); setRecipeDetails("");
         setDetoxNotes(""); setPhoto(null); setPhotoPreview(null); setPhotoMetadata(null);
+        setMoodTag(null);
       }, 2200)
 
     } catch (error: unknown) {
@@ -158,7 +170,7 @@ export default function Log() {
       </div>
 
       {/* ─── Category Picker ─── */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-6 gap-2">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
@@ -226,6 +238,33 @@ export default function Log() {
             </button>
           </div>
         </div>
+
+        {/* Mood tag (optional) */}
+        {(category === 'drink' || category === 'snack') && (
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
+              How are you feeling? (optional)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {MOOD_TAGS.map(m => (
+                <button
+                  key={m.label}
+                  type="button"
+                  onClick={() => setMoodTag(moodTag === `${m.emoji} ${m.label}` ? null : `${m.emoji} ${m.label}`)}
+                  className="text-xs font-bold px-3 py-2 rounded-sm transition-all active:scale-95"
+                  style={{
+                    background: moodTag === `${m.emoji} ${m.label}` ? 'var(--amber-dim)' : 'var(--bg-raised)',
+                    border: moodTag === `${m.emoji} ${m.label}` ? '2px solid var(--amber)' : '1px solid var(--border)',
+                    color: moodTag === `${m.emoji} ${m.label}` ? 'var(--amber)' : 'var(--text-secondary)',
+                    borderRadius: 'var(--card-radius)',
+                  }}
+                >
+                  {m.emoji} {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recipe toggle (drink/snack) */}
         {(category === 'drink' || category === 'snack') && (
