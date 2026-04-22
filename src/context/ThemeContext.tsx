@@ -1,17 +1,19 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "../lib/supabase";
+import { THEME_UNLOCKS, isThemeUnlocked } from "../lib/progression";
 
-export type Theme = "dark" | "light" | "verdant";
+export type Theme = "dark" | "light" | "verdant" | "sakura";
 
 interface ThemeContextType {
   theme: Theme;
-  setTheme: (t: Theme) => void;
+  setTheme: (t: Theme, userLevel?: number) => void;
   toggleTheme: () => void;
+  getThemeUnlocks: (level: number) => { themeId: string; label: string; desc: string; emoji: string; locked: boolean; requiredLevel: number; requiredRank: string }[];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_CLASSES: Theme[] = ["dark", "light", "verdant"];
+const THEME_CLASSES: Theme[] = ["dark", "light", "verdant", "sakura"];
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
@@ -63,15 +65,34 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme, userId]);
 
-  const setTheme = (t: Theme) => setThemeState(t);
+  const setTheme = (t: Theme, userLevel?: number) => {
+    // If userLevel provided, check if theme is unlocked
+    if (userLevel !== undefined && !isThemeUnlocked(t, userLevel)) {
+      return; // Theme is locked — ignore
+    }
+    setThemeState(t);
+  };
+
   const toggleTheme = () =>
     setThemeState(prev => {
       const idx = THEME_CLASSES.indexOf(prev);
       return THEME_CLASSES[(idx + 1) % THEME_CLASSES.length];
     });
 
+  const getThemeUnlocks = (level: number) => {
+    return THEME_UNLOCKS.map(t => ({
+      themeId: t.themeId,
+      label: t.label,
+      desc: t.desc,
+      emoji: t.emoji,
+      locked: !isThemeUnlocked(t.themeId, level),
+      requiredLevel: t.requiredLevel,
+      requiredRank: t.requiredRank,
+    }));
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, getThemeUnlocks }}>
       {children}
     </ThemeContext.Provider>
   );

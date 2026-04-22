@@ -20,6 +20,7 @@ import ConnectPage from "./pages/ConnectPage"
 import Rank from "./pages/Rank"
 import SessionView from "./pages/SessionView"
 import Calendar from "./pages/Calendar"
+import Challenges from "./pages/Challenges"
 
 import ManaByteOverlay from "./components/ManaByteOverlay"
 import Landing from "./pages/Landing"
@@ -50,10 +51,30 @@ function App() {
   if (!ready) {
     return (
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--bg-deep)' }}>
-        <div className="text-center">
-          <div className="text-5xl mb-3">🍻</div>
-          <p className="text-sm font-bold" style={{ color: 'var(--text-muted)', fontFamily: 'Syne, sans-serif' }}>Loading ChugChug...</p>
+        <div className="text-center relative">
+          {/* Expanding ring */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div style={{
+              width: 120, height: 120,
+              borderRadius: '50%',
+              border: '2px solid var(--amber)',
+              opacity: 0.2,
+              animation: 'loaderRing 2s ease-out infinite',
+            }} />
+          </div>
+          <div className="text-6xl mb-4" style={{ animation: 'loaderPulse 1.5s ease-in-out infinite' }}>⛩️</div>
+          <p className="text-xs font-black uppercase tracking-[0.3em]" style={{ color: 'var(--text-muted)', fontFamily: 'Syne, sans-serif' }}>ChugChug</p>
         </div>
+        <style>{`
+          @keyframes loaderPulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.08); opacity: 1; }
+          }
+          @keyframes loaderRing {
+            0% { transform: scale(0.8); opacity: 0.4; }
+            100% { transform: scale(2.5); opacity: 0; }
+          }
+        `}</style>
       </div>
     )
   }
@@ -86,6 +107,7 @@ function App() {
         <Route path="/rank"                element={<Rank />} />
         <Route path="/session/:id"         element={<SessionView />} />
         <Route path="/calendar"             element={<Calendar />} />
+        <Route path="/challenges"           element={<Challenges />} />
         {/* Redirect old routes */}
         <Route path="/live-party/:partyId?"element={<Navigate to="/" replace />} />
         <Route path="/social"              element={<Navigate to="/groups" replace />} />

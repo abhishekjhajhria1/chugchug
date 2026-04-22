@@ -3,8 +3,9 @@ import { useChug } from "../context/ChugContext"
 import { supabase } from "../lib/supabase"
 import { firebaseDb } from "../lib/firebase"
 import { ref, get, remove } from "firebase/database"
-import { evaluateAndAwardBadges } from "../lib/progression"
+import { evaluateAndAwardBadges, getRankInfo } from "../lib/progression"
 import { Camera, Loader2, X, Eye, Users, Globe, Lock } from "lucide-react"
+import SessionRecapCard from "./SessionRecapCard"
 
 interface EndSessionModalProps {
   sessionId: string
@@ -34,6 +35,8 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [showRecap, setShowRecap] = useState(false)
+  const [sessionStartTime] = useState(() => Date.now())
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Load participant data from Firebase
@@ -156,7 +159,8 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
         remove(ref(firebaseDb, `sessions/${sessionId}`))
       }, 5000)
 
-      onDone()
+      // Show recap card instead of immediately navigating home
+      setShowRecap(true)
     } catch (e: any) {
       alert("Error ending session: " + e.message)
     } finally {
@@ -166,6 +170,24 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
 
   const myCount = participants.find(p => p.userId === user?.id)?.count || 0
   const totalDrinks = participants.reduce((sum, p) => sum + p.count, 0)
+
+  // Recap card data
+  const rankInfo = getRankInfo(profile?.level ?? 1, profile?.xp ?? 0)
+  const elapsedMinutes = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000))
+
+  if (showRecap) {
+    return (
+      <SessionRecapCard
+        participants={participants}
+        sessionDate={new Date()}
+        elapsedMinutes={elapsedMinutes}
+        currentUserStreak={profile?.current_streak ?? 0}
+        currentUserRank={rankInfo.current.title}
+        currentUserRankEmoji={rankInfo.current.emoji}
+        onClose={onDone}
+      />
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col justify-end p-4 anim-fade" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>

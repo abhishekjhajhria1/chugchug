@@ -2,10 +2,12 @@ import React, { useCallback, useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
-import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, X, HandCoins, Loader2, PartyPopper, Beer, ArrowRight } from "lucide-react"
+import { Users, ArrowLeft, ThumbsUp, ThumbsDown, Crown, MessageCircle, X, HandCoins, Loader2, PartyPopper, Beer, ArrowRight, Flame } from "lucide-react"
 import { Link } from "react-router-dom"
 import LiveCounter from "../components/LiveCounter"
 import PhotoMetadata from "../components/PhotoMetadata"
+import { getRankInfo, getCrewStreakInfo } from "../lib/progression"
+import type { CrewStreakInfo } from "../lib/progression"
 
 export interface ActivityLog {
     id: string
@@ -56,6 +58,9 @@ export default function GroupFeed() {
     const [splitMode, setSplitMode] = useState<'equal' | 'drink'>('equal')
     const [todayCounts, setTodayCounts] = useState<Record<string, number>>({})
 
+    // Crew streak
+    const [crewStreak, setCrewStreak] = useState<CrewStreakInfo>({ crewStreak: 0, crewLongestStreak: 0, lastLoggerUsername: null })
+
     const fetchGroupData = useCallback(async () => {
         if (!id) return
 
@@ -66,6 +71,9 @@ export default function GroupFeed() {
             .single()
 
         if (groupData) setGroup(groupData)
+
+        // Fetch crew streak
+        getCrewStreakInfo(id).then(setCrewStreak).catch(console.error)
 
         const { data: membersData } = await supabase
             .from("group_members")
@@ -323,6 +331,37 @@ export default function GroupFeed() {
                 </button>
             </div>
 
+            {/* Crew Streak Banner */}
+            {crewStreak.crewStreak > 0 && (
+                <div
+                    className="flex items-center justify-between p-3.5 rounded-[4px] relative overflow-hidden"
+                    style={{
+                        background: crewStreak.crewStreak >= 14 ? 'linear-gradient(135deg, rgba(209,32,32,0.12), rgba(216,162,94,0.08))' : crewStreak.crewStreak >= 7 ? 'var(--amber-dim)' : 'var(--bg-deep)',
+                        border: `1px solid ${crewStreak.crewStreak >= 14 ? 'rgba(209,32,32,0.3)' : crewStreak.crewStreak >= 7 ? 'rgba(216,162,94,0.3)' : 'var(--border-mid)'}`,
+                    }}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
+                            <Flame size={18} style={{ color: crewStreak.crewStreak >= 14 ? 'var(--coral)' : crewStreak.crewStreak >= 7 ? 'var(--amber)' : 'var(--text-muted)', animation: crewStreak.crewStreak >= 7 ? 'pulse 1.5s ease-in-out infinite' : 'none' }} />
+                            <span className="text-lg font-black" style={{ fontFamily: 'Syne, sans-serif', color: crewStreak.crewStreak >= 14 ? 'var(--coral)' : crewStreak.crewStreak >= 7 ? 'var(--amber)' : 'var(--text-primary)' }}>
+                                {crewStreak.crewStreak}
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: crewStreak.crewStreak >= 7 ? 'var(--amber)' : 'var(--text-muted)' }}>Crew Streak 🔥</p>
+                            {crewStreak.lastLoggerUsername && (
+                                <p className="text-[9px] font-bold" style={{ color: 'var(--text-ghost)' }}>Last: @{crewStreak.lastLoggerUsername}</p>
+                            )}
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[2px]" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-ghost)', border: '1px solid var(--border)' }}>
+                            Best: {crewStreak.crewLongestStreak}
+                        </span>
+                    </div>
+                </div>
+            )}
+
             {/* Quick Actions / Info Row */}
             <div className="grid grid-cols-2 gap-2 my-4">
                 {/* Invite Code */}
@@ -549,6 +588,10 @@ export default function GroupFeed() {
                                             <Link to={`/profile/${log.user_id}`} className="text-sm font-bold leading-none transition-colors" style={{ color: 'var(--text-secondary)' }}>
                                                 {log.profiles?.username || "Unknown"}
                                             </Link>
+                                            {(() => {
+                                                const ri = getRankInfo(userLevel);
+                                                return <span className="text-[8px] font-black uppercase tracking-widest ml-1" style={{ color: ri.current.color }}>{ri.current.emoji}</span>;
+                                            })()}
                                             <p className="text-[10px] uppercase font-black tracking-widest" style={{ color: 'var(--text-muted)' }}>{log.category}</p>
                                         </div>
                                     </div>

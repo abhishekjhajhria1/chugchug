@@ -15,6 +15,7 @@ interface Group {
   id: string
   name: string
   invite_code: string
+  crew_streak?: number
 }
 
 interface PartyPreview {
@@ -74,7 +75,7 @@ export default function Groups() {
 
     const { data: memberData } = await supabase
       .from("group_members")
-      .select(`groups (id, name, invite_code)`)
+      .select(`groups (id, name, invite_code, crew_streak)`)
       .eq("user_id", user.id)
 
     const groupIds: string[] = []
@@ -514,8 +515,13 @@ export default function Groups() {
                       </div>
                       <span className="font-black text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif' }}>{g.name}</span>
                     </div>
-                    <div className="w-full pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                    <div className="w-full pt-2 flex items-center justify-between" style={{ borderTop: '1px solid var(--border)' }}>
                       <LiveCounter groupId={g.id} compact />
+                      {(g.crew_streak ?? 0) > 0 && (
+                        <span className="flex items-center gap-1 text-[9px] font-black" style={{ color: (g.crew_streak ?? 0) >= 7 ? 'var(--amber)' : 'var(--text-muted)' }}>
+                          <Flame size={10} /> {g.crew_streak}
+                        </span>
+                      )}
                     </div>
                   </button>
                 ))}

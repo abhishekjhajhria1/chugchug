@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase"
 import { Globe, Users, MapPin, Trophy, UserPlus, Check, Clock } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import { Link } from "react-router-dom"
+import { getRankInfo } from "../lib/progression"
 
 interface Leader { id: string; username: string; xp: number; level: number; city?: string }
 
@@ -10,7 +11,7 @@ export default function Rank() {
   const { user, profile } = useChug()
   const [leaders, setLeaders] = useState<Leader[]>([])
   const [friendships, setFriendships] = useState<Record<string, string>>({})
-  const [scope, setScope] = useState<'global' | 'group' | 'regional'>('global')
+  const [scope, setScope] = useState<'global' | 'group' | 'regional' | 'friends' | 'weekly'>('global')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -37,6 +38,38 @@ export default function Rank() {
           else {
             const { data } = await supabase.from("profiles").select("id, username, xp, level, city").ilike("city", profile.city).order("xp", { ascending: false }).limit(50)
             if (data) setLeaders(data as Leader[])
+          }
+        } else if (scope === 'friends') {
+          const { data: fData } = await supabase.from('friendships').select('user_1, user_2').eq('status', 'accepted').or(`user_1.eq.${user.id},user_2.eq.${user.id}`)
+          if (fData && fData.length > 0) {
+            const userIds = fData.map(f => f.user_1 === user.id ? f.user_2 : f.user_1)
+            userIds.push(user.id)
+            const { data } = await supabase.from("profiles").select("id, username, xp, level, city").in("id", userIds).order("xp", { ascending: false }).limit(50)
+            if (data) setLeaders(data as Leader[])
+          } else {
+            const { data } = await supabase.from("profiles").select("id, username, xp, level, city").eq("id", user.id)
+            if (data) setLeaders(data as Leader[])
+          }
+        } else if (scope === 'weekly') {
+          const lastWeek = new Date()
+          lastWeek.setDate(lastWeek.getDate() - 7)
+          const { data: logsData } = await supabase.from("activity_logs").select("user_id, category, profiles(id, username, level, city)").gte("created_at", lastWeek.toISOString())
+          if (logsData) {
+            const xpMap: Record<string, Leader> = {}
+            logsData.forEach(log => {
+              const uid = log.user_id
+              const p = log.profiles as any
+              if (!p) return
+              if (!xpMap[uid]) {
+                xpMap[uid] = { id: uid, username: p.username, xp: 0, level: p.level, city: p.city }
+              }
+              const isWellness = log.category === 'gym' || log.category === 'detox'
+              xpMap[uid].xp += isWellness ? 10 : 5
+            })
+            const sorted = Object.values(xpMap).sort((a, b) => b.xp - a.xp).slice(0, 50)
+            setLeaders(sorted)
+          } else {
+            setLeaders([])
           }
         }
         const { data: fData } = await supabase.from('friendships').select('user_1, user_2, status').or(`user_1.eq.${user.id},user_2.eq.${user.id}`)
@@ -67,8 +100,10 @@ export default function Rank() {
       <div className="flex rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)' }}>
         {([
           { id: 'global',   label: 'Global',   icon: Globe,   color: 'var(--amber)', bg: 'var(--amber-dim)' },
-          { id: 'group',    label: 'Groups',   icon: Users,   color: 'var(--acid)',   bg: 'var(--acid-dim)' },
-          { id: 'regional', label: 'Local',    icon: MapPin,  color: 'var(--coral)',  bg: 'var(--coral-dim)' },
+          { id: 'weekly',   label: 'Weekly',   icon: Clock,   color: 'var(--blue)',  bg: 'var(--indigo-dim)' },
+          { id: 'friends',  label: 'Friends',  icon: UserPlus,color: 'var(--coral)', bg: 'var(--coral-dim)' },
+          { id: 'group',    label: 'Groups',   icon: Users,   color: 'var(--acid)',  bg: 'var(--acid-dim)' },
+          { id: 'regional', label: 'Local',    icon: MapPin,  color: 'var(--amber)', bg: 'var(--amber-dim)' },
         ] as const).map(({ id, label, icon: Icon, color, bg }, i, arr) => (
           <button
             key={id}
@@ -119,7 +154,15 @@ export default function Rank() {
                       <Link to={`/profile/${leader.id}`} className="font-bold text-lg block leading-tight transition-colors" style={{ color: 'var(--text-primary)' }}>
                         {leader.username}
                       </Link>
-                      {scope === 'regional' && leader.city && <span className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>{leader.city}</span>}
+                      {(() => {
+                        const ri = getRankInfo(leader.level || 1, leader.xp);
+                        return (
+                          <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: ri.current.color }}>
+                            {ri.current.emoji} {ri.current.title}
+                          </span>
+                        );
+                      })()}
+                      {scope === 'regional' && leader.city && <span className="text-xs font-bold ml-1" style={{ color: 'var(--text-muted)' }}>· {leader.city}</span>}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">

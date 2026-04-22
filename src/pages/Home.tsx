@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Loader2, BookOpen, ArrowRight, Swords, Skull, Beer, LogIn,
-  ChevronLeft, ChevronRight, Flame
+  ChevronLeft, ChevronRight, Flame, Zap
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useChug } from "../context/ChugContext";
 import { useNavigate } from "react-router-dom";
+import { getRankInfo, getDailyBounties, checkDailyBountyCompletion } from "../lib/progression";
+import type { BountyDef } from "../lib/progression";
+import ArchetypeQuiz, { ARCHETYPES } from "../components/ArchetypeQuiz";
+import type { ArchetypeId } from "../components/ArchetypeQuiz";
 
 interface RankUser { id: string; username: string; xp: number }
 interface Badge { id: string; name: string; icon_text: string }
@@ -19,6 +23,11 @@ export default function Home() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showArchetypeQuiz, setShowArchetypeQuiz] = useState(false);
+
+  // Daily Bounties
+  const [dailyBounties, setDailyBounties] = useState<BountyDef[]>([]);
+  const [bountyProgress, setBountyProgress] = useState<Record<string, { completed: boolean; current: number; target: number }>>({});
 
   const [chatPrompt, setChatPrompt] = useState("");
   const [chatReply, setChatReply] = useState("");
@@ -125,6 +134,17 @@ export default function Home() {
     };
     fetchData();
   }, [user, profile]);
+
+  // Fetch daily bounties and their completion status
+  useEffect(() => {
+    if (!user) return;
+    setDailyBounties(getDailyBounties());
+    const fetchBountyProgress = async () => {
+      const progress = await checkDailyBountyCompletion(user.id);
+      setBountyProgress(progress);
+    };
+    fetchBountyProgress();
+  }, [user]);
 
   // Fetch month's logs for calendar
   useEffect(() => {
@@ -289,13 +309,21 @@ export default function Home() {
     { label: "Log Drink", to: "/log", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "✍️" },
     { label: "My Crew", to: "/groups", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👥" },
     { label: "Taverns", to: "/party", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🏯" },
-    { label: "Analytics", to: "/calendar", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "📊" },
+    { label: "Challenges", to: "/challenges", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🎯" },
     { label: "Explore", to: "/world", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "🗺️" },
     { label: "Shogun Rank", to: "/rank", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👑" },
   ];
 
   return (
     <div className="space-y-6 pb-6 wano-fade">
+
+      {/* Archetype Quiz Modal */}
+      {showArchetypeQuiz && (
+        <ArchetypeQuiz
+          onComplete={() => setShowArchetypeQuiz(false)}
+          onSkip={() => setShowArchetypeQuiz(false)}
+        />
+      )}
 
       {/* ─── ONBOARDING INTRO (new users only) ─── */}
       {showOnboarding && (
@@ -359,7 +387,7 @@ export default function Home() {
 
       {/* ─── 1. HERO GREETING ─── */}
       <div
-        className="p-5 flex flex-col justify-between relative overflow-hidden"
+        className="p-5 flex flex-col justify-between relative overflow-hidden anim-stagger-1"
         style={{
           background: 'linear-gradient(135deg, var(--amber-dim), rgba(209,32,32,0.05))',
           border: '1px solid var(--amber)',
@@ -372,42 +400,166 @@ export default function Home() {
         </div>
 
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: 'var(--text-muted)' }}>
-                Welcome, {profile?.username || 'Traveler'}
-              </p>
-              <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--text-primary)' }}>
-                The Night is Young ⚔️
-              </h1>
-            </div>
-          </div>
+          {(() => {
+            const rankInfo = getRankInfo(profile?.level ?? 1, profile?.xp ?? 0);
+            const streak = profile?.current_streak ?? 0;
+            return (
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: 'var(--text-muted)' }}>
+                      Welcome, {profile?.username || 'Traveler'}
+                    </p>
+                    <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.4rem', color: 'var(--text-primary)' }}>
+                      {rankInfo.current.emoji} {rankInfo.current.title}
+                    </h1>
+                    {/* Archetype badge */}
+                    {profile?.archetype && ARCHETYPES[profile.archetype as ArchetypeId] && (
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-[2px] ml-1" style={{ background: `${ARCHETYPES[profile.archetype as ArchetypeId].color}18`, color: ARCHETYPES[profile.archetype as ArchetypeId].color, border: `1px solid ${ARCHETYPES[profile.archetype as ArchetypeId].color}30` }}>
+                        {ARCHETYPES[profile.archetype as ArchetypeId].emoji} {ARCHETYPES[profile.archetype as ArchetypeId].title}
+                      </span>
+                    )}
+                  </div>
+                  {/* Streak flame */}
+                  {streak > 0 && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: streak >= 14 ? 'rgba(209,32,32,0.15)' : streak >= 7 ? 'rgba(216,162,94,0.15)' : 'rgba(255,255,255,0.06)', border: `1px solid ${streak >= 14 ? 'rgba(209,32,32,0.3)' : streak >= 7 ? 'rgba(216,162,94,0.3)' : 'var(--border)'}` }}>
+                      <Flame size={14} style={{ color: streak >= 14 ? 'var(--coral)' : streak >= 7 ? 'var(--amber)' : 'var(--text-muted)', animation: streak >= 7 ? 'pulse 1.5s ease-in-out infinite' : 'none' }} />
+                      <span className="text-sm font-black" style={{ fontFamily: 'Syne, sans-serif', color: streak >= 14 ? 'var(--coral)' : streak >= 7 ? 'var(--amber)' : 'var(--text-secondary)' }}>{streak}</span>
+                    </div>
+                  )}
+                </div>
 
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: 'var(--text-secondary)' }}>
-              Lv. {profile?.level ?? 1} Samurai
-            </span>
-            <span className="text-[10px] font-bold" style={{ color: 'var(--amber)' }}>
-              {profile?.xp ?? 0} XP
-            </span>
-          </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-extrabold uppercase tracking-widest" style={{ color: rankInfo.current.color }}>
+                    Lv. {profile?.level ?? 1} {rankInfo.current.title}
+                  </span>
+                  <span className="text-[10px] font-bold" style={{ color: 'var(--amber)' }}>
+                    {profile?.xp ?? 0} XP
+                  </span>
+                </div>
 
-          <div className="h-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '1px' }}>
-            <div
-              className="h-full transition-all duration-700"
-              style={{
-                width: `${xpProgress}%`,
-                background: 'var(--amber)',
-                boxShadow: 'var(--amber-glow)',
-              }}
-            />
-          </div>
+                <div className="h-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '1px' }}>
+                  <div
+                    className="h-full transition-all duration-700"
+                    style={{
+                      width: `${xpProgress}%`,
+                      background: rankInfo.current.color,
+                      boxShadow: `0 0 8px ${rankInfo.current.glowColor}`,
+                    }}
+                  />
+                </div>
+
+                {/* Next rank indicator */}
+                {rankInfo.next && (
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-[10px] font-bold" style={{ color: 'var(--text-ghost)' }}>
+                      {rankInfo.xpToNext.toLocaleString()} XP to {rankInfo.next.emoji} {rankInfo.next.title}
+                    </span>
+                    <span className="text-[10px] font-black" style={{ color: rankInfo.current.color }}>
+                      {rankInfo.progressPercent}%
+                    </span>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
 
+      {/* ─── 1.1 ARCHETYPE DISCOVER PROMPT ─── */}
+      {profile && !profile.archetype && (
+        <button
+          onClick={() => setShowArchetypeQuiz(true)}
+          className="w-full p-4 rounded-[4px] flex items-center gap-4 active:scale-[0.98] transition-transform relative overflow-hidden anim-stagger-1"
+          style={{
+            background: 'linear-gradient(135deg, rgba(155,89,182,0.12), rgba(216,162,94,0.08))',
+            border: '1px solid rgba(155,89,182,0.25)',
+            borderLeft: '4px solid #9B59B6',
+          }}
+        >
+          <div className="w-12 h-12 rounded-[4px] flex items-center justify-center text-2xl shrink-0" style={{ background: 'rgba(155,89,182,0.15)', border: '1px solid rgba(155,89,182,0.3)' }}>
+            🎭
+          </div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: '#9B59B6' }}>
+              Discover Your Archetype
+            </p>
+            <p className="text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>
+              5 questions · Ronin, Shogun, Sage, or Berserker?
+            </p>
+          </div>
+          <ArrowRight size={18} style={{ color: '#9B59B6' }} />
+        </button>
+      )}
+
+      {/* ─── 1.25 DAILY BOUNTIES ─── */}
+      {dailyBounties.length > 0 && (
+        <section
+          className="overflow-hidden anim-stagger-2"
+          style={{
+            background: 'var(--card-bg)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--card-radius)',
+          }}
+        >
+          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+            <h2 className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--amber)' }}>
+              <Zap size={12} /> Daily Bounties
+            </h2>
+            <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '1px solid rgba(216,162,94,0.2)', borderRadius: '2px' }}>
+              Resets at midnight
+            </span>
+          </div>
+          <div className="px-3 pb-3 space-y-2">
+            {dailyBounties.map((bounty) => {
+              const prog = bountyProgress[bounty.id];
+              const completed = prog?.completed ?? false;
+              const current = prog?.current ?? 0;
+              const target = prog?.target ?? bounty.target;
+              const pct = target > 0 ? Math.round((current / target) * 100) : 0;
+              return (
+                <div
+                  key={bounty.id}
+                  className="flex items-center gap-3 p-3 transition-all"
+                  style={{
+                    background: completed ? 'var(--acid-dim)' : 'var(--bg-raised)',
+                    border: completed ? '1px solid rgba(204,255,0,0.2)' : '1px solid var(--border)',
+                    borderRadius: 'var(--card-radius)',
+                    opacity: completed ? 0.75 : 1,
+                  }}
+                >
+                  <div
+                    className="w-10 h-10 shrink-0 flex items-center justify-center text-lg"
+                    style={{ background: 'var(--bg-deep)', borderRadius: 'var(--card-radius)', border: '1px solid var(--border-mid)' }}
+                  >
+                    {completed ? '✅' : bounty.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-xs font-bold" style={{ color: completed ? 'var(--acid)' : 'var(--text-primary)', textDecoration: completed ? 'line-through' : 'none' }}>
+                        {bounty.title}
+                      </span>
+                      <span className="text-[10px] font-black px-1.5 py-0.5" style={{ background: completed ? 'var(--acid-dim)' : 'var(--amber-dim)', color: completed ? 'var(--acid)' : 'var(--amber)', borderRadius: '2px' }}>
+                        +{bounty.xpReward}
+                      </span>
+                    </div>
+                    <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{bounty.description}</p>
+                    {!completed && (
+                      <div className="h-1 mt-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+                        <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: 'var(--amber)' }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* ─── 1.5 FULL MONTHLY CALENDAR ─── */}
       <section
-        className="overflow-hidden"
+        className="overflow-hidden anim-stagger-2"
         style={{
           background: 'var(--card-bg)',
           border: '1px solid var(--border)',
@@ -598,9 +750,9 @@ export default function Home() {
       </section>
 
       {/* ─── 3. KATANA GRID QUICK ACTIONS ─── */}
-      <section>
+      <section className="anim-stagger-3">
         <p className="section-label mb-3 border-l-2 pl-2" style={{ borderColor: 'var(--coral)' }}>What is your decree? 📜</p>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2.5">
           {quickActions.map((action) => (
             <button
               key={action.label}
@@ -624,7 +776,7 @@ export default function Home() {
 
       {/* ─── 3. TAVERN SUPERVISOR: Ninkasi ─── */}
       <section
-        className="overflow-hidden"
+        className="overflow-hidden anim-stagger-4"
         style={{
           background: 'linear-gradient(to bottom, rgba(209,32,32,0.05), var(--card-bg))',
           border: '1px solid var(--border)',
@@ -714,7 +866,7 @@ export default function Home() {
       </section>
 
       {/* ─── 4. TOP PERFORMERS + RECIPES ─── */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 anim-stagger-5">
         <section className="p-4 relative overflow-hidden" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '4px' }}>
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-4 flex items-center gap-1.5" style={{ color: 'var(--amber)' }}>
             🏆 Shogunate Top 5
@@ -770,7 +922,7 @@ export default function Home() {
       </div>
 
       {/* ─── 5. BADGES ─── */}
-      <section style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '4px', padding: 18 }}>
+      <section className="anim-stagger-6" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '4px', padding: 18 }}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-[10px] font-black uppercase tracking-widest border-l-2 pl-2" style={{ borderColor: 'var(--acid)', color: 'var(--text-muted)' }}>
             🎖️ Bounties & Badges

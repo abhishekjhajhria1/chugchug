@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
-import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays } from "lucide-react"
+import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Lock } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import { useTheme } from "../context/ThemeContext"
 import type { Theme } from "../context/ThemeContext"
 import QRCodeModal from "../components/QRCodeModal"
+import { getRankInfo, RANK_LADDER } from "../lib/progression"
+import ArchetypeQuiz, { ARCHETYPES } from "../components/ArchetypeQuiz"
+import type { ArchetypeId } from "../components/ArchetypeQuiz"
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useChug()
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme, getThemeUnlocks } = useTheme()
   const [isEditing, setIsEditing] = useState(false)
+  const [showArchetypeQuiz, setShowArchetypeQuiz] = useState(false)
   const [editForm, setEditForm] = useState({ bio: "", college: "", city: "", country: "", stealth_mode: false })
   const [saving, setSaving] = useState(false)
   const [activities, setActivities] = useState<any[]>([])
@@ -75,7 +79,7 @@ export default function Profile() {
     setSavingLog(false)
   }
 
-  const p = profile || { id: user?.id || '', username: user?.email?.split('@')[0] || 'Traveler', level: 1, xp: 0, bio: '', city: '', country: '', stealth_mode: false, privacy_settings: {} }
+  const p = profile || { id: user?.id || '', username: user?.email?.split('@')[0] || 'Traveler', level: 1, xp: 0, bio: '', city: '', country: '', stealth_mode: false, privacy_settings: {}, archetype: undefined }
 
   const catColors: Record<string, string> = {
     drink: 'var(--amber)', snack: 'var(--coral)', cigarette: 'var(--sage)',
@@ -88,7 +92,7 @@ export default function Profile() {
   const levelColor = (p.level || 1) >= 25 ? 'var(--acid)' : (p.level || 1) >= 10 ? 'var(--amber)' : 'var(--coral)'
 
   return (
-    <div className="space-y-5 pb-24">
+    <div className="space-y-5 pb-24 wano-fade">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="page-title">My Profile</h1>
@@ -107,30 +111,86 @@ export default function Profile() {
       <div className="glass-card text-center">
         {/* Avatar */}
         <div className="flex justify-center mb-3">
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black relative"
-            style={{
-              background: 'var(--bg-raised)',
-              border: `3px solid ${levelColor}`,
-              boxShadow: `0 0 20px ${levelColor}40`,
-              color: levelColor,
-              fontFamily: 'Syne, sans-serif',
-            }}
-          >
-            {p.username?.[0]?.toUpperCase() || '?'}
-            {/* Level badge */}
+          <div className="relative">
+            {/* Orbiting ring */}
             <div
-              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black"
-              style={{ background: levelColor, color: '#1A1208', border: '2px solid var(--bg-deep)' }}
+              className="absolute -inset-2"
+              style={{
+                border: `1.5px dashed ${levelColor}`,
+                borderRadius: '50%',
+                opacity: 0.25,
+                animation: 'spin 12s linear infinite',
+              }}
+            />
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black relative"
+              style={{
+                background: 'var(--bg-raised)',
+                border: `3px solid ${levelColor}`,
+                boxShadow: `0 0 20px ${levelColor}40`,
+                color: levelColor,
+                fontFamily: 'Syne, sans-serif',
+              }}
             >
-              {p.level ?? 1}
+              {p.username?.[0]?.toUpperCase() || '?'}
+              {/* Level badge */}
+              <div
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black"
+                style={{ background: levelColor, color: '#1A1208', border: '2px solid var(--bg-deep)' }}
+              >
+                {p.level ?? 1}
+              </div>
             </div>
           </div>
         </div>
+        <style>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
 
         <h2 className="text-xl font-black mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
           {p.username}
         </h2>
+
+        {/* Rank title */}
+        {(() => {
+          const ri = getRankInfo(p.level ?? 1, p.xp ?? 0);
+          return (
+            <p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: ri.current.color }}>
+              {ri.current.emoji} {ri.current.title}
+            </p>
+          );
+        })()}
+
+        {/* Archetype badge */}
+        {p.archetype && ARCHETYPES[p.archetype as ArchetypeId] ? (
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-[2px]" style={{ background: `${ARCHETYPES[p.archetype as ArchetypeId].color}15`, color: ARCHETYPES[p.archetype as ArchetypeId].color, border: `1px solid ${ARCHETYPES[p.archetype as ArchetypeId].color}30` }}>
+              {ARCHETYPES[p.archetype as ArchetypeId].emoji} The {ARCHETYPES[p.archetype as ArchetypeId].title}
+            </span>
+            <button onClick={() => setShowArchetypeQuiz(true)} className="text-[8px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-ghost)' }}>
+              Retake
+            </button>
+          </div>
+        ) : !isEditing && (
+          <button
+            onClick={() => setShowArchetypeQuiz(true)}
+            className="text-[10px] font-bold uppercase tracking-widest mb-2 px-3 py-1.5 rounded-[2px] transition-all active:scale-95"
+            style={{ background: 'rgba(155,89,182,0.1)', color: '#9B59B6', border: '1px solid rgba(155,89,182,0.2)' }}
+          >
+            🎭 Discover Your Archetype
+          </button>
+        )}
+
+        {/* Archetype Quiz Modal */}
+        {showArchetypeQuiz && (
+          <ArchetypeQuiz
+            onComplete={() => setShowArchetypeQuiz(false)}
+            onSkip={() => setShowArchetypeQuiz(false)}
+          />
+        )}
 
         {p.bio && !isEditing && (
           <p className="text-sm font-medium mb-3 italic" style={{ color: 'var(--text-secondary)' }}>"{p.bio}"</p>
@@ -165,27 +225,35 @@ export default function Profile() {
               App Theme
             </p>
             <div className="flex gap-2">
-              {[
-                { id: 'dark' as Theme, label: '🎌 Wano Arc', desc: 'Dark · Samurai' },
-                { id: 'light' as Theme, label: '☀️ Wano Day', desc: 'Light · Clean' },
-                { id: 'verdant' as Theme, label: '🌿 Verdant', desc: 'Earthy · Calm' },
-              ].map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setTheme(t.id)}
-                  className="flex-1 py-2.5 px-2 rounded-sm text-center transition-all active:scale-95"
-                  style={{
-                    background: theme === t.id ? 'var(--amber-dim)' : 'var(--bg-raised)',
-                    border: theme === t.id ? '2px solid var(--amber)' : '1px solid var(--border)',
-                    borderRadius: 'var(--card-radius)',
-                  }}
-                >
-                  <div className="text-xs font-bold" style={{ color: theme === t.id ? 'var(--amber)' : 'var(--text-primary)' }}>
-                    {t.label}
-                  </div>
-                  <div className="text-[8px] mt-0.5" style={{ color: 'var(--text-ghost)' }}>{t.desc}</div>
-                </button>
-              ))}
+              {(() => {
+                const themeUnlocks = getThemeUnlocks(p.level ?? 1);
+                return themeUnlocks.map(t => (
+                  <button
+                    key={t.themeId}
+                    onClick={() => !t.locked && setTheme(t.themeId as Theme, p.level ?? 1)}
+                    className="flex-1 py-2.5 px-2 rounded-sm text-center transition-all active:scale-95 relative"
+                    style={{
+                      background: theme === t.themeId ? 'var(--amber-dim)' : t.locked ? 'var(--bg-deep)' : 'var(--bg-raised)',
+                      border: theme === t.themeId ? '2px solid var(--amber)' : t.locked ? '1px solid var(--border)' : '1px solid var(--border)',
+                      borderRadius: 'var(--card-radius)',
+                      opacity: t.locked ? 0.5 : 1,
+                      cursor: t.locked ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {t.locked && (
+                      <div className="absolute top-1 right-1">
+                        <Lock size={10} style={{ color: 'var(--text-ghost)' }} />
+                      </div>
+                    )}
+                    <div className="text-xs font-bold" style={{ color: theme === t.themeId ? 'var(--amber)' : t.locked ? 'var(--text-ghost)' : 'var(--text-primary)' }}>
+                      {t.emoji} {t.label}
+                    </div>
+                    <div className="text-[8px] mt-0.5" style={{ color: 'var(--text-ghost)' }}>
+                      {t.locked ? `🔒 Lv.${t.requiredLevel} ${t.requiredRank}` : t.desc}
+                    </div>
+                  </button>
+                ));
+              })()}
             </div>
           </div>
         )}
@@ -218,6 +286,54 @@ export default function Profile() {
                 </div>
               </div>
             )}
+
+            {/* Rank Journey Ladder */}
+            <div className="rounded-sm p-4 text-left" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>🗡️ Rank Journey</p>
+              <div className="space-y-2">
+                {RANK_LADDER.map((rank) => {
+                  const userLevel = p.level ?? 1;
+                  const isCurrentRank = userLevel >= rank.minLevel && userLevel <= rank.maxLevel;
+                  const isUnlocked = userLevel >= rank.minLevel;
+                  const ri = getRankInfo(userLevel, p.xp ?? 0);
+                  return (
+                    <div
+                      key={rank.title}
+                      className="flex items-center gap-3 p-2 transition-all"
+                      style={{
+                        background: isCurrentRank ? `${rank.color}15` : 'transparent',
+                        border: isCurrentRank ? `1px solid ${rank.color}40` : '1px solid transparent',
+                        borderRadius: 'var(--card-radius)',
+                        opacity: isUnlocked ? 1 : 0.4,
+                      }}
+                    >
+                      <span className="text-lg w-8 text-center">{rank.emoji}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold" style={{ color: isCurrentRank ? rank.color : isUnlocked ? 'var(--text-primary)' : 'var(--text-ghost)' }}>
+                            {rank.title}
+                          </span>
+                          <span className="text-[9px] font-bold" style={{ color: 'var(--text-ghost)' }}>
+                            Lv. {rank.minLevel}{rank.maxLevel < 999 ? `-${rank.maxLevel}` : '+'}
+                          </span>
+                        </div>
+                        {isCurrentRank && ri.next && (
+                          <div className="h-1 mt-1 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+                            <div className="h-full transition-all duration-500" style={{ width: `${ri.progressPercent}%`, background: rank.color }} />
+                          </div>
+                        )}
+                      </div>
+                      {isCurrentRank && (
+                        <span className="text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5" style={{ background: `${rank.color}20`, color: rank.color, borderRadius: '2px' }}>YOU</span>
+                      )}
+                      {!isUnlocked && (
+                        <Lock size={12} style={{ color: 'var(--text-ghost)' }} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 
@@ -297,7 +413,7 @@ export default function Profile() {
           ) : (
             <div className="space-y-3">
               {activities.map(act => (
-                <div key={act.id} className="glass-card" style={{ padding: 16 }}>
+                <div key={act.id} className="glass-card" style={{ padding: 16, borderLeft: `4px solid ${catColors[act.category] || 'var(--border)'}` }}>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div

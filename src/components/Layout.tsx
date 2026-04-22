@@ -15,6 +15,32 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="absolute rounded-full" style={{ width: 200, height: 200, bottom: '5%', right: '-8%', background: 'radial-gradient(circle, rgba(216,60,60,0.04), transparent 60%)' }} />
       </div>
 
+      {/* Sakura petals — hidden in verdant mode via CSS */}
+      <div className="sakura-layer">
+        {[
+          { left: '8%',  dur: '18s', del: '0s',   size: 8  },
+          { left: '25%', dur: '22s', del: '3s',   size: 10 },
+          { left: '42%', dur: '16s', del: '7s',   size: 7  },
+          { left: '58%', dur: '25s', del: '2s',   size: 9  },
+          { left: '72%', dur: '19s', del: '10s',  size: 11 },
+          { left: '88%', dur: '21s', del: '5s',   size: 8  },
+          { left: '15%', dur: '24s', del: '12s',  size: 6  },
+          { left: '65%', dur: '17s', del: '8s',   size: 10 },
+        ].map((p, i) => (
+          <div
+            key={i}
+            className="sakura-petal"
+            style={{
+              '--left': p.left,
+              '--dur': p.dur,
+              '--del': p.del,
+              width: p.size,
+              height: p.size,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
+
       {/* Top header bar */}
       <header
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 transition-colors duration-300"

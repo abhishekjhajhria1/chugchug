@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
-import { evaluateAndAwardBadges } from "../lib/progression"
-import { Camera, CheckCircle2, ChevronDown } from "lucide-react"
+import { evaluateAndAwardBadges, updateStreak, updateCrewStreaks, getDailyBounties, checkDailyBountyCompletion } from "../lib/progression"
+import { Camera, ChevronDown } from "lucide-react"
 import { extractPhotoMetadata } from "../components/PhotoMetadata"
 
 type ActivityCategory = 'drink' | 'cigarette' | 'snack' | 'gym' | 'detox' | 'water'
@@ -41,6 +41,8 @@ export default function Log() {
   const [recipeDetails, setRecipeDetails] = useState("")
   const [detoxNotes, setDetoxNotes] = useState("")
   const [moodTag, setMoodTag] = useState<string | null>(null)
+  const [streakResult, setStreakResult] = useState<{ currentStreak: number; isNewDay: boolean } | null>(null)
+  const [completedBounties, setCompletedBounties] = useState<string[]>([])
 
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
@@ -128,6 +130,23 @@ export default function Log() {
       await refreshProfile()
       await evaluateAndAwardBadges(user.id)
 
+      // Update streak
+      const streakData = await updateStreak(user.id)
+      setStreakResult(streakData)
+
+      // Update crew streaks for all groups
+      updateCrewStreaks(user.id).catch(console.error)
+
+      // Check bounty completions
+      const bountyResults = await checkDailyBountyCompletion(user.id)
+      const completed = Object.entries(bountyResults)
+        .filter(([, v]) => v.completed)
+        .map(([k]) => {
+          const bounty = getDailyBounties().find(b => b.id === k)
+          return bounty ? bounty.title : k
+        })
+      setCompletedBounties(completed)
+
       setSuccess(true)
       setTimeout(() => {
         setSuccess(false); setItemName(""); setQuantity(1);
@@ -142,20 +161,58 @@ export default function Log() {
   }
 
   if (success) {
+    const confetti = ['🎉', '✨', '🍻', '🎊', '⚡', '🏆', '🌟', '🔥']
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4 anim-pop">
-        <div
-          className="w-20 h-20 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--sage-dim)', border: '2px solid rgba(76,175,125,0.4)' }}
-        >
-          <CheckCircle2 size={44} style={{ color: 'var(--sage)' }} strokeWidth={2} />
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-5 relative overflow-hidden">
+        {/* Scattered confetti */}
+        {confetti.map((emoji, i) => (
+          <div
+            key={i}
+            className="absolute text-2xl"
+            style={{
+              left: `${15 + (i * 10)}%`,
+              top: `${20 + (i % 3) * 20}%`,
+              animation: `confettiBurst 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${i * 0.08}s both`,
+              opacity: 0.8,
+            }}
+          >
+            {emoji}
+          </div>
+        ))}
+
+        <div className="anim-burst">
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center text-5xl"
+            style={{ background: 'var(--acid-dim)', border: '3px solid var(--acid)', boxShadow: 'var(--acid-glow)' }}
+          >
+            ✅
+          </div>
         </div>
-        <h2 className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
-          Logged! 🎉
-        </h2>
-        <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
-          XP added. Waiting for group appraisals...
-        </p>
+        <div className="text-center">
+          <h2 className="text-2xl font-black mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
+            Logged! 🎉
+          </h2>
+          <p className="text-sm font-bold" style={{ color: 'var(--acid)' }}>
+            +{quantity * (category === 'gym' || category === 'detox' ? 10 : 5)} XP earned
+          </p>
+          {streakResult && streakResult.isNewDay && (
+            <p className="text-sm font-black mt-2" style={{ color: streakResult.currentStreak >= 7 ? 'var(--amber)' : 'var(--text-secondary)' }}>
+              🔥 Day {streakResult.currentStreak} of your flame!
+            </p>
+          )}
+          {completedBounties.length > 0 && (
+            <div className="mt-3 space-y-1">
+              {completedBounties.map((name) => (
+                <p key={name} className="text-xs font-bold" style={{ color: 'var(--amber)' }}>
+                  ⚡ Bounty complete: {name}
+                </p>
+              ))}
+            </div>
+          )}
+          <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+            Check your challenges for new progress
+          </p>
+        </div>
       </div>
     )
   }

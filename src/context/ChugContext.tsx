@@ -15,6 +15,10 @@ interface UserProfile {
     country: string | null;
     stealth_mode?: boolean;
     privacy_settings?: any;
+    current_streak?: number;
+    longest_streak?: number;
+    last_activity_date?: string;
+    archetype?: string;
 }
 
 interface ChugContextType {
