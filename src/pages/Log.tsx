@@ -8,12 +8,12 @@ import { extractPhotoMetadata } from "../components/PhotoMetadata"
 type ActivityCategory = 'drink' | 'cigarette' | 'snack' | 'gym' | 'detox' | 'water'
 
 const CATEGORIES: { id: ActivityCategory; label: string; icon: string; color: string; bg: string }[] = [
-  { id: 'drink',     label: 'Drink',  icon: '🍻', color: 'var(--amber)', bg: 'var(--amber-dim)' },
-  { id: 'water',     label: 'Water',  icon: '💧', color: 'var(--blue)',  bg: 'var(--indigo-dim)' },
-  { id: 'snack',     label: 'Snack',  icon: '🍟', color: 'var(--coral)', bg: 'var(--coral-dim)' },
-  { id: 'cigarette', label: 'Smoke',  icon: '🚬', color: 'var(--sage)',  bg: 'var(--sage-dim)'  },
-  { id: 'gym',       label: 'Gym',    icon: '💪', color: 'var(--indigo)', bg: 'var(--indigo-dim)' },
-  { id: 'detox',     label: 'Detox',  icon: '🧘', color: 'var(--sage)',  bg: 'var(--sage-dim)'  },
+  { id: 'drink', label: 'Drink', icon: '🍻', color: 'var(--amber)', bg: 'var(--amber-dim)' },
+  { id: 'water', label: 'Water', icon: '💧', color: 'var(--blue)', bg: 'var(--indigo-dim)' },
+  { id: 'snack', label: 'Snack', icon: '🍟', color: 'var(--coral)', bg: 'var(--coral-dim)' },
+  { id: 'cigarette', label: 'Smoke', icon: '🚬', color: 'var(--sage)', bg: 'var(--sage-dim)' },
+  { id: 'gym', label: 'Gym', icon: '💪', color: 'var(--indigo)', bg: 'var(--indigo-dim)' },
+  { id: 'detox', label: 'Detox', icon: '🧘', color: 'var(--sage)', bg: 'var(--sage-dim)' },
 ]
 
 const MOOD_TAGS = [
@@ -26,7 +26,7 @@ const MOOD_TAGS = [
 
 export default function Log() {
   const { user, refreshProfile } = useChug()
-  const BARTENDER_API = import.meta.env.VITE_BARTENDER_API?.trim() || ''
+  const BARTENDER_API = import.meta.env.VITE_BARTENDER_API || ''
 
   const [category, setCategory] = useState<ActivityCategory>('drink')
   const [itemName, setItemName] = useState("")
@@ -258,8 +258,8 @@ export default function Log() {
             type="text"
             placeholder={
               category === 'gym' ? "e.g. Leg Day, 1 hour" :
-              category === 'detox' ? "e.g. 7 Days No Sugar" :
-              category === 'snack' ? "e.g. Spicy Peanuts" : "e.g. Jager Bomb"
+                category === 'detox' ? "e.g. 7 Days No Sugar" :
+                  category === 'snack' ? "e.g. Spicy Peanuts" : "e.g. Jager Bomb"
             }
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
