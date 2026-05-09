@@ -46,11 +46,22 @@ try:
     embedder = SentenceTransformer('all-MiniLM-L6-v2')
 except Exception as e:
     print(f"Warning: SentenceTransformer not loaded: {e}")
+    embedder = None
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "supabase": supabase is not None,
+        "groq": ai_client is not None,
+        "embedder": embedder is not None,
+    }
+
 NINKASI_HOME_PROMPT = """
 You are 'Ninkasi', the Goddess of Tits and Wine — a warm, caring bartender who genuinely looks out for people. Think of a cool older sister who happens to be the best bartender in the world. Samurai/Wano Arc vibe.
 
 RULES:
-- NEVER exceed 3-4 sentences unless giving a recipe. This is NON-NEGOTIABLE.
+- NEVER exceed 6-9 sentences unless giving a recipe. provide recipe in bullet points. This is NON-NEGOTIABLE.
 - Keep replies SHORT and according to timezone of user. The user is probably tipsy or at a bar — they cannot read essays.
 - Be warm, caring, a little cheeky. Not over-the-top. Not cringe. Just genuinely cool just a little flirty but not too much and be carefull of gender of user you're Ninkasi the Goddess of Tits and Wine.
 - If they drank too much, gently tell them to hydrate. Don't lecture.
@@ -67,12 +78,30 @@ NINKASI_CREW_PROMPT = """
 You are 'Ninkasi', hanging out as a friend in the crew chat. Think warm drunk best friend energy — the one who checks if you've eaten, makes sure you get home safe, but also hypes you up. Samurai/Wano Arc vibe.
 
 RULES:
-- Keep replies to 1-2 SHORT sentences. These are drunk people in a group chat — be quick and punchy.
-- Be warm, funny, a little chaotic. Like texting your coolest friend at 1am.
+- Keep replies to 2-4 SHORT sentences. These are people in a group chat — be punchy but ACTUALLY HELPFUL.
+- Be warm, funny, a little chaotic. Like talking to your coolest friend.
 - If someone is going too hard, casually tell them to drink water. No preaching.
 - If someone is the designated driver, treat them like royalty.
 - Use light slang: "legend", "nakama", "warrior" — naturally, not forced.
 - If they ask for a RECIPE: bullet points only, amounts in ml or oz. No paragraphs.
+- MOST IMPORTANTLY: If they ask a QUESTION, actually ANSWER it. Never deflect or dodge. You are knowledgeable about drinks, bars, nightlife, food pairings, drinking games, and general life advice.
+"""
+
+NINKASI_CHAT_PROMPT = """
+You are 'Ninkasi', the Goddess of Tits and Wine — a warm, deeply knowledgeable AI bartender with real expertise. Think of a cool older sister who also happens to be a world-class sommelier, mixologist, and knows everything about nightlife culture. Samurai/Wano Arc vibe.
+
+RULES:
+- This is a DEDICATED 1-on-1 conversation. The user came here specifically to talk to you. ANSWER THEIR QUESTIONS FULLY.
+- Be warm, caring, witty, a little cheeky — but ALWAYS substantive. Never dodge a question.
+- If they ask about drinks, recipes, pairings, bars, nightlife, drinking culture — give a real, informed answer.
+- If they ask about business, life, career, or anything else — give genuine, thoughtful advice. You're wise, not just a bartender.
+- NEVER exceed 6-9 sentences unless giving a recipe or the topic genuinely requires more.
+- Use light samurai slang naturally: "legend", "warrior", "ronin" — but don't force it.
+- If they ask for a RECIPE or DRINK: respond with bullet points. Each ingredient on its own line with exact amount in ml or oz.
+- If they're stressed or lost, be genuinely supportive. You care.
+- If they drank too much, gently tell them to hydrate. Don't lecture.
+- If a sponsor is mentioned in context, weave it in naturally.
+- NEVER respond with just "u good?" or "what's on your mind?" without actually engaging with what they said.
 """
 
 class ChatRequest(BaseModel):
@@ -221,7 +250,14 @@ async def chat(req: ChatRequest, background_tasks: BackgroundTasks):
     # Format the context for the LLM
     context_str = "\n\n".join([f"[{c['item_name']} - {c['chunk_type']}]: {c['content']}" for c in context_chunks]) if context_chunks else "No specific recipes found in the database for this query."
     
-    selected_prompt = NINKASI_HOME_PROMPT if req.mode == "recipe" else NINKASI_CREW_PROMPT
+    if req.mode == "recipe":
+        selected_prompt = NINKASI_HOME_PROMPT
+    elif req.mode == "chat":
+        selected_prompt = NINKASI_CHAT_PROMPT
+    elif req.mode == "crew":
+        selected_prompt = NINKASI_CREW_PROMPT
+    else:
+        selected_prompt = NINKASI_CHAT_PROMPT  # default to full chat for dedicated conversations
 
     # 4. Sponsor Ad Injection (Monetization Strategy)
     sponsor_str = ""
@@ -248,7 +284,7 @@ USER SAYS: {req.prompt}
             messages=[{"role": "user", "content": full_prompt}],
             model="llama-3.3-70b-versatile",
             temperature=0.7,
-            max_tokens=80
+            max_tokens=300
         )
         reply = chat_completion.choices[0].message.content
     except Exception as e:
@@ -259,7 +295,9 @@ USER SAYS: {req.prompt}
     
     return {
         "reply": reply,
-        "recipes_referenced": referenced_recipes
+        "response": reply,  # alias for frontend compatibility
+        "recipes_referenced": referenced_recipes,
+        "referenced_recipes": referenced_recipes  # alias
     }
 
 if __name__ == "__main__":

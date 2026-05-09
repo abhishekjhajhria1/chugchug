@@ -75,10 +75,14 @@ export interface ThemeUnlock {
 }
 
 export const THEME_UNLOCKS: ThemeUnlock[] = [
-  { themeId: 'dark',    label: 'Wano Arc',   desc: 'Dark · Samurai',           emoji: '🎌', requiredLevel: 1,  requiredRank: 'Wanderer' },
-  { themeId: 'light',   label: 'Wano Day',   desc: 'Light · Clean',            emoji: '☀️', requiredLevel: 4,  requiredRank: 'Ronin'    },
-  { themeId: 'verdant', label: 'Verdant',     desc: 'Earthy · Calm',            emoji: '🌿', requiredLevel: 7,  requiredRank: 'Samurai'  },
-  { themeId: 'sakura',  label: 'Sakura',      desc: 'Cherry Blossom · Vibrant', emoji: '🌸', requiredLevel: 11, requiredRank: 'War Captain' },
+  { themeId: 'dark',     label: 'Wano Arc',      desc: 'Dark · Samurai',             emoji: '🎌', requiredLevel: 1,  requiredRank: 'Wanderer'    },
+  { themeId: 'light',    label: 'Wano Day',      desc: 'Light · Clean',              emoji: '☀️', requiredLevel: 4,  requiredRank: 'Ronin'       },
+  { themeId: 'midnight', label: 'Midnight',       desc: 'Deep Ocean · Night',         emoji: '🌊', requiredLevel: 5,  requiredRank: 'Ronin'       },
+  { themeId: 'verdant',  label: 'Verdant',        desc: 'Earthy · Calm',              emoji: '🌿', requiredLevel: 7,  requiredRank: 'Samurai'     },
+  { themeId: 'sakura',   label: 'Sakura',         desc: 'Cherry Blossom · Vibrant',   emoji: '🌸', requiredLevel: 11, requiredRank: 'War Captain' },
+  { themeId: 'ember',    label: 'Ember',          desc: 'Volcanic · Forge',           emoji: '🔥', requiredLevel: 14, requiredRank: 'War Captain' },
+  { themeId: 'frost',    label: 'Arctic Frost',   desc: 'Ice Blue · Tundra',          emoji: '❄️', requiredLevel: 20, requiredRank: 'Daimyo'      },
+  { themeId: 'gold',     label: 'Imperial Gold',  desc: 'Shogun\'s Palace · Luxe',    emoji: '👑', requiredLevel: 30, requiredRank: 'Shogun'      },
 ]
 
 export function isThemeUnlocked(themeId: string, level: number): boolean {
@@ -261,6 +265,123 @@ export async function checkDailyBountyCompletion(userId: string): Promise<Record
   }
 
   return results
+}
+
+// ══════════════════════════════════════════════════════════════
+// ── WEEKLY CHALLENGES ──
+// Refresh every Monday. Harder than dailies, more XP.
+// ══════════════════════════════════════════════════════════════
+
+export interface WeeklyChallenge {
+  id: string
+  title: string
+  description: string
+  xpReward: number
+  emoji: string
+  target: number
+  category: 'drinking' | 'wellness' | 'social' | 'milestones'
+}
+
+export const WEEKLY_CHALLENGE_POOL: WeeklyChallenge[] = [
+  { id: 'w_7_logs',        title: 'Daily Logger',        description: 'Log something every day this week',           xpReward: 100, emoji: '📅', target: 7,  category: 'milestones' },
+  { id: 'w_try_3_new',     title: 'Adventurer',          description: 'Try 3 new drinks this week',                  xpReward: 75,  emoji: '🗺️', target: 3,  category: 'drinking' },
+  { id: 'w_2_gym',         title: 'Iron Will',           description: 'Log 2+ gym sessions this week',               xpReward: 60,  emoji: '💪', target: 2,  category: 'wellness' },
+  { id: 'w_3_dry_days',    title: 'Balance Keeper',      description: 'Have 3+ dry days this week',                  xpReward: 80,  emoji: '🌿', target: 3,  category: 'wellness' },
+  { id: 'w_join_session',  title: 'Social Drinker',      description: 'Join 2+ drinking sessions this week',         xpReward: 70,  emoji: '🍻', target: 2,  category: 'social' },
+  { id: 'w_10_logs',       title: 'Overachiever',        description: 'Log 10+ activities this week',                xpReward: 90,  emoji: '⚡', target: 10, category: 'milestones' },
+  { id: 'w_photo_5',       title: 'Photographer',        description: 'Take 5 photos with your logs this week',      xpReward: 65,  emoji: '📸', target: 5,  category: 'social' },
+  { id: 'w_water_5',       title: 'Hydration Hero',      description: 'Log water 5 times this week',                 xpReward: 50,  emoji: '💧', target: 5,  category: 'wellness' },
+  { id: 'w_detox_2',       title: 'Mind & Body',         description: 'Log 2 detox/meditation sessions',             xpReward: 55,  emoji: '🧘', target: 2,  category: 'wellness' },
+  { id: 'w_variety_4',     title: 'Renaissance Soul',    description: 'Log in 4+ different categories this week',    xpReward: 85,  emoji: '🎨', target: 4,  category: 'milestones' },
+]
+
+// ══════════════════════════════════════════════════════════════
+// ── MONTHLY CHALLENGES ──
+// Refresh on the 1st. Epic scale, big XP rewards.
+// ══════════════════════════════════════════════════════════════
+
+export interface MonthlyChallenge {
+  id: string
+  title: string
+  description: string
+  xpReward: number
+  emoji: string
+  target: number
+  category: 'drinking' | 'wellness' | 'social' | 'milestones'
+}
+
+export const MONTHLY_CHALLENGE_POOL: MonthlyChallenge[] = [
+  { id: 'm_30_logs',       title: 'Month of Discipline', description: 'Log every day this month',                    xpReward: 300, emoji: '🏆', target: 30, category: 'milestones' },
+  { id: 'm_10_new_drinks', title: 'Connoisseur',         description: 'Try 10 new drinks this month',                xpReward: 200, emoji: '🍷', target: 10, category: 'drinking' },
+  { id: 'm_15_dry_days',   title: 'Sober Warrior',       description: '15+ dry days this month',                     xpReward: 250, emoji: '🛡️', target: 15, category: 'wellness' },
+  { id: 'm_8_gym',         title: 'Iron Temple Master',  description: '8+ gym sessions this month',                  xpReward: 200, emoji: '🏋️', target: 8,  category: 'wellness' },
+  { id: 'm_5_sessions',    title: 'Party Animal',        description: 'Join 5+ group sessions this month',           xpReward: 180, emoji: '🎉', target: 5,  category: 'social' },
+  { id: 'm_50_logs',       title: 'Legendary Logger',    description: '50+ total logs this month',                   xpReward: 350, emoji: '📜', target: 50, category: 'milestones' },
+  { id: 'm_20_photos',     title: 'Memory Keeper',       description: '20 photos with logs this month',              xpReward: 150, emoji: '🖼️', target: 20, category: 'social' },
+  { id: 'm_streak_14',     title: 'Fortnight Streak',    description: 'Maintain a 14-day logging streak',            xpReward: 400, emoji: '🔥', target: 14, category: 'milestones' },
+]
+
+/**
+ * Get ISO week number and key.
+ */
+export function getWeekKey(date: Date = new Date()): string {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const dayNum = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`
+}
+
+/**
+ * Get month key (YYYY-MM).
+ */
+export function getMonthKey(date: Date = new Date()): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+/**
+ * Get this week's challenges (deterministic — 3 per week).
+ */
+export function getWeeklyChallenges(date: Date = new Date()): WeeklyChallenge[] {
+  const weekKey = getWeekKey(date)
+  let hash = 0
+  for (let i = 0; i < weekKey.length; i++) {
+    hash = ((hash << 5) - hash) + weekKey.charCodeAt(i)
+    hash = hash & hash
+  }
+  hash = Math.abs(hash)
+
+  const pool = [...WEEKLY_CHALLENGE_POOL]
+  const selected: WeeklyChallenge[] = []
+  for (let i = 0; i < 3 && pool.length > 0; i++) {
+    const idx = (hash + i * 6271) % pool.length
+    selected.push(pool[idx])
+    pool.splice(idx, 1)
+  }
+  return selected
+}
+
+/**
+ * Get this month's challenges (deterministic — 3 per month).
+ */
+export function getMonthlyChallenges(date: Date = new Date()): MonthlyChallenge[] {
+  const monthKey = getMonthKey(date)
+  let hash = 0
+  for (let i = 0; i < monthKey.length; i++) {
+    hash = ((hash << 5) - hash) + monthKey.charCodeAt(i)
+    hash = hash & hash
+  }
+  hash = Math.abs(hash)
+
+  const pool = [...MONTHLY_CHALLENGE_POOL]
+  const selected: MonthlyChallenge[] = []
+  for (let i = 0; i < 3 && pool.length > 0; i++) {
+    const idx = (hash + i * 8117) % pool.length
+    selected.push(pool[idx])
+    pool.splice(idx, 1)
+  }
+  return selected
 }
 
 // ══════════════════════════════════════════════════════════════

@@ -8,6 +8,7 @@ import { ref, get, set, serverTimestamp, onValue } from "firebase/database"
 import LiveCounter from "../components/LiveCounter"
 import BeerCounter from "../components/BeerCounter"
 import { Share2, Users, Globe, PartyPopper, Zap, Clock } from "lucide-react"
+import { useToast } from "../components/Toast"
 
 // Base64 for a short "ding" sound
 const CHUG_SOUND = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTv9T19Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Q"
@@ -16,6 +17,7 @@ export default function LiveParty() {
     const { partyId } = useParams()
     const navigate = useNavigate()
     const { user, profile } = useChug()
+    const toast = useToast()
     const [sharing, setSharing] = useState(false)
     const [startTime] = useState(Date.now())
     const [elapsed, setElapsed] = useState("0:00")
@@ -100,7 +102,7 @@ export default function LiveParty() {
                 xp_earned: finalXp,
                 privacy_level: 'public'
             })
-            alert("Shared to your individual Activity Feed!")
+            toast.success("Shared to your individual Activity Feed!")
         } catch(e) {}
         setSharing(false)
     }
@@ -155,7 +157,7 @@ export default function LiveParty() {
                 console.warn("Could not share to common groups", e)
             }
 
-            alert("Shared the party to the World Forum and any Common Groups!")
+            toast.success("Shared the party to the World Forum and any Common Groups!")
         } catch(e) {}
         setSharing(false)
     }

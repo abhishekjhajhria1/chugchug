@@ -3,45 +3,18 @@ import { Globe, Trophy, UtensilsCrossed, Star, Flame, TrendingUp, Zap, Award, Ba
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { Link } from "react-router-dom"
-
-interface WorldExperience {
-    id: string; user_id: string; title: string; content: string; likes_count: number; created_at: string
-    profiles: { username: string; avatar_url: string }
-    reactions?: Record<string, string[]>
-    comments?: { id: string; user_id: string; content: string; created_at: string; profiles?: { username: string; avatar_url?: string } }[]
-}
-interface Activity {
-    id: string; user_id: string; item_name: string; category: string; xp_earned: number; photo_metadata?: any; created_at: string
-    profiles: { username: string; avatar_url: string }
-}
-interface RankedUser { id: string; username: string; xp: number; level: number; city?: string; country?: string; top_recipe?: string }
-interface TrendingItem { item_name: string; category: string; count: number }
-interface Challenge { id: string; title: string; description: string; target: number; current: number; icon: string }
-
-const COUNTRY_FLAGS: Record<string, string> = {
-    'india': '🇮🇳', 'usa': '🇺🇸', 'united states': '🇺🇸', 'uk': '🇬🇧', 'united kingdom': '🇬🇧',
-    'canada': '🇨🇦', 'australia': '🇦🇺', 'germany': '🇩🇪', 'france': '🇫🇷', 'japan': '🇯🇵',
-    'brazil': '🇧🇷', 'mexico': '🇲🇽', 'spain': '🇪🇸', 'italy': '🇮🇹', 'south korea': '🇰🇷',
-    'china': '🇨🇳', 'russia': '🇷🇺', 'netherlands': '🇳🇱', 'sweden': '🇸🇪', 'norway': '🇳🇴',
-    'denmark': '🇩🇰', 'finland': '🇫🇮', 'switzerland': '🇨🇭', 'portugal': '🇵🇹', 'ireland': '🇮🇪',
-    'new zealand': '🇳🇿', 'singapore': '🇸🇬', 'thailand': '🇹🇭', 'philippines': '🇵🇭',
-    'indonesia': '🇮🇩', 'malaysia': '🇲🇾', 'vietnam': '🇻🇳', 'argentina': '🇦🇷', 'colombia': '🇨🇴',
-    'chile': '🇨🇱', 'peru': '🇵🇪', 'egypt': '🇪🇬', 'nigeria': '🇳🇬', 'south africa': '🇿🇦',
-    'turkey': '🇹🇷', 'pakistan': '🇵🇰', 'bangladesh': '🇧🇩', 'sri lanka': '🇱🇰', 'nepal': '🇳🇵',
-    'uae': '🇦🇪', 'saudi arabia': '🇸🇦', 'poland': '🇵🇱', 'austria': '🇦🇹', 'belgium': '🇧🇪',
-    'czech republic': '🇨🇿', 'greece': '🇬🇷', 'romania': '🇷🇴', 'hungary': '🇭🇺', 'ukraine': '🇺🇦',
-}
-function getFlag(country?: string): string {
-    if (!country) return '🌍'
-    return COUNTRY_FLAGS[country.toLowerCase().trim()] || '🌍'
-}
+import { useToast } from "../components/Toast"
+import { getFlag } from "../constants/categories"
+import type { WorldExperience, WorldActivity, RankUser, TrendingItem, Challenge } from "../types"
 
 export default function World() {
     const { user, profile } = useChug()
+    const toast = useToast()
 
+    type Activity = WorldActivity
     const [topActivity, setTopActivity] = useState<Activity | null>(null)
     const [topRecipes, setTopRecipes] = useState<Activity[]>([])
-    const [topRankers, setTopRankers] = useState<RankedUser[]>([])
+    const [topRankers, setTopRankers] = useState<RankUser[]>([])
     const [trending, setTrending] = useState<TrendingItem[]>([])
     const [drinkOfDay, setDrinkOfDay] = useState<Activity | null>(null)
     const [totalUsers, setTotalUsers] = useState(0)
@@ -125,7 +98,7 @@ export default function World() {
                         setTopRankers(rankRes.data.map(r => {
                             const userFavs = favoriteData?.filter(f => f.user_id === r.id) || []
                             return { ...r, top_recipe: userFavs.length > 0 ? userFavs[0].item_name : undefined }
-                        }) as RankedUser[])
+                        }) as RankUser[])
                     }
                     const idx = rankRes.data.findIndex(r => r.id === user.id)
                     if (idx !== -1) setUserRank(idx + 1)
@@ -183,7 +156,7 @@ export default function World() {
         setSubmittingExp(true)
         const { data, error } = await supabase.from('world_experiences').insert({ user_id: user.id, title: newExpTitle, content: newExpContent }).select('*, profiles(username, avatar_url)').single()
         if (data) { setExperiences([data as WorldExperience, ...experiences]); setShowExpForm(false); setNewExpTitle(""); setNewExpContent("") }
-        if (error) alert("Error sharing tale: " + error.message)
+        if (error) toast.error("Error sharing tale: " + error.message)
         setSubmittingExp(false)
     }
 
@@ -226,9 +199,9 @@ export default function World() {
         if (!acc[country]) acc[country] = { users: [], totalXp: 0 }
         acc[country].users.push(r); acc[country].totalXp += r.xp
         return acc
-    }, {} as Record<string, { users: RankedUser[]; totalXp: number }>), [topRankers])
+    }, {} as Record<string, { users: RankUser[]; totalXp: number }>), [topRankers])
 
-    const sortedCountries = useMemo(() => Object.entries(countryGroups).sort(([, a], [, b]) => b.totalXp - a.totalXp), [countryGroups])
+    const sortedCountries = useMemo(() => Object.entries(countryGroups).sort(([, a], [, b]) => (b as { totalXp: number }).totalXp - (a as { totalXp: number }).totalXp), [countryGroups])
 
     const userPercentile = useMemo(() => {
         if (!userRank || !totalUsers || totalUsers === 0) return null
@@ -539,7 +512,7 @@ export default function World() {
                 </h2>
                 {sortedCountries.length > 0 ? (
                     <div className="space-y-4">
-                        {sortedCountries.map(([country, data], countryIdx) => (
+                        {sortedCountries.map(([country, _data], countryIdx) => { const data = _data as { users: RankUser[]; totalXp: number }; return (
                             <div key={country} className="rounded-sm overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                                 <div className="flex items-center justify-between px-4 py-3" style={{ background: countryIdx === 0 ? 'var(--amber-dim)' : 'transparent', borderBottom: '1px solid var(--border)' }}>
                                     <div className="flex items-center gap-2">
@@ -552,7 +525,7 @@ export default function World() {
                                     </div>
                                 </div>
                                 <div className="px-4 py-2 space-y-2">
-                                    {data.users.slice(0, 3).map((ranker, index) => (
+                                    {data.users.slice(0, 3).map((ranker: RankUser, index: number) => (
                                         <div key={ranker.id} className="flex items-center justify-between py-1">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-6 h-6 rounded-full flex items-center justify-center font-black text-xs" style={{ background: index === 0 ? 'var(--amber-dim)' : 'var(--bg-surface)', border: '1px solid var(--border)', color: index === 0 ? 'var(--amber)' : 'var(--text-muted)' }}>{index + 1}</div>
@@ -568,7 +541,7 @@ export default function World() {
                                     ))}
                                 </div>
                             </div>
-                        ))}
+                        ); })}
                     </div>
                 ) : (
                     <p className="font-bold text-center py-4" style={{ color: 'var(--text-muted)' }}>No players found.</p>

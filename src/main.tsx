@@ -5,6 +5,7 @@ import App from "./App"
 import "./index.css"
 import { ChugProvider } from "./context/ChugContext"
 import { ThemeProvider } from "./context/ThemeContext"
+import { ToastProvider } from "./components/Toast"
 import ErrorBoundary from "./components/ErrorBoundary"
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
@@ -13,7 +14,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <ThemeProvider>
           <ChugProvider>
-            <App />
+            <ToastProvider>
+              <App />
+            </ToastProvider>
           </ChugProvider>
         </ThemeProvider>
       </BrowserRouter>

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { ArrowLeft, Receipt, Handshake, Loader2 } from "lucide-react"
+import { useToast } from "../components/Toast"
 
 
 
@@ -18,6 +19,7 @@ export default function GroupBalances() {
   const { id: groupId } = useParams()
   const navigate = useNavigate()
   const { user } = useChug()
+  const toast = useToast()
 
   const [groupName, setGroupName] = useState("")
   const [debts, setDebts] = useState<SimplifiedDebt[]>([])
@@ -139,9 +141,9 @@ export default function GroupBalances() {
       
       // Refresh the balances
       await fetchBalances()
-      alert("Settled successfully! You're square.")
+      toast.success("Settled successfully! You're square.")
     } catch (err: any) {
-      alert("Error settling up: " + err.message)
+      toast.error("Error settling up: " + err.message)
     } finally {
       setSettlingWith(null)
     }

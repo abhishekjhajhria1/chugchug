@@ -10,10 +10,9 @@ import { getRankInfo, getDailyBounties, checkDailyBountyCompletion } from "../li
 import type { BountyDef } from "../lib/progression";
 import ArchetypeQuiz, { ARCHETYPES } from "../components/ArchetypeQuiz";
 import type { ArchetypeId } from "../components/ArchetypeQuiz";
-
-interface RankUser { id: string; username: string; xp: number }
-interface Badge { id: string; name: string; icon_text: string }
-interface Recipe { id: string; item_name: string; category: string; xp_earned: number }
+import { useToast } from "../components/Toast";
+import { generateSessionCode } from "../utils/crypto";
+import type { RankUser, Badge, Recipe } from "../types";
 
 export default function Home() {
   const { user, profile } = useChug();
@@ -34,8 +33,9 @@ export default function Home() {
   const [chatLoading, setChatLoading] = useState(false);
   const [referencedRecipes, setReferencedRecipes] = useState<string[]>([]);
   const [chatError, setChatError] = useState("");
+  const toast = useToast();
   const responseRef = useRef<HTMLDivElement>(null);
-  const BARTENDER_API = import.meta.env.VITE_BARTENDER_API?.trim() || "";
+  const BARTENDER_API = import.meta.env.VITE_BARTENDER_API?.trim() || import.meta.env.VITE_NINKASI_API_URL?.trim() || "";
 
   // --- MONTHLY CALENDAR STATE ---
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
@@ -193,12 +193,7 @@ export default function Home() {
     checkActiveSession();
   }, [user]);
 
-  const generateJoinCode = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    return code;
-  };
+  const generateJoinCode = generateSessionCode;
 
   const handleStartSession = async () => {
     if (!user) return;
@@ -213,14 +208,14 @@ export default function Home() {
       await supabase.from('session_participants').insert({ session_id: data.id, user_id: user.id });
       navigate(`/session/${data.id}`);
     } else {
-      alert('Failed to create session');
+      toast.error('Failed to create session');
     }
     setSessionCreating(false);
   };
 
   const handleJoinSession = async () => {
     const code = joinCodeInput.trim().toUpperCase();
-    if (!code || code.length < 4) return alert('Enter a valid join code');
+    if (!code || code.length < 4) { toast.error('Enter a valid join code'); return; }
     const { data } = await supabase
       .from('drinking_sessions')
       .select('id')
@@ -230,7 +225,7 @@ export default function Home() {
     if (data) {
       navigate(`/session/${data.id}`);
     } else {
-      alert('No active session found with this code');
+      toast.error('No active session found with this code');
     }
   };
 
@@ -307,11 +302,11 @@ export default function Home() {
 
   const quickActions = [
     { label: "Log Drink", to: "/log", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "✍️" },
-    { label: "My Crew", to: "/groups", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👥" },
-    { label: "Taverns", to: "/party", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🏯" },
+    { label: "Split Bill", to: "/groups", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "💸" },
+    { label: "Taverns", to: "/tavern", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🏯" },
     { label: "Challenges", to: "/challenges", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🎯" },
-    { label: "Explore", to: "/world", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "🗺️" },
-    { label: "Shogun Rank", to: "/rank", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👑" },
+    { label: "Premium", to: "/premium", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👑" },
+    { label: "Shogun Rank", to: "/rank", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "🏆" },
   ];
 
   return (

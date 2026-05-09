@@ -2,6 +2,8 @@ import { useState } from "react"
 import { supabase } from "../lib/supabase"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
+import { validateUsername } from "../utils/validation"
+import { useToast } from "../components/Toast"
 
 export default function Auth() {
   const [email, setEmail] = useState("")
@@ -11,6 +13,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
+  const toast = useToast()
 
   const handleAuth = async () => {
     setLoading(true)
@@ -20,12 +23,30 @@ export default function Auth() {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
     } else {
-      if (!username.trim()) { setError("Pick a username to get started!"); setLoading(false); return }
+      // Validate username
+      const usernameError = validateUsername(username)
+      if (usernameError) { setError(usernameError); setLoading(false); return }
       if (password.length < 6) { setError("Password must be at least 6 characters."); setLoading(false); return }
+
+      // Check username uniqueness before signup
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username.trim())
+        .limit(1)
+      if (existing && existing.length > 0) {
+        setError("Username is already taken. Pick another one!")
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) { setError(error.message) }
       else if (data.user) {
-        await supabase.from("profiles").upsert({ id: data.user.id, username, xp: 0, level: 1 })
+        const { error: profileError } = await supabase.from("profiles").upsert({ id: data.user.id, username: username.trim(), xp: 0, level: 1 })
+        if (profileError) {
+          toast.error("Account created but profile setup failed. Try logging in.")
+        }
       }
     }
 
@@ -41,6 +62,7 @@ export default function Auth() {
         onClick={() => navigate('/')} 
         className="absolute top-6 left-6 p-2 rounded-full active:scale-95 transition-all outline-none"
         style={{ color: 'var(--text-secondary)', background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
+        aria-label="Go back"
       >
         <ArrowLeft size={20} />
       </button>
@@ -95,8 +117,10 @@ export default function Auth() {
                 placeholder="Pick something legendary"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                maxLength={20}
                 className="glass-input"
               />
+              <p className="text-[10px] mt-1 font-bold" style={{ color: 'var(--text-ghost)' }}>3-20 chars, letters/numbers/underscores only</p>
             </div>
           )}
 

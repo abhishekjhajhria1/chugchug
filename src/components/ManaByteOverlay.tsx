@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useChug } from "../context/ChugContext"
 
 interface XpEvent {
     id: number
@@ -8,27 +9,29 @@ interface XpEvent {
 export default function ManaByteOverlay() {
     const [xpEvents, setXpEvents] = useState<XpEvent[]>([])
     const [levelUpTrigger, setLevelUpTrigger] = useState(false)
+    const { onXpGain, onLevelUp } = useChug()
 
     useEffect(() => {
         let idCounter = 0
-        ;(window as any).triggerXpAnimation = (amount: number) => {
+
+        const unsubXp = onXpGain((amount: number) => {
             const id = ++idCounter
             setXpEvents(prev => [...prev, { id, amount }])
             setTimeout(() => {
                 setXpEvents(prev => prev.filter(e => e.id !== id))
             }, 2500)
-        }
+        })
 
-        ;(window as any).triggerLevelUpAnimation = () => {
+        const unsubLevel = onLevelUp(() => {
             setLevelUpTrigger(true)
             setTimeout(() => setLevelUpTrigger(false), 2500)
-        }
+        })
 
         return () => {
-            delete (window as any).triggerXpAnimation
-            delete (window as any).triggerLevelUpAnimation
+            unsubXp()
+            unsubLevel()
         }
-    }, [])
+    }, [onXpGain, onLevelUp])
 
     return (
         <div className="fixed inset-0 z-[110] pointer-events-none overflow-hidden">
@@ -64,18 +67,6 @@ export default function ManaByteOverlay() {
                     <span className="text-[10px] font-bold mt-0.5" style={{ color: 'var(--text-muted)' }}>✨ nice!</span>
                 </div>
             ))}
-
-            <style>{`
-                @keyframes floatUpAndFade {
-                    0% { transform: translateY(0) scale(0.7); opacity: 0; }
-                    15% { transform: translateY(-15px) scale(1.1); opacity: 1; }
-                    60% { transform: translateY(-40px) scale(1); opacity: 1; }
-                    100% { transform: translateY(-80px) scale(0.9); opacity: 0; }
-                }
-                .animate-floatUpAndFade {
-                    animation: floatUpAndFade 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-                }
-            `}</style>
         </div>
     )
 }

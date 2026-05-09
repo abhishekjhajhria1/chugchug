@@ -352,6 +352,266 @@
   box-shadow: 0 8px 24px rgba(232, 117, 168, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   🌊 MIDNIGHT THEME — Deep Ocean Night
+   Unlocked at Lv. 5 (Ronin)
+   ═══════════════════════════════════════════════════════════ */
+.midnight {
+  --bg-deep:    #080E1A;
+  --bg-mid:     #0D1526;
+  --bg-surface: #121D34;
+  --bg-raised:  #182642;
+  --bg-overlay: rgba(8, 14, 26, 0.92);
+
+  --amber:       #4A9ED6;
+  --amber-light: #6DBAE8;
+  --amber-dim:   rgba(74, 158, 214, 0.15);
+  --amber-glow:  0 0 24px rgba(74, 158, 214, 0.30);
+
+  --coral:       #E05555;
+  --coral-light: #F07070;
+  --coral-dim:   rgba(224, 85, 85, 0.15);
+  --coral-glow:  0 0 24px rgba(224, 85, 85, 0.30);
+
+  --acid:        #3DD68C;
+  --acid-light:  #5EEAA8;
+  --acid-dim:    rgba(61, 214, 140, 0.15);
+  --acid-glow:   0 0 24px rgba(61, 214, 140, 0.30);
+
+  --primary: var(--amber); --primary-light: var(--amber-light);
+  --primary-dim: var(--amber-dim); --primary-glow: var(--amber-glow);
+  --mint: var(--acid); --pink: var(--coral); --gold: var(--amber);
+  --blue: #5B8EF5;
+
+  --border: rgba(255,255,255,0.06); --border-mid: rgba(255,255,255,0.12);
+  --border-focus: rgba(74,158,214,0.4);
+
+  --text-primary: #E4EDF5; --text-secondary: #9AAEC0;
+  --text-muted: #5A7088; --text-ghost: #3A4D62;
+
+  --card-bg: rgba(13,21,38,0.88); --card-blur: 18px;
+  --card-radius: 4px; --card-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --input-bg: rgba(10,16,30,0.7);
+
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim);
+  --indigo: var(--blue); --indigo-dim: rgba(91,142,245,0.15);
+  --border-warm: rgba(74,158,214,0.12);
+
+  --glass-bg: var(--card-bg); --glass-border: var(--border);
+  --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
+  --glass-fill-elevated: var(--bg-raised);
+  --glass-fill-hover: rgba(24,38,66,0.9); --glass-fill-inset: var(--input-bg);
+}
+
+.midnight body::before {
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(74,158,214,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 100%, rgba(61,214,140,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(91,142,245,0.03) 0%, transparent 55%);
+}
+
+.midnight .glass-btn {
+  background: linear-gradient(135deg, #4A9ED6, #2A6FA0);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(74,158,214,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   🔥 EMBER THEME — Volcanic Forge
+   Unlocked at Lv. 14 (War Captain)
+   ═══════════════════════════════════════════════════════════ */
+.ember {
+  --bg-deep:    #140A08;
+  --bg-mid:     #1E100C;
+  --bg-surface: #2A1612;
+  --bg-raised:  #361E18;
+  --bg-overlay: rgba(20, 10, 8, 0.92);
+
+  --amber:       #F0853A;
+  --amber-light: #F5A862;
+  --amber-dim:   rgba(240, 133, 58, 0.15);
+  --amber-glow:  0 0 24px rgba(240, 133, 58, 0.35);
+
+  --coral:       #E83A3A;
+  --coral-light: #F06060;
+  --coral-dim:   rgba(232, 58, 58, 0.15);
+  --coral-glow:  0 0 24px rgba(232, 58, 58, 0.35);
+
+  --acid:        #D4AA4A;
+  --acid-light:  #E8C570;
+  --acid-dim:    rgba(212, 170, 74, 0.15);
+  --acid-glow:   0 0 24px rgba(212, 170, 74, 0.30);
+
+  --primary: var(--amber); --primary-light: var(--amber-light);
+  --primary-dim: var(--amber-dim); --primary-glow: var(--amber-glow);
+  --mint: var(--acid); --pink: var(--coral); --gold: var(--amber);
+  --blue: #D47030;
+
+  --border: rgba(255,255,255,0.06); --border-mid: rgba(255,255,255,0.12);
+  --border-focus: rgba(240,133,58,0.4);
+
+  --text-primary: #F5E8E0; --text-secondary: #C0A898;
+  --text-muted: #8A7060; --text-ghost: #5A4438;
+
+  --card-bg: rgba(30,16,12,0.88); --card-blur: 18px;
+  --card-radius: 4px; --card-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --input-bg: rgba(24,12,8,0.7);
+
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim);
+  --indigo: var(--blue); --indigo-dim: rgba(212,112,48,0.15);
+  --border-warm: rgba(240,133,58,0.12);
+
+  --glass-bg: var(--card-bg); --glass-border: var(--border);
+  --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
+  --glass-fill-elevated: var(--bg-raised);
+  --glass-fill-hover: rgba(54,30,24,0.9); --glass-fill-inset: var(--input-bg);
+}
+
+.ember body::before {
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(240,133,58,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 100%, rgba(232,58,58,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(212,170,74,0.04) 0%, transparent 55%);
+}
+
+.ember .glass-btn {
+  background: linear-gradient(135deg, #F0853A, #D45A20);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(240,133,58,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ❄️ FROST THEME — Arctic Tundra
+   Unlocked at Lv. 20 (Daimyo)
+   ═══════════════════════════════════════════════════════════ */
+.frost {
+  --bg-deep:    #0A1018;
+  --bg-mid:     #101820;
+  --bg-surface: #162030;
+  --bg-raised:  #1E2A3C;
+  --bg-overlay: rgba(10, 16, 24, 0.92);
+
+  --amber:       #7AC5E8;
+  --amber-light: #A0D8F2;
+  --amber-dim:   rgba(122, 197, 232, 0.15);
+  --amber-glow:  0 0 24px rgba(122, 197, 232, 0.30);
+
+  --coral:       #E86A80;
+  --coral-light: #F08898;
+  --coral-dim:   rgba(232, 106, 128, 0.15);
+  --coral-glow:  0 0 24px rgba(232, 106, 128, 0.30);
+
+  --acid:        #88D4B0;
+  --acid-light:  #A8E8CA;
+  --acid-dim:    rgba(136, 212, 176, 0.15);
+  --acid-glow:   0 0 24px rgba(136, 212, 176, 0.30);
+
+  --primary: var(--amber); --primary-light: var(--amber-light);
+  --primary-dim: var(--amber-dim); --primary-glow: var(--amber-glow);
+  --mint: var(--acid); --pink: var(--coral); --gold: var(--amber);
+  --blue: #6AA0D8;
+
+  --border: rgba(255,255,255,0.06); --border-mid: rgba(255,255,255,0.12);
+  --border-focus: rgba(122,197,232,0.4);
+
+  --text-primary: #E8F0F5; --text-secondary: #A0B8C8;
+  --text-muted: #607888; --text-ghost: #3A5060;
+
+  --card-bg: rgba(16,24,32,0.88); --card-blur: 18px;
+  --card-radius: 8px; --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --input-bg: rgba(12,18,28,0.7);
+
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim);
+  --indigo: var(--blue); --indigo-dim: rgba(106,160,216,0.15);
+  --border-warm: rgba(122,197,232,0.12);
+
+  --glass-bg: var(--card-bg); --glass-border: var(--border);
+  --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
+  --glass-fill-elevated: var(--bg-raised);
+  --glass-fill-hover: rgba(30,42,60,0.9); --glass-fill-inset: var(--input-bg);
+}
+
+.frost body::before {
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(122,197,232,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 100%, rgba(136,212,176,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(106,160,216,0.03) 0%, transparent 55%);
+}
+
+.frost .glass-btn {
+  background: linear-gradient(135deg, #7AC5E8, #4A9ECC);
+  color: #0A1018;
+  box-shadow: 0 4px 16px rgba(122,197,232,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   👑 IMPERIAL GOLD THEME — Shogun's Palace
+   Unlocked at Lv. 30 (Shogun)
+   ═══════════════════════════════════════════════════════════ */
+.gold {
+  --bg-deep:    #0E0C08;
+  --bg-mid:     #181410;
+  --bg-surface: #221E16;
+  --bg-raised:  #2C2820;
+  --bg-overlay: rgba(14, 12, 8, 0.92);
+
+  --amber:       #E8C44A;
+  --amber-light: #F0D870;
+  --amber-dim:   rgba(232, 196, 74, 0.15);
+  --amber-glow:  0 0 24px rgba(232, 196, 74, 0.35);
+
+  --coral:       #D44040;
+  --coral-light: #E86060;
+  --coral-dim:   rgba(212, 64, 64, 0.15);
+  --coral-glow:  0 0 24px rgba(212, 64, 64, 0.30);
+
+  --acid:        #B8D060;
+  --acid-light:  #D0E880;
+  --acid-dim:    rgba(184, 208, 96, 0.15);
+  --acid-glow:   0 0 24px rgba(184, 208, 96, 0.30);
+
+  --primary: var(--amber); --primary-light: var(--amber-light);
+  --primary-dim: var(--amber-dim); --primary-glow: var(--amber-glow);
+  --mint: var(--acid); --pink: var(--coral); --gold: var(--amber);
+  --blue: #C8A838;
+
+  --border: rgba(255,255,255,0.06); --border-mid: rgba(255,255,255,0.12);
+  --border-focus: rgba(232,196,74,0.4);
+
+  --text-primary: #F5EED8; --text-secondary: #C0B898;
+  --text-muted: #888068; --text-ghost: #585040;
+
+  --card-bg: rgba(24,20,16,0.88); --card-blur: 18px;
+  --card-radius: 2px; --card-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  --input-bg: rgba(18,14,10,0.7);
+
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim);
+  --indigo: var(--blue); --indigo-dim: rgba(200,168,56,0.15);
+  --border-warm: rgba(232,196,74,0.12);
+
+  --glass-bg: var(--card-bg); --glass-border: var(--border);
+  --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
+  --glass-fill-elevated: var(--bg-raised);
+  --glass-fill-hover: rgba(44,40,32,0.9); --glass-fill-inset: var(--input-bg);
+}
+
+.gold body::before {
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(232,196,74,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 100%, rgba(212,64,64,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(184,208,96,0.03) 0%, transparent 55%);
+}
+
+.gold .glass-btn {
+  background: linear-gradient(135deg, #E8C44A, #C8A020);
+  color: #0E0C08;
+  box-shadow: 0 4px 16px rgba(232,196,74,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
 /* ──────────────── RESET ──────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; }
 html { scroll-behavior: smooth; }
@@ -585,6 +845,39 @@ body::before {
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 .anim-burst { animation: confettiBurst 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ── Toast slide-in ── */
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Loader animations (moved from inline <style> in App.tsx) ── */
+@keyframes loaderPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes loaderRing {
+  0% { transform: scale(0.8); opacity: 0.4; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ── Spin animation (moved from inline <style> in Profile.tsx) ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── XP Float animation (moved from ManaByteOverlay inline <style>) ── */
+@keyframes floatUpAndFade {
+  0% { transform: translateY(0) scale(0.7); opacity: 0; }
+  15% { transform: translateY(-15px) scale(1.1); opacity: 1; }
+  60% { transform: translateY(-40px) scale(1); opacity: 1; }
+  100% { transform: translateY(-80px) scale(0.9); opacity: 0; }
+}
+.animate-floatUpAndFade {
+  animation: floatUpAndFade 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
 
 /* ── Subtle grain overlay for depth/texture ── */
 body::after {

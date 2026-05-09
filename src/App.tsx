@@ -1,90 +1,83 @@
-import { useEffect, useState } from "react"
+import { lazy, Suspense } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
-import { supabase } from "./lib/supabase"
-import type { Session } from "@supabase/supabase-js"
+import { useChug } from "./context/ChugContext"
 import Layout from "./components/Layout"
 import BottomNav from "./components/BottomNav"
-import Home from "./pages/Home"
-import Log from "./pages/Log"
-import Party from "./pages/Party"
-import Profile from "./pages/Profile"
-import Auth from "./pages/Auth"
-import Groups from "./pages/Groups"
-import GroupFeed from "./pages/GroupFeed"
-import GroupChat from "./pages/GroupChat"
-import PartyView from "./pages/PartyView"
-import PublicProfile from "./pages/PublicProfile"
-import World from "./pages/World"
-import GroupBalances from "./pages/GroupBalances"
-import ConnectPage from "./pages/ConnectPage"
-import Rank from "./pages/Rank"
-import SessionView from "./pages/SessionView"
-import Calendar from "./pages/Calendar"
-import Challenges from "./pages/Challenges"
-
+import ErrorBoundary from "./components/ErrorBoundary"
 import ManaByteOverlay from "./components/ManaByteOverlay"
-import Landing from "./pages/Landing"
+
+// ── Lazy-loaded pages (code splitting) ──────────────────────────
+const Home = lazy(() => import("./pages/Home"))
+const Log = lazy(() => import("./pages/Log"))
+const Party = lazy(() => import("./pages/Party"))
+const Profile = lazy(() => import("./pages/Profile"))
+const Auth = lazy(() => import("./pages/Auth"))
+const Groups = lazy(() => import("./pages/Groups"))
+const GroupFeed = lazy(() => import("./pages/GroupFeed"))
+const GroupChat = lazy(() => import("./pages/GroupChat"))
+const PartyView = lazy(() => import("./pages/PartyView"))
+const PublicProfile = lazy(() => import("./pages/PublicProfile"))
+const World = lazy(() => import("./pages/World"))
+const GroupBalances = lazy(() => import("./pages/GroupBalances"))
+const ConnectPage = lazy(() => import("./pages/ConnectPage"))
+const Rank = lazy(() => import("./pages/Rank"))
+const SessionView = lazy(() => import("./pages/SessionView"))
+const Calendar = lazy(() => import("./pages/Calendar"))
+const Challenges = lazy(() => import("./pages/Challenges"))
+const Landing = lazy(() => import("./pages/Landing"))
+const Tavern = lazy(() => import("./pages/Tavern"))
+const Premium = lazy(() => import("./pages/Premium"))
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
+
+// ── Loading skeleton ────────────────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--bg-deep)' }}>
+      <div className="text-center relative">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div style={{
+            width: 120, height: 120,
+            borderRadius: '50%',
+            border: '2px solid var(--amber)',
+            opacity: 0.2,
+            animation: 'loaderRing 2s ease-out infinite',
+          }} />
+        </div>
+        <div className="text-6xl mb-4" style={{ animation: 'loaderPulse 1.5s ease-in-out infinite' }}>⛩️</div>
+        <p className="text-xs font-black uppercase tracking-[0.3em]" style={{ color: 'var(--text-muted)', fontFamily: 'Syne, sans-serif' }}>ChugChug</p>
+      </div>
+    </div>
+  )
+}
+
+// ── Route-level error boundary ──────────────────────────────────
+function RouteGuard({ children }: { children: React.ReactNode }) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>
+        {children}
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
 
 function App() {
-  const [session, setSession] = useState<Session | null>(null)
-  const [ready, setReady] = useState(false)
+  // Single auth source — from ChugContext (no duplicate onAuthStateChange here)
+  const { user, loading } = useChug()
 
-  useEffect(() => {
-    // Single auth listener — no parallel getSession() call to avoid lock contention
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setReady(true)
-    })
-
-    // Fallback: if no event fires within 2 seconds, consider auth resolved (no session)
-    const timeout = setTimeout(() => {
-      setReady(true)
-    }, 2000)
-
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
-    }
-  }, [])
-
-  // Show nothing until auth state is resolved — prevents flash
-  if (!ready) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--bg-deep)' }}>
-        <div className="text-center relative">
-          {/* Expanding ring */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div style={{
-              width: 120, height: 120,
-              borderRadius: '50%',
-              border: '2px solid var(--amber)',
-              opacity: 0.2,
-              animation: 'loaderRing 2s ease-out infinite',
-            }} />
-          </div>
-          <div className="text-6xl mb-4" style={{ animation: 'loaderPulse 1.5s ease-in-out infinite' }}>⛩️</div>
-          <p className="text-xs font-black uppercase tracking-[0.3em]" style={{ color: 'var(--text-muted)', fontFamily: 'Syne, sans-serif' }}>ChugChug</p>
-        </div>
-        <style>{`
-          @keyframes loaderPulse {
-            0%, 100% { transform: scale(1); opacity: 0.9; }
-            50% { transform: scale(1.08); opacity: 1; }
-          }
-          @keyframes loaderRing {
-            0% { transform: scale(0.8); opacity: 0.4; }
-            100% { transform: scale(2.5); opacity: 0; }
-          }
-        `}</style>
-      </div>
-    )
+  // Show loader until auth state is resolved
+  if (loading) {
+    return <PageLoader />
   }
 
-  if (!session) {
+  if (!user) {
     return (
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="*" element={<Landing />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="*" element={<Landing />} />
+        </Routes>
+      </Suspense>
     )
   }
 
@@ -92,22 +85,25 @@ function App() {
     <Layout>
       <ManaByteOverlay />
       <Routes>
-        <Route path="/"                    element={<Home />} />
-        <Route path="/log"                 element={<Log />} />
-        <Route path="/party"               element={<Party />} />
-        <Route path="/party/:id"           element={<PartyView />} />
-        <Route path="/world"               element={<World />} />
-        <Route path="/profile"             element={<Profile />} />
-        <Route path="/profile/:id"         element={<PublicProfile />} />
-        <Route path="/groups"              element={<Groups />} />
-        <Route path="/group/:id"           element={<GroupFeed />} />
-        <Route path="/group/:id/chat"      element={<GroupChat />} />
-        <Route path="/group/:id/balances"  element={<GroupBalances />} />
-        <Route path="/connect/:id"         element={<ConnectPage />} />
-        <Route path="/rank"                element={<Rank />} />
-        <Route path="/session/:id"         element={<SessionView />} />
-        <Route path="/calendar"             element={<Calendar />} />
-        <Route path="/challenges"           element={<Challenges />} />
+        <Route path="/"                    element={<RouteGuard><Home /></RouteGuard>} />
+        <Route path="/log"                 element={<RouteGuard><Log /></RouteGuard>} />
+        <Route path="/party"               element={<RouteGuard><Party /></RouteGuard>} />
+        <Route path="/party/:id"           element={<RouteGuard><PartyView /></RouteGuard>} />
+        <Route path="/world"               element={<RouteGuard><World /></RouteGuard>} />
+        <Route path="/profile"             element={<RouteGuard><Profile /></RouteGuard>} />
+        <Route path="/profile/:id"         element={<RouteGuard><PublicProfile /></RouteGuard>} />
+        <Route path="/groups"              element={<RouteGuard><Groups /></RouteGuard>} />
+        <Route path="/group/:id"           element={<RouteGuard><GroupFeed /></RouteGuard>} />
+        <Route path="/group/:id/chat"      element={<RouteGuard><GroupChat /></RouteGuard>} />
+        <Route path="/group/:id/balances"  element={<RouteGuard><GroupBalances /></RouteGuard>} />
+        <Route path="/connect/:id"         element={<RouteGuard><ConnectPage /></RouteGuard>} />
+        <Route path="/rank"                element={<RouteGuard><Rank /></RouteGuard>} />
+        <Route path="/session/:id"         element={<RouteGuard><SessionView /></RouteGuard>} />
+        <Route path="/calendar"            element={<RouteGuard><Calendar /></RouteGuard>} />
+        <Route path="/challenges"          element={<RouteGuard><Challenges /></RouteGuard>} />
+        <Route path="/tavern"              element={<RouteGuard><Tavern /></RouteGuard>} />
+        <Route path="/premium"             element={<RouteGuard><Premium /></RouteGuard>} />
+        <Route path="/admin"               element={<RouteGuard><AdminDashboard /></RouteGuard>} />
         {/* Redirect old routes */}
         <Route path="/live-party/:partyId?"element={<Navigate to="/" replace />} />
         <Route path="/social"              element={<Navigate to="/groups" replace />} />

@@ -5,6 +5,7 @@ import { useChug } from "../context/ChugContext"
 import { supabase } from "../lib/supabase"
 import { firebaseDb } from "../lib/firebase"
 import { ref, push, onChildAdded, query, orderByChild, limitToLast, off, serverTimestamp } from "firebase/database"
+import { useToast } from "../components/Toast"
 
 interface ChatMessage {
   id: string
@@ -23,6 +24,7 @@ export default function GroupChat() {
   const { id: groupId } = useParams()
   const navigate = useNavigate()
   const { user, profile } = useChug()
+  const toast = useToast()
 
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState("")
@@ -151,11 +153,11 @@ export default function GroupChat() {
     if (!selected) return
 
     if (selected.size > 5 * 1024 * 1024) {
-      alert("Image must be under 5MB")
+      toast.error("Image must be under 5MB")
       return
     }
     if (!selected.type.startsWith("image/")) {
-      alert("Only images allowed")
+      toast.error("Only images allowed")
       return
     }
 
@@ -186,7 +188,7 @@ export default function GroupChat() {
       const { data } = supabase.storage.from("photos").getPublicUrl(fileName)
       return data.publicUrl
     } catch (err: any) {
-      alert("Image upload failed: " + err.message)
+      toast.error("Image upload failed: " + err.message)
       return null
     } finally {
       setUploadingImage(false)
@@ -260,7 +262,7 @@ export default function GroupChat() {
       setExpenseAmount("")
       setExpenseDesc("")
     } catch (err: any) {
-      alert("Failed to log expense: " + err.message)
+      toast.error("Failed to log expense: " + err.message)
     } finally {
       setSubmittingExpense(false)
     }
@@ -292,7 +294,7 @@ export default function GroupChat() {
       setNewMessage("")
       inputRef.current?.focus()
     } catch (err: any) {
-      alert("Failed to send message: " + (err?.message || "Unknown error"))
+      toast.error("Failed to send message: " + (err?.message || "Unknown error"))
     } finally {
       setSending(false)
     }

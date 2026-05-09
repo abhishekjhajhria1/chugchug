@@ -3,15 +3,18 @@ import { supabase } from "../lib/supabase"
 import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Lock } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import { useTheme } from "../context/ThemeContext"
-import type { Theme } from "../context/ThemeContext"
+import type { Theme } from "../types"
 import QRCodeModal from "../components/QRCodeModal"
 import { getRankInfo, RANK_LADDER } from "../lib/progression"
 import ArchetypeQuiz, { ARCHETYPES } from "../components/ArchetypeQuiz"
 import type { ArchetypeId } from "../components/ArchetypeQuiz"
+import { useToast } from "../components/Toast"
+import type { PrivacySettings } from "../types"
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useChug()
   const { theme, setTheme, getThemeUnlocks } = useTheme()
+  const toast = useToast()
   const [isEditing, setIsEditing] = useState(false)
   const [showArchetypeQuiz, setShowArchetypeQuiz] = useState(false)
   const [editForm, setEditForm] = useState({ bio: "", college: "", city: "", country: "", stealth_mode: false })
@@ -20,7 +23,7 @@ export default function Profile() {
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([])
   const [sessionFriends, setSessionFriends] = useState<any[]>([])
   const [showMyQR, setShowMyQR] = useState(false)
-  const [privacySettings, setPrivacySettings] = useState<any>({ beer_counter: 'group', location_sharing: 'off' })
+  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({ beer_counter: 'group', location_sharing: 'off' })
 
   const [editingLogId, setEditingLogId] = useState<string | null>(null)
   const [editLogPrivacy, setEditLogPrivacy] = useState<'public' | 'groups' | 'private' | 'hidden'>('public')
@@ -42,7 +45,7 @@ export default function Profile() {
     const { error } = await supabase.from("profiles").update({ ...editForm, privacy_settings: privacySettings }).eq("id", profile.id)
     setSaving(false)
     if (error) {
-      alert("Error saving: " + error.message)
+      toast.error("Error saving: " + error.message)
     } else {
       setIsEditing(false)
       // Refresh in background — don't block the UI
@@ -75,7 +78,7 @@ export default function Profile() {
     if (!error) {
       setActivities(activities.map(a => a.id === id ? { ...a, privacy_level: editLogPrivacy, group_id: editLogPrivacy === 'groups' ? (editLogGroupStr || null) : null } : a))
       setEditingLogId(null)
-    } else alert("Failed: " + error.message)
+    } else toast.error("Failed: " + error.message)
     setSavingLog(false)
   }
 
@@ -224,14 +227,14 @@ export default function Profile() {
             <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-center" style={{ color: 'var(--text-ghost)' }}>
               App Theme
             </p>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-4 gap-2">
               {(() => {
                 const themeUnlocks = getThemeUnlocks(p.level ?? 1);
                 return themeUnlocks.map(t => (
                   <button
                     key={t.themeId}
                     onClick={() => !t.locked && setTheme(t.themeId as Theme, p.level ?? 1)}
-                    className="flex-1 py-2.5 px-2 rounded-sm text-center transition-all active:scale-95 relative"
+                    className="py-2.5 px-1.5 rounded-sm text-center transition-all active:scale-95 relative"
                     style={{
                       background: theme === t.themeId ? 'var(--amber-dim)' : t.locked ? 'var(--bg-deep)' : 'var(--bg-raised)',
                       border: theme === t.themeId ? '2px solid var(--amber)' : t.locked ? '1px solid var(--border)' : '1px solid var(--border)',
@@ -242,15 +245,20 @@ export default function Profile() {
                   >
                     {t.locked && (
                       <div className="absolute top-1 right-1">
-                        <Lock size={10} style={{ color: 'var(--text-ghost)' }} />
+                        <Lock size={8} style={{ color: 'var(--text-ghost)' }} />
                       </div>
                     )}
-                    <div className="text-xs font-bold" style={{ color: theme === t.themeId ? 'var(--amber)' : t.locked ? 'var(--text-ghost)' : 'var(--text-primary)' }}>
-                      {t.emoji} {t.label}
+                    <div className="text-[10px] font-bold" style={{ color: theme === t.themeId ? 'var(--amber)' : t.locked ? 'var(--text-ghost)' : 'var(--text-primary)' }}>
+                      {t.emoji}
                     </div>
-                    <div className="text-[8px] mt-0.5" style={{ color: 'var(--text-ghost)' }}>
-                      {t.locked ? `🔒 Lv.${t.requiredLevel} ${t.requiredRank}` : t.desc}
+                    <div className="text-[7px] font-bold mt-0.5 truncate" style={{ color: theme === t.themeId ? 'var(--amber)' : 'var(--text-ghost)' }}>
+                      {t.label}
                     </div>
+                    {t.locked && (
+                      <div className="text-[6px] mt-0.5" style={{ color: 'var(--text-ghost)' }}>
+                        Lv.{t.requiredLevel}
+                      </div>
+                    )}
                   </button>
                 ));
               })()}
@@ -261,12 +269,36 @@ export default function Profile() {
         {/* Calendar + QR buttons */}
         {!isEditing && (
           <div className="mt-4 space-y-3">
+            {/* Premium badge */}
+            {p.is_premium && (
+              <div className="flex items-center justify-center gap-2 py-2.5 px-4" style={{ background: 'linear-gradient(135deg, var(--amber-dim), rgba(232,196,74,0.05))', border: '1px solid rgba(232,196,74,0.3)', borderRadius: 'var(--card-radius)' }}>
+                <span className="text-sm">👑</span>
+                <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--amber)' }}>Premium Member</span>
+              </div>
+            )}
+
             <button onClick={() => window.location.href = '/calendar'} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(124,154,116,0.25)', color: 'var(--acid)' }}>
               <CalendarDays size={18} /> Drinking Calendar
             </button>
             <button onClick={() => setShowMyQR(true)} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(245,166,35,0.25)', color: 'var(--amber)' }}>
-              <QrCode size={18} /> My Connection QR
+              <QrCode size={18} /> My QR (Friends + Loyalty)
             </button>
+
+            {/* Quick nav row */}
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => window.location.href = '/tavern'} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
+                🏯 Tavern
+              </button>
+              {!p.is_premium ? (
+                <button onClick={() => window.location.href = '/premium'} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)', borderRadius: 'var(--card-radius)' }}>
+                  👑 Go Premium
+                </button>
+              ) : (
+                <button onClick={() => window.location.href = '/challenges'} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
+                  ⚔️ Challenges
+                </button>
+              )}
+            </div>
             {sessionFriends.length > 0 && (
               <div className="rounded-sm p-3 text-left" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                 <div className="flex items-center gap-2 mb-2">

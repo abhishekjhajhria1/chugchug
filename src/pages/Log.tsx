@@ -4,29 +4,14 @@ import { useChug } from "../context/ChugContext"
 import { evaluateAndAwardBadges, updateStreak, updateCrewStreaks, getDailyBounties, checkDailyBountyCompletion } from "../lib/progression"
 import { Camera, ChevronDown } from "lucide-react"
 import { extractPhotoMetadata } from "../components/PhotoMetadata"
-
-type ActivityCategory = 'drink' | 'cigarette' | 'snack' | 'gym' | 'detox' | 'water'
-
-const CATEGORIES: { id: ActivityCategory; label: string; icon: string; color: string; bg: string }[] = [
-  { id: 'drink', label: 'Drink', icon: '🍻', color: 'var(--amber)', bg: 'var(--amber-dim)' },
-  { id: 'water', label: 'Water', icon: '💧', color: 'var(--blue)', bg: 'var(--indigo-dim)' },
-  { id: 'snack', label: 'Snack', icon: '🍟', color: 'var(--coral)', bg: 'var(--coral-dim)' },
-  { id: 'cigarette', label: 'Smoke', icon: '🚬', color: 'var(--sage)', bg: 'var(--sage-dim)' },
-  { id: 'gym', label: 'Gym', icon: '💪', color: 'var(--indigo)', bg: 'var(--indigo-dim)' },
-  { id: 'detox', label: 'Detox', icon: '🧘', color: 'var(--sage)', bg: 'var(--sage-dim)' },
-]
-
-const MOOD_TAGS = [
-  { emoji: '😄', label: 'Social' },
-  { emoji: '😌', label: 'Chill' },
-  { emoji: '😤', label: 'Stress' },
-  { emoji: '🎉', label: 'Party' },
-  { emoji: '😴', label: 'Tired' },
-]
+import { useToast } from "../components/Toast"
+import { CATEGORIES, MOOD_TAGS } from "../constants/categories"
+import type { ActivityCategory, PhotoMetadata } from "../types"
 
 export default function Log() {
   const { user, refreshProfile } = useChug()
-  const BARTENDER_API = import.meta.env.VITE_BARTENDER_API || ''
+  const toast = useToast()
+  const BARTENDER_API = import.meta.env.VITE_BARTENDER_API || import.meta.env.VITE_NINKASI_API_URL || ''
 
   const [category, setCategory] = useState<ActivityCategory>('drink')
   const [itemName, setItemName] = useState("")
@@ -46,7 +31,7 @@ export default function Log() {
 
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
-  const [photoMetadata, setPhotoMetadata] = useState<Record<string, any> | null>(null)
+  const [photoMetadata, setPhotoMetadata] = useState<PhotoMetadata | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [loading, setLoading] = useState(false)
@@ -69,9 +54,11 @@ export default function Log() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       setPhoto(file)
+      // Revoke previous URL to prevent memory leak
+      if (photoPreview) URL.revokeObjectURL(photoPreview)
       setPhotoPreview(URL.createObjectURL(file))
       const meta = await extractPhotoMetadata(file)
-      setPhotoMetadata(meta)
+      setPhotoMetadata(meta as PhotoMetadata | null)
     }
   }
 
@@ -156,7 +143,7 @@ export default function Log() {
       }, 2200)
 
     } catch (error: unknown) {
-      alert("Something went wrong: " + (error as Error).message)
+      toast.error("Something went wrong: " + (error as Error).message)
     } finally { setLoading(false) }
   }
 

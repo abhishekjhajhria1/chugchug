@@ -7,6 +7,7 @@ import LiveCounter from "../components/LiveCounter"
 import BeerCounter from "../components/BeerCounter"
 import { firebaseDb } from "../lib/firebase"
 import { ref, push, onChildAdded } from "firebase/database"
+import { useToast } from "../components/Toast"
 
 interface Party {
     id: string
@@ -27,6 +28,7 @@ export default function PartyView() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const { user } = useChug()
+    const toast = useToast()
 
     const [party, setParty] = useState<Party | null>(null)
     const [loading, setLoading] = useState(true)
@@ -110,7 +112,7 @@ export default function PartyView() {
         if (!error) {
             setRsvpStatus('interested')
         } else {
-            alert("Failed to RSVP. " + error.message)
+            toast.error("Failed to RSVP. " + error.message)
         }
         setActionLoading(false)
     }

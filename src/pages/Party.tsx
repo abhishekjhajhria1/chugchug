@@ -5,6 +5,7 @@ import { PartyPopper, Calendar, MapPin, Beer, CheckCircle2, XCircle, QrCode, Sca
 import { Link } from "react-router-dom"
 import QRCodeModal from "../components/QRCodeModal"
 import LiveCounter from "../components/LiveCounter"
+import { useToast } from "../components/Toast"
 
 interface Party {
   id: string
@@ -33,6 +34,7 @@ interface HostedParty extends Party {
 
 export default function Party() {
   const { user } = useChug()
+  const toast = useToast()
   const [view, setView] = useState<'feed' | 'create' | 'manage' | 'history'>('feed')
 
   const [parties, setParties] = useState<Party[]>([])
@@ -91,7 +93,7 @@ export default function Party() {
 
 
   const handleCreate = async () => {
-    if (!user || !form.title || !form.address || !form.date) return alert("Fill required fields (Title, Address, Date)")
+    if (!user || !form.title || !form.address || !form.date) { toast.error("Fill required fields (Title, Address, Date)"); return }
     setLoading(true)
     const { error } = await supabase.from("parties").insert({
       host_id: user.id,
@@ -110,7 +112,7 @@ export default function Party() {
       fetchFeed()
       fetchHosted()
     } else {
-      alert(error.message)
+      toast.error(error.message)
     }
     setLoading(false)
   }
@@ -122,7 +124,7 @@ export default function Party() {
       user_id: user.id,
       status: 'interested'
     })
-    if (!error) alert("Host notified of your interest!")
+    if (!error) toast.success("Host notified of your interest!")
   }
 
   const updateGuestStatus = async (partyId: string, guestId: string, status: 'accepted' | 'rejected') => {
@@ -141,7 +143,7 @@ export default function Party() {
   const copyInviteLink = (partyId: string) => {
     const link = `${window.location.origin}/party/${partyId}`
     navigator.clipboard.writeText(link)
-    alert("Invite link copied to clipboard!")
+    toast.success("Invite link copied to clipboard!")
   }
 
   const showPartyQR = (partyId: string, title: string) => {
@@ -157,7 +159,7 @@ export default function Party() {
     if (result.includes('/party/')) {
       window.location.href = result
     } else {
-      alert('Invalid party QR code')
+      toast.error('Invalid party QR code')
     }
   }
 

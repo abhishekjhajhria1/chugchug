@@ -1,10 +1,9 @@
 import { useNavigate, useLocation } from "react-router-dom"
-import { Home, Users, Globe, User, Plus } from "lucide-react"
+import { Home, Users, Globe, User } from "lucide-react"
 
 const tabs = [
   { path: "/",       icon: Home,   label: "Home" },
   { path: "/groups", icon: Users,  label: "Crew" },
-  { path: "/log",    icon: Plus,   label: "Log",  isFab: true },
   { path: "/world",  icon: Globe,  label: "Explore" },
   { path: "/profile",icon: User,   label: "Me" },
 ]
@@ -25,32 +24,10 @@ export default function BottomNav() {
       }}
     >
       <div className="max-w-lg mx-auto flex items-end justify-around px-2 pt-1 pb-2">
-        {tabs.map(({ path, icon: Icon, label, isFab }) => {
+        {tabs.map(({ path, icon: Icon, label }) => {
           const isActive = pathname === path || (path !== "/" && pathname.startsWith(path))
           const isHome = path === "/" && pathname === "/"
 
-          if (isFab) {
-            return (
-              <button
-                key={path}
-                onClick={() => navigate(path)}
-                className="relative flex flex-col items-center justify-center -mt-8 active:scale-95 transition-transform"
-                aria-label={label}
-              >
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
-                  style={{
-                    background: 'linear-gradient(180deg, var(--amber), var(--amber-light, #8C5C21))',
-                    border: '4px solid var(--bg-deep)',
-                    boxShadow: 'var(--amber-glow)',
-                    borderRadius: '50%',
-                  }}
-                >
-                  <Plus size={28} style={{ color: 'var(--bg-deep)' }} strokeWidth={3} />
-                </div>
-              </button>
-            )
-          }
 
           return (
             <button

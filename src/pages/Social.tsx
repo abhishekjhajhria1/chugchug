@@ -5,14 +5,13 @@ import { supabase } from "../lib/supabase"
 import { Users, UserPlus, UserCheck, Flame, Zap, ArrowRight, UserX, X, QrCode, ScanLine } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import QRScanner from "../components/QRScanner"
-
-interface Friend { friend_id: string; username: string; avatar_url: string; level: number; xp: number }
-interface PastPartier { suggested_id: string; username: string; avatar_url: string; interaction_count: number }
-interface FriendRequest { id: string; user_1: string; user_2: string; status: string; profiles: { id: string; username: string; avatar_url: string } }
+import { useToast } from "../components/Toast"
+import type { Friend, PastPartier, FriendRequest } from "../types"
 
 export default function Social() {
   const { user } = useChug()
   const navigate = useNavigate()
+  const toast = useToast()
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'discover'>('friends')
   const [showQR, setShowQR] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
@@ -84,7 +83,7 @@ export default function Social() {
     if (decodedText && decodedText.length === 36) {
       await handleSendRequest(decodedText)
       if ((window as any).triggerClink) (window as any).triggerClink(decodedText)
-    } else { alert("Invalid user QR code.") }
+    } else { toast.error("Invalid user QR code.") }
   }
 
   return (

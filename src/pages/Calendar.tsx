@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight, Calendar as CalIcon,
   Target, TrendingUp, Share2, X, PenLine, ArrowLeft, Zap
 } from "lucide-react"
+import { useToast } from "../components/Toast"
 
 interface DayLog {
   date: string
@@ -64,6 +65,7 @@ const CAT_EMOJI: Record<string, string> = {
 export default function Calendar() {
   const { user, profile } = useChug()
   const navigate = useNavigate()
+  const toast = useToast()
 
   const [logs, setLogs] = useState<DayLog[]>([])
   const [loading, setLoading] = useState(true)
@@ -326,10 +328,10 @@ export default function Calendar() {
           // Copy to clipboard as text
           const text = `🍻 ChugChug Wrapped - ${wrappedStats.month} ${wrappedStats.year}\n@${wrappedStats.username}\n\n🍻 ${wrappedStats.totalDrinks} drinks\n🌿 ${wrappedStats.totalDryDays} dry days\n🔥 ${wrappedStats.bestStreak}d best streak\n💰 ₹${wrappedStats.moneySaved} saved\n🏆 Rank: ${wrappedStats.rank} · Level ${wrappedStats.level}`
           await navigator.clipboard.writeText(text)
-          alert("Wrapped stats copied to clipboard! 📋 Screenshot the card to share the visual.")
+          toast.success("Wrapped stats copied to clipboard! 📋 Screenshot the card to share the visual.")
         }
       } catch {
-        alert("Screenshot this card and share it! 📸")
+        toast.info("Screenshot this card and share it! 📸")
       }
     }
   }

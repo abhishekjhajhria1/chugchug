@@ -6,6 +6,7 @@ import { ref, get, remove } from "firebase/database"
 import { evaluateAndAwardBadges, getRankInfo } from "../lib/progression"
 import { Camera, Loader2, X, Eye, Users, Globe, Lock } from "lucide-react"
 import SessionRecapCard from "./SessionRecapCard"
+import { useToast } from "../components/Toast"
 
 interface EndSessionModalProps {
   sessionId: string
@@ -28,6 +29,7 @@ const VISIBILITY_OPTIONS = [
 
 export default function EndSessionModal({ sessionId, groupId, onClose, onDone }: EndSessionModalProps) {
   const { user, profile } = useChug()
+  const toast = useToast()
   const [participants, setParticipants] = useState<ParticipantSummary[]>([])
   const [visibility, setVisibility] = useState<'public' | 'groups' | 'private'>(groupId ? 'groups' : 'public')
   const [userGroups, setUserGroups] = useState<{ id: string; name: string }[]>([])
@@ -77,6 +79,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       setPhoto(file)
+      if (photoPreview) URL.revokeObjectURL(photoPreview)
       setPhotoPreview(URL.createObjectURL(file))
     }
   }
@@ -162,7 +165,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
       // Show recap card instead of immediately navigating home
       setShowRecap(true)
     } catch (e: any) {
-      alert("Error ending session: " + e.message)
+      toast.error("Error ending session: " + e.message)
     } finally {
       setSaving(false)
     }

@@ -5,6 +5,7 @@ import { ref, set } from "firebase/database"
 import { useChug } from "../context/ChugContext"
 import { evaluateAndAwardBadges } from "../lib/progression"
 import { Beer, Share2, Users, Globe, Minus, RotateCcw, Camera, Loader2, X } from "lucide-react"
+import { useToast } from "../components/Toast"
 
 interface BeerCounterProps {
   compact?: boolean
@@ -15,6 +16,7 @@ interface BeerCounterProps {
 
 export default function BeerCounter({ compact, partyId, groupId, onSessionLogged }: BeerCounterProps) {
   const { user, profile } = useChug()
+  const toast = useToast()
   const [count, setCount] = useState(0)
   const [showShare, setShowShare] = useState(false)
   const [animating, setAnimating] = useState(false)
@@ -157,13 +159,14 @@ export default function BeerCounter({ compact, partyId, groupId, onSessionLogged
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       setPhoto(file)
+      if (photoPreview) URL.revokeObjectURL(photoPreview)
       setPhotoPreview(URL.createObjectURL(file))
     }
   }
 
   const handleLogSession = async () => {
-    if (!user || count === 0) return alert("You need at least 1 count to log a session!")
-    if (!photo) return alert("Please upload a photograph of your drinking session!")
+    if (!user || count === 0) { toast.error("You need at least 1 count to log a session!"); return }
+    if (!photo) { toast.error("Please upload a photograph of your drinking session!"); return }
     setLogging(true)
 
     try {
@@ -199,10 +202,10 @@ export default function BeerCounter({ compact, partyId, groupId, onSessionLogged
       setShowLogModal(false)
       setPhoto(null)
       setPhotoPreview(null)
-      alert("Session logged successfully!")
+      toast.success("Session logged successfully!")
 
     } catch (e: any) {
-      alert("Error logging session: " + e.message)
+      toast.error("Error logging session: " + e.message)
     } finally {
       setLogging(false)
     }

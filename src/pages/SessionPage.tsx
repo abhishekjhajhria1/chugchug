@@ -7,11 +7,13 @@ import { QRCodeSVG } from "qrcode.react"
 import { Zap, Clock, Timer, ScanLine } from "lucide-react"
 import BeerCounter from "../components/BeerCounter"
 import QRScanner from "../components/QRScanner"
+import { useToast } from "../components/Toast"
 
 const CHUG_SOUND = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTv9T19Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Q"
 
 export default function SessionPage() {
     const { user, profile } = useChug()
+    const toast = useToast()
     const [partyId, setPartyId] = useState<string>("")
     const [startTime] = useState(Date.now())
     const [elapsed, setElapsed] = useState("0:00")
@@ -96,7 +98,7 @@ export default function SessionPage() {
         if (decodedText && decodedText.includes('/live-party/')) {
             window.location.href = decodedText
         } else {
-            alert("Invalid party QR code.")
+            toast.error("Invalid party QR code.")
         }
     }
 

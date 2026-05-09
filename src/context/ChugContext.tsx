@@ -1,31 +1,18 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import { supabase } from "../lib/supabase";
 import type { User } from "@supabase/supabase-js";
-
-interface UserProfile {
-    id: string;
-    username: string;
-    xp: number;
-    level: number;
-    avatar_url: string | null;
-    bio: string | null;
-    college: string | null;
-    city: string | null;
-    country: string | null;
-    stealth_mode?: boolean;
-    privacy_settings?: any;
-    current_streak?: number;
-    longest_streak?: number;
-    last_activity_date?: string;
-    archetype?: string;
-}
+import type { UserProfile } from "../types";
 
 interface ChugContextType {
     user: User | null;
     profile: UserProfile | null;
     loading: boolean;
     refreshProfile: () => Promise<void>;
+    /** Subscribe to XP gain events */
+    onXpGain: (cb: (delta: number) => void) => () => void;
+    /** Subscribe to level-up events */
+    onLevelUp: (cb: () => void) => () => void;
 }
 
 const ChugContext = createContext<ChugContextType | undefined>(undefined);
@@ -35,12 +22,26 @@ export function ChugProvider({ children }: { children: ReactNode }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Event subscribers (replaces window-based event bus)
+    const xpListeners = useRef<Set<(delta: number) => void>>(new Set());
+    const levelUpListeners = useRef<Set<() => void>>(new Set());
+
+    const onXpGain = useCallback((cb: (delta: number) => void) => {
+        xpListeners.current.add(cb);
+        return () => { xpListeners.current.delete(cb); };
+    }, []);
+
+    const onLevelUp = useCallback((cb: () => void) => {
+        levelUpListeners.current.add(cb);
+        return () => { levelUpListeners.current.delete(cb); };
+    }, []);
+
     const fetchProfile = async (userId: string, retries = 3) => {
         try {
             for (let i = 0; i < retries; i++) {
                 const { data, error } = await supabase
                     .from("profiles")
-                    .select("*")
+                    .select("id, username, xp, level, avatar_url, bio, college, city, country, stealth_mode, privacy_settings, current_streak, longest_streak, last_activity_date, archetype, theme_preference")
                     .eq("id", userId)
                     .single();
 
@@ -55,7 +56,7 @@ export function ChugProvider({ children }: { children: ReactNode }) {
                 }
                 
                 if (data) {
-                    setProfile(data);
+                    setProfile(data as UserProfile);
                     return;
                 }
             }
@@ -69,17 +70,7 @@ export function ChugProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        supabase.auth.getSession().then(async ({ data: { session } }) => {
-            setUser(session?.user ?? null);
-            if (session?.user) {
-                await fetchProfile(session.user.id);
-                setLoading(false);
-            } else {
-                setLoading(false);
-            }
-        });
-
-        let channel: any
+        let channel: ReturnType<typeof supabase.channel> | null = null;
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (_event, session) => {
@@ -89,43 +80,50 @@ export function ChugProvider({ children }: { children: ReactNode }) {
                     setLoading(false);
 
                     // Set up realtime listener for the profile
-                    if (channel) supabase.removeChannel(channel)
+                    if (channel) supabase.removeChannel(channel);
                     channel = supabase.channel(`public:profiles:id=eq.${session.user.id}`)
                         .on(
                             'postgres_changes',
                             { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${session.user.id}` },
                             (payload) => {
-                                const newProfile = payload.new as UserProfile
+                                const newProfile = payload.new as UserProfile;
                                 setProfile(prev => {
                                     if (prev) {
-                                        if (newProfile.xp > prev.xp && (window as any).triggerXpAnimation) {
-                                            (window as any).triggerXpAnimation(newProfile.xp - prev.xp)
+                                        // Notify subscribers instead of using window globals
+                                        if (newProfile.xp > prev.xp) {
+                                            const delta = newProfile.xp - prev.xp;
+                                            xpListeners.current.forEach(cb => cb(delta));
                                         }
-                                        if (newProfile.level > prev.level && (window as any).triggerLevelUpAnimation) {
-                                            (window as any).triggerLevelUpAnimation()
+                                        if (newProfile.level > prev.level) {
+                                            levelUpListeners.current.forEach(cb => cb());
                                         }
                                     }
-                                    return newProfile
-                                })
+                                    return newProfile;
+                                });
                             }
                         )
-                        .subscribe()
+                        .subscribe();
                 } else {
-                    if (channel) supabase.removeChannel(channel)
+                    if (channel) supabase.removeChannel(channel);
+                    channel = null;
                     setProfile(null);
                     setLoading(false);
                 }
             }
         );
 
+        // Fallback: if no auth event fires within 2s, resolve as no session
+        const timeout = setTimeout(() => setLoading(false), 2000);
+
         return () => {
             subscription.unsubscribe();
-            if (channel) supabase.removeChannel(channel)
+            clearTimeout(timeout);
+            if (channel) supabase.removeChannel(channel);
         };
     }, []);
 
     return (
-        <ChugContext.Provider value={{ user, profile, loading, refreshProfile }}>
+        <ChugContext.Provider value={{ user, profile, loading, refreshProfile, onXpGain, onLevelUp }}>
             {children}
         </ChugContext.Provider>
     );

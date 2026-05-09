@@ -1,6 +1,7 @@
 import { useState, useRef } from "react"
 import { supabase } from "../lib/supabase"
 import { Camera, X, Upload, Loader2 } from "lucide-react"
+import { useToast } from "../components/Toast"
 
 interface PhotoUploadProps {
   groupId: string
@@ -15,13 +16,15 @@ export default function PhotoUpload({ groupId, userId, onUploadComplete, compact
   const [caption, setCaption] = useState("")
   const [uploading, setUploading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const toast = useToast()
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0]
     if (!selected) return
-    if (selected.size > 5 * 1024 * 1024) { alert("Image must be under 5MB"); return }
-    if (!selected.type.startsWith("image/")) { alert("Only image files are allowed"); return }
+    if (selected.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return }
+    if (!selected.type.startsWith("image/")) { toast.error("Only image files are allowed"); return }
     setFile(selected)
+    if (preview) URL.revokeObjectURL(preview)
     setPreview(URL.createObjectURL(selected))
   }
 
@@ -38,7 +41,7 @@ export default function PhotoUpload({ groupId, userId, onUploadComplete, compact
       onUploadComplete(urlData.publicUrl)
       setPreview(null); setFile(null); setCaption("")
     } catch (err: any) {
-      alert("Upload failed: " + (err.message || "Unknown error"))
+      toast.error("Upload failed: " + (err.message || "Unknown error"))
     } finally { setUploading(false) }
   }
 

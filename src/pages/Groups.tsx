@@ -7,39 +7,20 @@ import { useChug } from "../context/ChugContext"
 import LiveCounter from "../components/LiveCounter"
 import PhotoMetadata from "../components/PhotoMetadata"
 import NinkasiChat from "../components/NinkasiChat"
-import type { ActivityLog } from "./GroupFeed"
+import type { ActivityLog } from "../types"
 import { QRCodeSVG } from "qrcode.react"
 import QRScanner from "../components/QRScanner"
+import { useToast } from "../components/Toast"
+import { validateGroupName } from "../utils/validation"
+import EmergencySOS from "../components/EmergencySOS"
+import type { Group, FeedItem, Friend, PastPartier, FriendRequest, PartyPreview } from "../types"
 
-interface Group {
-  id: string
-  name: string
-  invite_code: string
-  crew_streak?: number
-}
 
-interface PartyPreview {
-  id: string
-  title: string
-  event_date: string
-  address: string
-  host_id: string
-  profiles?: { username: string }
-}
-
-interface FeedItem {
-  type: 'log' | 'party'
-  date: string
-  data: ActivityLog | PartyPreview
-}
-
-interface Friend { friend_id: string; username: string; avatar_url: string; level: number; xp: number }
-interface PastPartier { suggested_id: string; username: string; avatar_url: string; interaction_count: number }
-interface FriendRequest { id: string; user_1: string; user_2: string; status: string; profiles: { id: string; username: string; avatar_url: string } }
 
 export default function Groups() {
   const { user } = useChug()
   const navigate = useNavigate()
+  const toast = useToast()
 
   const [activeTab, setActiveTab] = useState<'crews' | 'buddies' | 'requests' | 'discover' | 'ninkasi'>('crews')
 
@@ -183,16 +164,16 @@ export default function Groups() {
       await supabase.from("group_members").insert({ group_id: data.id, user_id: user.id })
       setNewInviteCode(code)
       fetchCrewsData()
-    } else if (error) alert(error.message)
+    } else if (error) toast.error(error.message)
   }
 
   const handleJoinGroup = async () => {
     if (!user || !joinCode.trim()) return
     const normalizedCode = joinCode.trim().toUpperCase()
     const { data } = await supabase.from("groups").select("id").eq("invite_code", normalizedCode).single()
-    if (!data) return alert("Invalid invite code")
+    if (!data) { toast.error("Invalid invite code"); return }
     const { error } = await supabase.from("group_members").insert({ group_id: data.id, user_id: user.id })
-    if (error && !error.message.toLowerCase().includes("duplicate")) return alert(error.message)
+    if (error && !error.message.toLowerCase().includes("duplicate")) { toast.error(error.message); return }
     setModalMode(null)
     setJoinCode("")
     fetchCrewsData()
@@ -234,8 +215,8 @@ export default function Groups() {
         receiver_id: targetId,
         status: 'sent'
       });
-      if (error) alert(error.message);
-      else alert(`Sent a drink ping to ${username}! 🍻`);
+      if (error) toast.error(error.message);
+      else toast.success(`Sent a drink ping to ${username}! 🍻`);
     } catch (e) {
       console.error(e)
     }
@@ -245,10 +226,10 @@ export default function Groups() {
     setIsScanning(false)
     if (decodedText && decodedText.length === 36) {
       await handleSendRequest(decodedText)
-      alert("Friend request sent!")
+      toast.success("Friend request sent!")
     } else if (decodedText.includes('/connect/')) {
       window.location.href = decodedText;
-    } else { alert("Invalid user QR code.") }
+    } else { toast.error("Invalid user QR code.") }
   }
 
   // --- NFC HANDLERS ---
@@ -407,6 +388,7 @@ export default function Groups() {
           <Users size={22} style={{ color: 'var(--amber)' }} /> The Crew
         </h1>
         <div className="flex items-center gap-2">
+          <EmergencySOS />
           <button onClick={() => setShowQR(true)} className="p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }} title="Show QR">
             <QrCode size={18} />
           </button>

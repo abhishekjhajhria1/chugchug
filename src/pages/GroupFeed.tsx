@@ -8,30 +8,13 @@ import LiveCounter from "../components/LiveCounter"
 import PhotoMetadata from "../components/PhotoMetadata"
 import { getRankInfo, getCrewStreakInfo } from "../lib/progression"
 import type { CrewStreakInfo } from "../lib/progression"
+import { useToast } from "../components/Toast"
+import { generateSessionCode } from "../utils/crypto"
+import { CAT_COLORS } from "../constants/categories"
+import type { ActivityLog } from "../types"
 
-export interface ActivityLog {
-    id: string
-    user_id: string
-    category: string
-    item_name: string
-    quantity: number
-    xp_earned: number
-    photo_url: string | null
-    created_at: string
-    profiles?: {
-        username: string
-        level?: number
-    }
-    log_appraisals?: {
-        vote_type: string
-        appraiser_id: string
-    }[]
-    photo_metadata?: any | null
-    photo_verifications?: {
-        verifier_id: string
-        profiles?: { username: string }
-    }[]
-}
+// ActivityLog type is now imported from ../types
+
 
 
 
@@ -39,6 +22,7 @@ export default function GroupFeed() {
     const { id } = useParams()
     const navigate = useNavigate()
     const { user } = useChug()
+    const toast = useToast()
 
     const [group, setGroup] = useState<{ name: string, invite_code: string } | null>(null)
     const [logs, setLogs] = useState<ActivityLog[]>([])
@@ -187,7 +171,7 @@ export default function GroupFeed() {
         const targetLog = logs.find(l => l.id === logId)
         if (!targetLog) return
         if (targetLog.user_id === user.id) {
-            alert("You cannot appraise your own activity.")
+            toast.error("You cannot appraise your own activity.")
             return
         }
 
@@ -215,14 +199,14 @@ export default function GroupFeed() {
             }
             fetchGroupData()
         } else {
-            alert("Error appraising: " + error.message)
+            toast.error("Error appraising: " + error.message)
         }
     }
 
     const handleSplitSubmit = async () => {
         if (!user || !id || !splitTitle.trim() || !splitAmount || isNaN(Number(splitAmount))) return
-        if (selectedSplitters.length === 0) return alert("Select at least one person to split with.")
-        if (Number(splitAmount) <= 0) return alert("Amount must be greater than 0.")
+        if (selectedSplitters.length === 0) { toast.error("Select at least one person to split with."); return }
+        if (Number(splitAmount) <= 0) { toast.error("Amount must be greater than 0."); return }
 
         setSubmittingSplit(true)
         try {
@@ -265,14 +249,14 @@ export default function GroupFeed() {
             const { error: splitErr } = await supabase.from('expense_splits').insert(splitsToInsert)
             if (splitErr) throw splitErr
 
-            alert("Expense added successfully!")
+            toast.success("Expense added successfully!")
             setShowSplitModal(false)
             setSplitTitle("")
             setSplitAmount("")
 
             // Note: Since Splitwise just creates DB records, we just redirect to Balances if they want
         } catch (err: any) {
-            alert("Error creating split: " + err.message)
+            toast.error("Error creating split: " + err.message)
         } finally {
             setSubmittingSplit(false)
         }
@@ -299,9 +283,11 @@ export default function GroupFeed() {
     const handleStartGroupSession = async () => {
         if (!user || !id) return
         setStartingSession(true)
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
         let code = ''
-        for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)]
+        const arr = new Uint8Array(6)
+        crypto.getRandomValues(arr)
+        const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+        for (let i = 0; i < 6; i++) code += charset[arr[i] % charset.length]
         const { data, error } = await supabase.from('drinking_sessions').insert({
             creator_id: user.id, group_id: id, join_code: code, status: 'active'
         }).select('id, join_code').single()
@@ -309,7 +295,7 @@ export default function GroupFeed() {
             await supabase.from('session_participants').insert({ session_id: data.id, user_id: user.id })
             navigate(`/session/${data.id}`)
         } else {
-            alert('Failed to start session')
+            toast.error('Failed to start session')
         }
         setStartingSession(false)
     }
@@ -365,7 +351,7 @@ export default function GroupFeed() {
             {/* Quick Actions / Info Row */}
             <div className="grid grid-cols-2 gap-2 my-4">
                 {/* Invite Code */}
-                <div onClick={() => { navigator.clipboard.writeText(group?.invite_code || ''); alert('Code Copied!') }} className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 cursor-pointer relative overflow-hidden group/tile" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+                <div onClick={() => { navigator.clipboard.writeText(group?.invite_code || ''); toast.success('Code Copied!') }} className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 cursor-pointer relative overflow-hidden group/tile" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
                     <span className="text-[10px] uppercase font-bold tracking-widest leading-none z-10" style={{ color: 'var(--text-muted)' }}>Invite Code</span>
                     <span className="text-xl font-black tracking-widest mt-1 z-10" style={{ color: 'var(--amber)', fontFamily: 'Syne, sans-serif' }}>{group?.invite_code || "---"}</span>
                     <div className="absolute top-0 right-0 p-1 opacity-5 group-hover/tile:opacity-10 transition-opacity"><Users size={60} /></div>
@@ -380,7 +366,7 @@ export default function GroupFeed() {
                         event_date: new Date().toISOString(), status: 'active'
                     }).select().single();
                     if (data) navigate(`/party/${data.id}`);
-                    if (error) alert(error.message);
+                    if (error) toast.error(error.message);
                 }}
                     className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile"
                     style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
@@ -569,7 +555,7 @@ export default function GroupFeed() {
                         const legendaryVotes = log.log_appraisals?.filter(a => a.vote_type === 'legendary').length || 0
                         const userVote = log.log_appraisals?.find(a => a.appraiser_id === user?.id)?.vote_type
 
-                        const catColors: Record<string, string> = { drink: 'var(--amber)', snack: 'var(--coral)', cigarette: 'var(--acid)', gym: 'var(--amber)', detox: 'var(--acid)' }
+                        const catColors = CAT_COLORS
                         const badgeColor = catColors[log.category] || '#CCC'
 
                         const userLevel = log.profiles?.level || 1
