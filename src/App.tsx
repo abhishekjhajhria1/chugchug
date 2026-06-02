@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
 import { useChug } from "./context/ChugContext"
 import Layout from "./components/Layout"
-import BottomNav from "./components/BottomNav"
 import ErrorBoundary from "./components/ErrorBoundary"
 import ManaByteOverlay from "./components/ManaByteOverlay"
 
@@ -110,7 +109,6 @@ function App() {
         <Route path="/auth"                element={<Navigate to="/" replace />} />
         <Route path="*"                    element={<Navigate to="/" replace />} />
       </Routes>
-      <BottomNav />
     </Layout>
   )
 }

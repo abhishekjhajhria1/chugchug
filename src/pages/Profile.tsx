@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Lock } from "lucide-react"
 import { useChug } from "../context/ChugContext"
@@ -15,6 +16,7 @@ export default function Profile() {
   const { user, profile, refreshProfile } = useChug()
   const { theme, setTheme, getThemeUnlocks } = useTheme()
   const toast = useToast()
+  const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [showArchetypeQuiz, setShowArchetypeQuiz] = useState(false)
   const [editForm, setEditForm] = useState({ bio: "", college: "", city: "", country: "", stealth_mode: false })
@@ -104,7 +106,7 @@ export default function Profile() {
             <Edit3 size={15} /> Edit
           </button>
         ) : (
-          <button onClick={() => setIsEditing(false)} className="glass-btn-secondary flex items-center gap-2 text-sm" style={{ padding: '8px 16px', borderColor: 'rgba(229,83,75,0.3)', color: 'var(--danger)' }}>
+          <button onClick={() => setIsEditing(false)} className="glass-btn-secondary flex items-center gap-2 text-sm" style={{ padding: '8px 16px', borderColor: 'rgba(229,83,75,0.3)', color: 'var(--danger, var(--coral))' }}>
             <X size={15} /> Cancel
           </button>
         )}
@@ -146,12 +148,6 @@ export default function Profile() {
             </div>
           </div>
         </div>
-        <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
 
         <h2 className="text-xl font-black mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
           {p.username}
@@ -277,7 +273,7 @@ export default function Profile() {
               </div>
             )}
 
-            <button onClick={() => window.location.href = '/calendar'} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(124,154,116,0.25)', color: 'var(--acid)' }}>
+            <button onClick={() => navigate('/calendar')} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(124,154,116,0.25)', color: 'var(--acid)' }}>
               <CalendarDays size={18} /> Drinking Calendar
             </button>
             <button onClick={() => setShowMyQR(true)} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(245,166,35,0.25)', color: 'var(--amber)' }}>
@@ -286,15 +282,15 @@ export default function Profile() {
 
             {/* Quick nav row */}
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => window.location.href = '/tavern'} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
+              <button onClick={() => navigate('/tavern')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
                 🏯 Tavern
               </button>
               {!p.is_premium ? (
-                <button onClick={() => window.location.href = '/premium'} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)', borderRadius: 'var(--card-radius)' }}>
+                <button onClick={() => navigate('/premium')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)', borderRadius: 'var(--card-radius)' }}>
                   👑 Go Premium
                 </button>
               ) : (
-                <button onClick={() => window.location.href = '/challenges'} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
+                <button onClick={() => navigate('/challenges')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
                   ⚔️ Challenges
                 </button>
               )}
@@ -516,7 +512,7 @@ export default function Profile() {
       <button
         onClick={handleLogout}
         className="glass-btn-secondary w-full py-4 flex items-center justify-center gap-2 text-sm"
-        style={{ borderColor: 'rgba(229,83,75,0.25)', color: 'var(--danger)' }}
+        style={{ borderColor: 'rgba(229,83,75,0.25)', color: 'var(--danger, var(--coral))' }}
       >
         <LogOut size={18} /> Sign Out
       </button>

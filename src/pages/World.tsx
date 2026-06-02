@@ -211,7 +211,7 @@ export default function World() {
 
 
     return (
-        <div className="space-y-6 pb-32">
+        <div className="space-y-6 pb-24">
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
@@ -258,8 +258,8 @@ export default function World() {
                             <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Total XP</p>
                         </div>
                     </div>
-                    <div className="mt-3 rounded-full h-3 overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
-                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(userPercentile, 100)}%`, background: 'linear-gradient(90deg, var(--amber), var(--coral))' }} />
+                    <div className="mt-3 h-3 overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}>
+                        <div className="h-full transition-all duration-1000" style={{ width: `${Math.min(userPercentile, 100)}%`, background: 'linear-gradient(90deg, var(--amber), var(--coral))', borderRadius: 'var(--card-radius)' }} />
                     </div>
                 </div>
             )}

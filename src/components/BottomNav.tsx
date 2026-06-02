@@ -14,16 +14,17 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 safe-bottom pb-2"
+      className="desktop-bottom-nav fixed bottom-0 left-0 right-0 z-50 safe-bottom"
       style={{
         background: 'var(--bg-overlay, rgba(11, 17, 31, 0.95))',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)',
+        backdropFilter: 'blur(30px) saturate(1.2)',
+        WebkitBackdropFilter: 'blur(30px) saturate(1.2)',
         borderTop: '1px solid var(--border-mid)',
         boxShadow: '0 -4px 30px rgba(0, 0, 0, 0.15)',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))',
       }}
     >
-      <div className="max-w-lg mx-auto flex items-end justify-around px-2 pt-1 pb-2">
+      <div className="flex items-end justify-around px-2 pt-1 pb-2">
         {tabs.map(({ path, icon: Icon, label }) => {
           const isActive = pathname === path || (path !== "/" && pathname.startsWith(path))
           const isHome = path === "/" && pathname === "/"

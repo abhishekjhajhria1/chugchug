@@ -437,7 +437,7 @@ export default function Log() {
             </div>
           )}
           {privacy === 'groups' && groups.length === 0 && (
-            <p className="text-xs font-medium mt-2" style={{ color: 'var(--danger)' }}>
+            <p className="text-xs font-medium mt-2" style={{ color: 'var(--danger, var(--coral))' }}>
               ⚠️ You're not in any groups. This will be private.
             </p>
           )}

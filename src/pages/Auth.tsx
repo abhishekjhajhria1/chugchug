@@ -84,7 +84,7 @@ export default function Auth() {
           WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid var(--border-mid)',
           borderTopColor: 'var(--amber-dim)',
-          borderRadius: 24,
+          borderRadius: 'var(--card-radius)',
           padding: '36px 28px 32px',
           boxShadow: 'var(--card-shadow)',
         }}
@@ -153,10 +153,11 @@ export default function Auth() {
 
           {error && (
             <div
-              className="rounded-xl px-4 py-3 anim-slide"
+              className="px-4 py-3 anim-slide"
               style={{
                 background: 'var(--coral-dim)',
                 border: '1px solid rgba(255,107,107,0.25)',
+                borderRadius: 'var(--card-radius)',
               }}
             >
               <p className="text-sm font-semibold" style={{ color: 'var(--coral)' }}>

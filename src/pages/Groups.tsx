@@ -404,7 +404,7 @@ export default function Groups() {
       </div>
 
       {/* TABS */}
-      <div className="flex rounded-2xl overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)' }}>
+      <div className="flex overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)', borderRadius: 'var(--card-radius)' }}>
         {([
           { id: 'crews' as const, label: 'Crews', icon: Users, color: 'var(--amber)' },
           { id: 'buddies' as const, label: 'Buddies', icon: UserCheck, color: 'var(--acid)' },
@@ -442,7 +442,7 @@ export default function Groups() {
               <Plus size={16} strokeWidth={2.5} /> New Crew
             </button>
             {showDropdown && (
-              <div className="absolute top-12 right-0 w-48 rounded-2xl overflow-hidden z-50" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-mid)' }}>
+              <div className="absolute top-12 right-0 w-48 overflow-hidden z-50" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-mid)', borderRadius: 'var(--card-radius)' }}>
                 <button onClick={() => { setModalMode('create'); setShowDropdown(false) }} className="w-full text-left px-4 py-3 font-bold text-sm" style={{ color: 'var(--text-primary)', borderBottom: '1px solid var(--border)' }}>✨ Create New Group</button>
                 <button onClick={() => { setModalMode('join'); setShowDropdown(false) }} className="w-full text-left px-4 py-3 font-bold text-sm" style={{ color: 'var(--text-primary)' }}>🔗 Join with Code</button>
               </div>
@@ -488,11 +488,11 @@ export default function Groups() {
                   <button
                     key={g.id}
                     onClick={() => navigate(`/group/${g.id}`)}
-                    className="snap-start shrink-0 rounded-2xl px-4 py-3 transition-all active:scale-95 flex flex-col gap-3 min-w-[160px] text-left"
-                    style={{ background: 'var(--card-bg)', border: '1px solid var(--border-warm)', minWidth: 160 }}
+                    className="snap-start shrink-0 px-4 py-3 transition-all active:scale-95 flex flex-col gap-3 min-w-[160px] text-left"
+                    style={{ background: 'var(--card-bg)', border: '1px solid var(--border-warm)', borderRadius: 'var(--card-radius)', minWidth: 160 }}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--amber-dim)' }}>
+                      <div className="w-8 h-8 flex items-center justify-center" style={{ background: 'var(--amber-dim)', borderRadius: 'var(--card-radius)' }}>
                         <Users size={16} strokeWidth={2} style={{ color: 'var(--amber)' }} />
                       </div>
                       <span className="font-black text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'Syne, sans-serif' }}>{g.name}</span>
@@ -511,7 +511,7 @@ export default function Groups() {
             </div>
           )}
           {groups.length === 0 && !loading && (
-            <div className="text-center py-8 rounded-2xl" style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-mid)' }}>
+            <div className="text-center py-8" style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-mid)', borderRadius: 'var(--card-radius)' }}>
               <p className="font-bold text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>You're not in any groups yet</p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Create or join one above!</p>
             </div>
@@ -520,7 +520,7 @@ export default function Groups() {
           <div>
             <p className="section-label mb-3">Group Activity Feed</p>
             {groupFeed.length === 0 && !loading ? (
-              <div className="text-center rounded-2xl py-10" style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-mid)' }}>
+              <div className="text-center py-10" style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-mid)', borderRadius: 'var(--card-radius)' }}>
                 <Activity size={28} className="mx-auto mb-3" style={{ color: 'var(--text-ghost)' }} />
                 <p className="font-semibold text-sm" style={{ color: 'var(--text-muted)' }}>No group activity yet.</p>
               </div>
@@ -620,7 +620,7 @@ export default function Groups() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {suggestions.map(s => (
-                <div key={s.suggested_id} className="flex flex-col p-4 rounded-2xl group" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)' }}>
+                <div key={s.suggested_id} className="flex flex-col p-4 group" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'var(--bg-surface)' }}>
                       {s.avatar_url ? <img src={s.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center" style={{ color: 'var(--text-muted)' }}><UserCheck size={16} /></div>}
@@ -630,7 +630,7 @@ export default function Groups() {
                       <p className="text-[10px] uppercase tracking-wider font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}><Zap size={10} /> Partied {s.interaction_count} times</p>
                     </div>
                   </div>
-                  <button onClick={() => handleSendRequest(s.suggested_id)} className="w-full py-2.5 text-[10px] uppercase tracking-widest font-black rounded-xl flex items-center justify-center gap-2" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                  <button onClick={() => handleSendRequest(s.suggested_id)} className="w-full py-2.5 text-[10px] uppercase tracking-widest font-black flex items-center justify-center gap-2" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}>
                     Send Request <ArrowRight size={14} />
                   </button>
                 </div>
@@ -649,13 +649,13 @@ export default function Groups() {
       {/* QR Modals */}
       {showQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 anim-fade" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
-          <div className="p-8 rounded-[32px] max-w-sm w-full relative flex flex-col items-center gap-6 anim-enter" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', boxShadow: '0 16px 64px rgba(0,0,0,0.6)' }}>
+          <div className="p-8 max-w-sm w-full relative flex flex-col items-center gap-6 anim-enter" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', boxShadow: '0 16px 64px rgba(0,0,0,0.6)', borderRadius: 'var(--card-radius)' }}>
             <button onClick={() => setShowQR(false)} className="absolute top-4 right-4 p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)' }}><X size={16} /></button>
             <div className="text-center">
               <h3 className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Your Profile Code</h3>
               <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Let someone scan this to add you instantly.</p>
             </div>
-            <div className="p-4 bg-white rounded-2xl" style={{ boxShadow: 'var(--amber-glow)' }}>
+            <div className="p-4 bg-white" style={{ boxShadow: 'var(--amber-glow)', borderRadius: 'var(--card-radius)' }}>
               <QRCodeSVG value={user?.id || ""} size={200} />
             </div>
           </div>

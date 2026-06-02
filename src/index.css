@@ -78,6 +78,12 @@
   --glass-fill-elevated:var(--bg-raised);
   --glass-fill-hover:   rgba(255, 255, 255, 0.9);
   --glass-fill-inset:   var(--input-bg);
+
+  --danger:      #DC2626;
+
+  /* Layout spacing */
+  --header-height: 60px;
+  --bottom-nav-height: 72px;
 }
 
 .dark {
@@ -152,6 +158,8 @@
   --glass-fill-elevated:var(--bg-raised);
   --glass-fill-hover:   rgba(30, 44, 69, 0.9);
   --glass-fill-inset:   var(--input-bg);
+
+  --danger:      #EF4444;
 }
 
 .verdant {
@@ -332,6 +340,8 @@
   --glass-fill-elevated:var(--bg-raised);
   --glass-fill-hover:   rgba(42, 30, 60, 0.9);
   --glass-fill-inset:   var(--input-bg);
+
+  --danger:      #F06080;
 }
 
 /* Sakura ambient glow */
@@ -402,6 +412,8 @@
   --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
   --glass-fill-elevated: var(--bg-raised);
   --glass-fill-hover: rgba(24,38,66,0.9); --glass-fill-inset: var(--input-bg);
+
+  --danger: #E05555;
 }
 
 .midnight body::before {
@@ -467,6 +479,8 @@
   --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
   --glass-fill-elevated: var(--bg-raised);
   --glass-fill-hover: rgba(54,30,24,0.9); --glass-fill-inset: var(--input-bg);
+
+  --danger: #E83A3A;
 }
 
 .ember body::before {
@@ -532,6 +546,8 @@
   --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
   --glass-fill-elevated: var(--bg-raised);
   --glass-fill-hover: rgba(30,42,60,0.9); --glass-fill-inset: var(--input-bg);
+
+  --danger: #E86A80;
 }
 
 .frost body::before {
@@ -597,6 +613,8 @@
   --glass-border-strong: var(--border-mid); --glass-fill: var(--card-bg);
   --glass-fill-elevated: var(--bg-raised);
   --glass-fill-hover: rgba(44,40,32,0.9); --glass-fill-inset: var(--input-bg);
+
+  --danger: #D44040;
 }
 
 .gold body::before {
@@ -611,6 +629,508 @@
   color: #0E0C08;
   box-shadow: 0 4px 16px rgba(232,196,74,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   🖥️ DESKTOP DESIGN SYSTEM v2
+   Cinematic sidebar, animated orbs, theme-reactive chrome.
+   Mobile: untouched. Desktop (≥768px): immersive two-panel.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base (Mobile-first — no changes) ── */
+.desktop-outer {
+  min-height: 100dvh;
+  background: var(--bg-deep);
+}
+
+.desktop-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  position: relative;
+}
+
+.desktop-shell > main { flex: 1; }
+.desktop-bottom-nav { margin-top: auto; }
+
+/* Hide sidebar & desktop-only elements on mobile */
+.desktop-sidebar { display: none; }
+.desktop-orbs { display: none; }
+
+/* ── Desktop Theme Variables ── */
+:root {
+  --desktop-bg: #060612;
+  --desktop-accent-rgb: 216,162,94;
+  --desktop-text: rgba(255,255,255,0.75);
+  --desktop-text-muted: rgba(255,255,255,0.4);
+  --desktop-text-bright: rgba(255,255,255,0.9);
+  --desktop-sidebar-bg: rgba(255,255,255,0.04);
+  --desktop-sidebar-border: rgba(255,255,255,0.08);
+  --desktop-shell-glow: rgba(216,162,94,0.15);
+  --desktop-glow-1: rgba(216,162,94,0.12);
+  --desktop-glow-2: rgba(209,32,32,0.08);
+  --desktop-glow-3: rgba(124,154,116,0.06);
+}
+
+.dark {
+  --desktop-bg: #040818;
+  --desktop-accent-rgb: 216,162,94;
+  --desktop-shell-glow: rgba(216,162,94,0.18);
+  --desktop-glow-1: rgba(216,162,94,0.14);
+  --desktop-glow-2: rgba(255,183,197,0.08);
+  --desktop-glow-3: rgba(209,32,32,0.06);
+}
+
+:root:not(.dark):not(.midnight):not(.sakura):not(.ember):not(.frost):not(.gold):not(.verdant) {
+  --desktop-bg: #18140E;
+  --desktop-accent-rgb: 216,142,48;
+  --desktop-shell-glow: rgba(216,142,48,0.15);
+  --desktop-glow-1: rgba(216,142,48,0.1);
+  --desktop-glow-2: rgba(216,60,60,0.06);
+  --desktop-glow-3: rgba(95,150,98,0.05);
+}
+
+.midnight {
+  --desktop-bg: #030A18;
+  --desktop-accent-rgb: 74,158,214;
+  --desktop-shell-glow: rgba(74,158,214,0.22);
+  --desktop-glow-1: rgba(74,158,214,0.15);
+  --desktop-glow-2: rgba(61,214,140,0.08);
+  --desktop-glow-3: rgba(91,142,245,0.08);
+}
+
+.sakura {
+  --desktop-bg: #0A0510;
+  --desktop-accent-rgb: 232,117,168;
+  --desktop-shell-glow: rgba(232,117,168,0.22);
+  --desktop-glow-1: rgba(232,117,168,0.14);
+  --desktop-glow-2: rgba(196,57,124,0.1);
+  --desktop-glow-3: rgba(168,137,212,0.08);
+}
+
+.ember {
+  --desktop-bg: #0C0605;
+  --desktop-accent-rgb: 240,133,58;
+  --desktop-shell-glow: rgba(240,133,58,0.25);
+  --desktop-glow-1: rgba(240,133,58,0.16);
+  --desktop-glow-2: rgba(232,58,58,0.1);
+  --desktop-glow-3: rgba(212,170,74,0.08);
+}
+
+.frost {
+  --desktop-bg: #050A14;
+  --desktop-accent-rgb: 122,197,232;
+  --desktop-shell-glow: rgba(122,197,232,0.22);
+  --desktop-glow-1: rgba(122,197,232,0.14);
+  --desktop-glow-2: rgba(136,212,176,0.08);
+  --desktop-glow-3: rgba(106,160,216,0.08);
+}
+
+.gold {
+  --desktop-bg: #080605;
+  --desktop-accent-rgb: 232,196,74;
+  --desktop-shell-glow: rgba(232,196,74,0.25);
+  --desktop-glow-1: rgba(232,196,74,0.16);
+  --desktop-glow-2: rgba(212,64,64,0.08);
+  --desktop-glow-3: rgba(184,208,96,0.06);
+}
+
+.verdant {
+  --desktop-bg: #080C06;
+  --desktop-accent-rgb: 107,158,122;
+  --desktop-shell-glow: rgba(107,158,122,0.18);
+  --desktop-glow-1: rgba(107,158,122,0.12);
+  --desktop-glow-2: rgba(196,114,74,0.08);
+  --desktop-glow-3: rgba(212,160,67,0.06);
+}
+
+/* ══════════════════════════════════════
+   DESKTOP LAYOUT (≥768px)
+   ══════════════════════════════════════ */
+@media (min-width: 768px) {
+
+  .desktop-outer {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    background: var(--desktop-bg);
+    position: relative;
+  }
+
+  /* Bright animated ambient blobs */
+  .desktop-outer::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 10% 10%, var(--desktop-glow-1) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 60% at 90% 85%, var(--desktop-glow-2) 0%, transparent 50%),
+      radial-gradient(ellipse 70% 40% at 50% 50%, var(--desktop-glow-3) 0%, transparent 45%),
+      radial-gradient(ellipse 40% 50% at 75% 15%, var(--desktop-glow-1) 0%, transparent 50%);
+    animation: dkAmbient 16s ease-in-out infinite alternate;
+  }
+
+  /* Dot grid */
+  .desktop-outer::after {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+    opacity: 0.4;
+    background-image: radial-gradient(circle, rgba(var(--desktop-accent-rgb), 0.35) 0.6px, transparent 0.6px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 10%, transparent 65%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 10%, transparent 65%);
+  }
+
+  /* ── Floating Orbs ── */
+  .desktop-orbs {
+    display: block;
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+  }
+  .desktop-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    will-change: transform, opacity;
+  }
+  .desktop-orb:nth-child(1) {
+    width: 300px; height: 300px;
+    top: -5%; left: -5%;
+    background: var(--desktop-glow-1);
+    animation: dkOrb1 18s ease-in-out infinite;
+  }
+  .desktop-orb:nth-child(2) {
+    width: 250px; height: 250px;
+    bottom: -5%; right: 5%;
+    background: var(--desktop-glow-2);
+    animation: dkOrb2 22s ease-in-out infinite;
+  }
+  .desktop-orb:nth-child(3) {
+    width: 200px; height: 200px;
+    top: 40%; right: 20%;
+    background: var(--desktop-glow-3);
+    animation: dkOrb3 15s ease-in-out infinite;
+  }
+  .desktop-orb:nth-child(4) {
+    width: 180px; height: 180px;
+    top: 20%; left: 15%;
+    background: var(--desktop-glow-1);
+    opacity: 0.5;
+    animation: dkOrb4 20s ease-in-out infinite;
+  }
+
+  /* ── Phone Shell ── */
+  .desktop-shell {
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    border-left: 1px solid rgba(255,255,255,0.07);
+    border-right: 1px solid rgba(255,255,255,0.07);
+    box-shadow:
+      0 0 80px var(--desktop-shell-glow),
+      0 0 160px rgba(0, 0, 0, 0.5);
+    transition: box-shadow 0.6s ease;
+  }
+
+  /* ── Sticky Header + Bottom Nav ── */
+  .desktop-header {
+    max-width: 480px;
+    left: auto !important;
+    right: auto !important;
+    width: 480px;
+    position: sticky !important;
+    top: 0;
+  }
+  .desktop-bottom-nav {
+    max-width: 480px;
+    left: auto !important;
+    right: auto !important;
+    width: 480px;
+    position: sticky !important;
+    bottom: 0;
+  }
+
+  /* ══════════════════════════════════════
+     SIDEBAR — Cinematic Branded Panel
+     ══════════════════════════════════════ */
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 360px;
+    min-width: 300px;
+    max-width: 380px;
+    padding: 40px 28px;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  /* Sidebar ambient glow */
+  .desktop-sidebar::before {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(var(--desktop-accent-rgb), 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 70% 80%, rgba(var(--desktop-accent-rgb), 0.04) 0%, transparent 60%);
+    animation: dkSidebarGlow 12s ease-in-out infinite alternate;
+  }
+
+  .desktop-sidebar-inner { position: relative; z-index: 2; }
+
+  /* ── Sidebar Card — Glassmorphism ── */
+  .desktop-sidebar-card {
+    background: linear-gradient(165deg,
+      rgba(var(--desktop-accent-rgb), 0.06) 0%,
+      var(--desktop-sidebar-bg) 30%,
+      rgba(0,0,0,0.2) 100%
+    );
+    border: 1px solid var(--desktop-sidebar-border);
+    border-radius: 20px;
+    padding: 36px 28px 28px;
+    backdrop-filter: blur(24px) saturate(1.3);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  /* Accent glow line at top */
+  .desktop-sidebar-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+      transparent 5%, rgba(var(--desktop-accent-rgb), 0.6) 30%,
+      rgba(var(--desktop-accent-rgb), 0.8) 50%,
+      rgba(var(--desktop-accent-rgb), 0.6) 70%, transparent 95%);
+    animation: dkAccentLine 4s ease-in-out infinite alternate;
+  }
+
+  /* Shimmer sweep */
+  .desktop-sidebar-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; right: 0;
+    width: 200%; height: 100%;
+    background: linear-gradient(105deg,
+      transparent 40%, rgba(var(--desktop-accent-rgb), 0.03) 45%,
+      rgba(var(--desktop-accent-rgb), 0.06) 50%,
+      rgba(var(--desktop-accent-rgb), 0.03) 55%, transparent 60%);
+    animation: dkShimmer 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* ── Logo ── */
+  .desktop-sidebar-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900; font-size: 32px;
+    letter-spacing: -0.02em; color: #fff;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 6px; position: relative;
+  }
+  .desktop-sidebar-logo .logo-icon {
+    font-size: 44px; position: relative;
+    filter: drop-shadow(0 0 16px rgba(var(--desktop-accent-rgb), 0.5));
+    animation: dkLogoPulse 4s ease-in-out infinite;
+  }
+  .desktop-sidebar-logo .logo-orbit {
+    position: absolute; left: -8px; top: -8px;
+    width: 60px; height: 60px;
+    border: 1.5px dashed rgba(var(--desktop-accent-rgb), 0.25);
+    border-radius: 50%;
+    animation: dkOrbitSpin 20s linear infinite;
+  }
+
+  .desktop-sidebar-tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    color: var(--desktop-text-muted);
+    margin-bottom: 28px; line-height: 1.6;
+  }
+  .desktop-sidebar-tagline strong {
+    color: var(--desktop-text-bright); font-weight: 700;
+  }
+
+  /* ── Features — Hoverable cards ── */
+  .desktop-sidebar-features {
+    list-style: none; padding: 0;
+    margin: 0 0 24px 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .desktop-sidebar-features li {
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--desktop-text);
+    padding: 10px 14px; border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: default;
+  }
+  .desktop-sidebar-features li:hover {
+    color: #fff;
+    background: rgba(var(--desktop-accent-rgb), 0.08);
+    border-color: rgba(var(--desktop-accent-rgb), 0.15);
+    transform: translateX(6px);
+    box-shadow: 0 4px 20px rgba(var(--desktop-accent-rgb), 0.1);
+  }
+  .desktop-sidebar-features .feature-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    background: rgba(var(--desktop-accent-rgb), 0.1);
+    border: 1px solid rgba(var(--desktop-accent-rgb), 0.12);
+    flex-shrink: 0; transition: all 0.3s ease;
+  }
+  .desktop-sidebar-features li:hover .feature-icon {
+    background: rgba(var(--desktop-accent-rgb), 0.18);
+    box-shadow: 0 0 16px rgba(var(--desktop-accent-rgb), 0.2);
+  }
+
+  /* ── Divider ── */
+  .desktop-sidebar-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent,
+      rgba(var(--desktop-accent-rgb), 0.25) 30%,
+      rgba(var(--desktop-accent-rgb), 0.4) 50%,
+      rgba(var(--desktop-accent-rgb), 0.25) 70%, transparent);
+    margin: 4px 0 20px 0;
+  }
+
+  /* ── Theme Indicator — Glowing pill ── */
+  .desktop-sidebar-theme {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: rgba(var(--desktop-accent-rgb), 0.06);
+    border: 1px solid rgba(var(--desktop-accent-rgb), 0.12);
+    border-radius: 14px; margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+  .desktop-sidebar-theme:hover {
+    background: rgba(var(--desktop-accent-rgb), 0.1);
+    border-color: rgba(var(--desktop-accent-rgb), 0.2);
+  }
+  .desktop-sidebar-theme .theme-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: rgba(var(--desktop-accent-rgb), 1);
+    box-shadow: 0 0 8px rgba(var(--desktop-accent-rgb), 0.6), 0 0 20px rgba(var(--desktop-accent-rgb), 0.3);
+    animation: dkThemePulse 2.5s ease-in-out infinite;
+  }
+  .desktop-sidebar-theme .theme-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 13px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--desktop-text-bright);
+  }
+  .desktop-sidebar-theme .theme-label {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: rgba(var(--desktop-accent-rgb), 0.7);
+    margin-left: auto;
+    background: rgba(var(--desktop-accent-rgb), 0.1);
+    padding: 3px 8px; border-radius: 6px;
+  }
+
+  /* ── Footer ── */
+  .desktop-sidebar-footer {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px; font-weight: 500;
+    color: var(--desktop-text-muted);
+    text-align: center; line-height: 1.7; margin-top: 4px;
+  }
+  .desktop-sidebar-footer span {
+    display: block; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    opacity: 0.5; margin-top: 6px;
+  }
+
+  /* ── Floating decorations ── */
+  .desktop-sidebar-decor {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  .desktop-sidebar-decor .decor-item {
+    position: absolute; opacity: 0.06;
+    animation: dkFloat 18s ease-in-out infinite;
+    will-change: transform;
+  }
+  .desktop-sidebar-decor .decor-item:nth-child(1) { top: 5%; right: 8%; font-size: 72px; animation-duration: 24s; }
+  .desktop-sidebar-decor .decor-item:nth-child(2) { bottom: 10%; left: 3%; font-size: 48px; animation-duration: 18s; animation-delay: -5s; }
+  .desktop-sidebar-decor .decor-item:nth-child(3) { top: 50%; right: 3%; font-size: 36px; animation-duration: 20s; animation-delay: -10s; }
+
+  /* ── Staggered entrance ── */
+  .desktop-sidebar .s-anim-1 { animation: dkSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+  .desktop-sidebar .s-anim-2 { animation: dkSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both; }
+  .desktop-sidebar .s-anim-3 { animation: dkSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both; }
+  .desktop-sidebar .s-anim-4 { animation: dkSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both; }
+  .desktop-sidebar .s-anim-5 { animation: dkSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.65s both; }
+}
+
+/* Hide sidebar below 1100px */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .desktop-sidebar { display: none; }
+}
+
+/* ══════════════════════════════════════
+   DESKTOP ANIMATIONS
+   ══════════════════════════════════════ */
+@keyframes dkAmbient {
+  0%   { opacity: 1; transform: scale(1) rotate(0deg); }
+  50%  { opacity: 0.85; transform: scale(1.08) rotate(1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes dkOrb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+  33% { transform: translate(60px, 40px) scale(1.15); opacity: 1; }
+  66% { transform: translate(-20px, 60px) scale(0.9); opacity: 0.7; }
+}
+@keyframes dkOrb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+  40% { transform: translate(-50px, -30px) scale(1.2); opacity: 1; }
+  70% { transform: translate(30px, -50px) scale(0.85); opacity: 0.6; }
+}
+@keyframes dkOrb3 {
+  0%, 100% { transform: translate(0, 0); opacity: 0.6; }
+  50% { transform: translate(-40px, 30px); opacity: 1; }
+}
+@keyframes dkOrb4 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  50% { transform: translate(30px, -20px) scale(1.1); opacity: 0.7; }
+}
+@keyframes dkLogoPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 16px rgba(var(--desktop-accent-rgb), 0.5)); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 28px rgba(var(--desktop-accent-rgb), 0.7)); }
+}
+@keyframes dkOrbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes dkThemePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(var(--desktop-accent-rgb), 0.6), 0 0 20px rgba(var(--desktop-accent-rgb), 0.3); }
+  50% { transform: scale(1.2); box-shadow: 0 0 12px rgba(var(--desktop-accent-rgb), 0.8), 0 0 30px rgba(var(--desktop-accent-rgb), 0.4); }
+}
+@keyframes dkFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-18px) rotate(5deg); }
+  75% { transform: translateY(12px) rotate(-3deg); }
+}
+@keyframes dkSidebarGlow { 0% { opacity: 1; } 100% { opacity: 0.6; transform: scale(1.05); } }
+@keyframes dkAccentLine { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+@keyframes dkShimmer { 0% { transform: translateX(-30%); } 100% { transform: translateX(80%); } }
+@keyframes dkSlideIn {
+  from { opacity: 0; transform: translateX(-20px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+
+
+
+
 
 /* ──────────────── RESET ──────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; }
@@ -647,6 +1167,13 @@ body::before {
 .sakura-layer {
   position: fixed; inset: 0;
   pointer-events: none; z-index: 0; overflow: hidden;
+}
+
+/* On desktop, scope sakura petals to the shell */
+@media (min-width: 768px) {
+  .sakura-layer {
+    position: absolute;
+  }
 }
 
 .sakura-petal {
@@ -837,6 +1364,13 @@ body::before {
 }
 .anim-tap { animation: rubberTap 0.35s ease both; }
 
+/* ── Slide-in animation (used in Auth, World, etc.) ── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+.anim-slide { animation: slideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
 /* ── Confetti burst (used on log success) ── */
 @keyframes confettiBurst {
   0%   { transform: scale(0) rotate(0deg); opacity: 0; }
@@ -949,4 +1483,7 @@ body::after {
 
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-top { padding-top: env(safe-area-inset-top); }
 }
