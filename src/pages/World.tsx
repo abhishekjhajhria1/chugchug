@@ -226,7 +226,7 @@ export default function World() {
 
             {/* LIVE TICKER */}
             {recentActivities.length > 0 && (
-                <div className="rounded-sm px-4 py-3 flex items-center gap-3 overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                <div className="rounded-lg px-4 py-3 flex items-center gap-3 overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                     <div className="shrink-0 px-2 py-0.5 rounded-full font-black text-[10px] uppercase tracking-wider animate-pulse" style={{ background: 'var(--coral-dim)', color: 'var(--coral)' }}>Live</div>
                     <div className="flex-1 overflow-hidden">
                         <p className="font-bold text-sm truncate transition-all duration-500" style={{ color: 'var(--text-primary)' }}>
@@ -278,7 +278,7 @@ export default function World() {
                 </div>
 
                 {showExpForm && (
-                    <div className="rounded-sm p-4 mb-4 anim-slide" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                    <div className="rounded-lg p-4 mb-4 anim-slide" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                         <input value={newExpTitle} onChange={e => setNewExpTitle(e.target.value)} placeholder="A wild night at..." className="glass-input mb-3" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.1rem' }} />
                         <textarea value={newExpContent} onChange={e => setNewExpContent(e.target.value)} placeholder="Share your experience with the world..." className="glass-input mb-3" style={{ height: 96, resize: 'none' }} />
                         <div className="flex gap-2">
@@ -295,7 +295,7 @@ export default function World() {
                         <p className="text-center font-bold py-4" style={{ color: 'var(--text-muted)' }}>The void is silent. No tales yet.</p>
                     ) : (
                         experiences.map(exp => (
-                            <div key={exp.id} className="rounded-sm p-4" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)' }}>
+                            <div key={exp.id} className="rounded-lg p-4" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)' }}>
                                 <h3 className="font-black text-lg mb-1 leading-tight" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>{exp.title}</h3>
                                 <p className="text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>{exp.content}</p>
                                 <div className="flex items-center justify-between mt-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
@@ -340,7 +340,7 @@ export default function World() {
 
                                 {/* Comments Section */}
                                 {activeCommentExp === exp.id && (
-                                    <div className="mt-3 p-3 rounded-sm anim-slide" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border)' }}>
+                                    <div className="mt-3 p-3 rounded-lg anim-slide" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border)' }}>
                                         <div className="space-y-3 mb-3 max-h-40 overflow-y-auto scrollbar-none">
                                             {(!exp.comments || exp.comments.length === 0) ? (
                                                 <p className="text-center font-bold text-xs py-2" style={{ color: 'var(--text-ghost)' }}>No comments yet. Be the first!</p>
@@ -385,7 +385,7 @@ export default function World() {
                     </h2>
                     <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x">
                         {trending.map((item, i) => (
-                            <div key={item.item_name} className="snap-start shrink-0 rounded-sm px-4 py-3 min-w-[140px]" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div key={item.item_name} className="snap-start shrink-0 rounded-lg px-4 py-3 min-w-[140px]" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="font-black text-lg" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--coral)' }}>#{i + 1}</span>
                                     <Flame size={14} style={{ color: 'var(--coral)' }} />
@@ -405,7 +405,7 @@ export default function World() {
                     <h2 className="flex items-center gap-2 mb-3" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-primary)' }}>
                         <span className="text-2xl">🎯</span> Drink of the Day
                     </h2>
-                    <div className="rounded-sm p-4" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                    <div className="rounded-lg p-4" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                         <div className="flex justify-between items-start">
                             <div>
                                 <h3 className="font-black text-2xl leading-tight" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{drinkOfDay.item_name}</h3>
@@ -426,7 +426,7 @@ export default function World() {
                     {challenges.map(c => {
                         const progress = Math.min((c.current / c.target) * 100, 100)
                         return (
-                            <div key={c.id} className="rounded-sm p-4" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div key={c.id} className="rounded-lg p-4" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl">{c.icon}</span>
@@ -452,7 +452,7 @@ export default function World() {
                     <Star fill="var(--amber)" size={24} style={{ color: 'var(--amber)' }} /> Top World Activity
                 </h2>
                 {topActivity ? (
-                    <div className="rounded-sm p-4 cursor-pointer hover:-translate-y-1 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                    <div className="rounded-lg p-4 cursor-pointer hover:-translate-y-1 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                         <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
@@ -486,7 +486,7 @@ export default function World() {
                 {topRecipes.length > 0 ? (
                     <div className="space-y-4">
                         {topRecipes.map((recipe, index) => (
-                            <div key={recipe.id} className="flex rounded-sm overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div key={recipe.id} className="flex rounded-lg overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                                 <div className="font-black flex items-center justify-center w-12" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', borderRight: '1px solid var(--border)' }}>#{index + 1}</div>
                                 <div className="p-4 flex-1">
                                     <div className="flex justify-between items-start">
@@ -513,7 +513,7 @@ export default function World() {
                 {sortedCountries.length > 0 ? (
                     <div className="space-y-4">
                         {sortedCountries.map(([country, _data], countryIdx) => { const data = _data as { users: RankUser[]; totalXp: number }; return (
-                            <div key={country} className="rounded-sm overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                            <div key={country} className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                                 <div className="flex items-center justify-between px-4 py-3" style={{ background: countryIdx === 0 ? 'var(--amber-dim)' : 'transparent', borderBottom: '1px solid var(--border)' }}>
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl">{getFlag(country)}</span>
@@ -554,15 +554,15 @@ export default function World() {
                     <TrendingUp size={24} strokeWidth={2} style={{ color: 'var(--amber)' }} /> Global Stats
                 </h2>
                 <div className="grid grid-cols-3 gap-3">
-                    <div className="rounded-sm p-3 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                    <div className="rounded-lg p-3 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                         <p className="font-black text-2xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>{totalUsers}</p>
                         <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Players</p>
                     </div>
-                    <div className="rounded-sm p-3 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                    <div className="rounded-lg p-3 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                         <p className="font-black text-2xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--acid)' }}>{totalLogs}</p>
                         <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Activities</p>
                     </div>
-                    <div className="rounded-sm p-3 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+                    <div className="rounded-lg p-3 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
                         <p className="font-black text-2xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--coral)' }}>{sortedCountries.length}</p>
                         <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Regions</p>
                     </div>

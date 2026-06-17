@@ -225,7 +225,7 @@ export default function Log() {
           <button
             key={cat.id}
             onClick={() => setCategory(cat.id)}
-            className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-sm transition-all active:scale-95"
+            className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-lg transition-all active:scale-95"
             style={{
               background: category === cat.id ? cat.bg : 'var(--bg-surface)',
               border: `2px solid ${category === cat.id ? cat.color + '50' : 'var(--border)'}`,
@@ -268,7 +268,7 @@ export default function Log() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-10 h-10 rounded-sm font-black text-xl flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-lg font-black text-xl flex items-center justify-center transition-colors"
               style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-mid)', color: 'var(--text-secondary)' }}
             >
               −
@@ -281,7 +281,7 @@ export default function Log() {
             </div>
             <button
               onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-10 rounded-sm font-black text-xl flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-lg font-black text-xl flex items-center justify-center transition-colors"
               style={{ background: selectedCat.bg, border: `1px solid ${selectedCat.color}40`, color: selectedCat.color }}
             >
               +
@@ -301,7 +301,7 @@ export default function Log() {
                   key={m.label}
                   type="button"
                   onClick={() => setMoodTag(moodTag === `${m.emoji} ${m.label}` ? null : `${m.emoji} ${m.label}`)}
-                  className="text-xs font-bold px-3 py-2 rounded-sm transition-all active:scale-95"
+                  className="text-xs font-bold px-3 py-2 rounded-lg transition-all active:scale-95"
                   style={{
                     background: moodTag === `${m.emoji} ${m.label}` ? 'var(--amber-dim)' : 'var(--bg-raised)',
                     border: moodTag === `${m.emoji} ${m.label}` ? '2px solid var(--amber)' : '1px solid var(--border)',
@@ -318,7 +318,7 @@ export default function Log() {
 
         {/* Recipe toggle (drink/snack) */}
         {(category === 'drink' || category === 'snack') && (
-          <div className="rounded-sm p-3 space-y-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+          <div className="rounded-lg p-3 space-y-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -383,7 +383,7 @@ export default function Log() {
           <input type="file" accept="image/*" capture="environment" hidden ref={fileInputRef} onChange={handlePhotoSelect} />
 
           {photoPreview ? (
-            <div className="relative w-full h-40 rounded-sm overflow-hidden" style={{ border: '1px solid var(--border-mid)' }}>
+            <div className="relative w-full h-40 rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-mid)' }}>
               <img src={photoPreview} alt="Proof" className="w-full h-full object-cover" />
               <button
                 onClick={() => { setPhoto(null); setPhotoPreview(null) }}
@@ -396,7 +396,7 @@ export default function Log() {
           ) : (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-24 rounded-sm flex flex-col items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95"
+              className="w-full h-24 rounded-lg flex flex-col items-center justify-center gap-2 transition-all hover:opacity-90 active:scale-95"
               style={{ background: 'var(--bg-raised)', border: '2px dashed var(--border-mid)', color: 'var(--text-muted)' }}
             >
               <Camera size={24} strokeWidth={1.5} />

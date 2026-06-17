@@ -25,7 +25,6 @@ const Calendar = lazy(() => import("./pages/Calendar"))
 const Challenges = lazy(() => import("./pages/Challenges"))
 const Landing = lazy(() => import("./pages/Landing"))
 const Tavern = lazy(() => import("./pages/Tavern"))
-const Premium = lazy(() => import("./pages/Premium"))
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
 const Events = lazy(() => import("./pages/Events"))
 
@@ -103,7 +102,6 @@ function App() {
         <Route path="/challenges"          element={<RouteGuard><Challenges /></RouteGuard>} />
         <Route path="/tavern"              element={<RouteGuard><Tavern /></RouteGuard>} />
         <Route path="/events"              element={<RouteGuard><Events /></RouteGuard>} />
-        <Route path="/premium"             element={<RouteGuard><Premium /></RouteGuard>} />
         <Route path="/admin"               element={<RouteGuard><AdminDashboard /></RouteGuard>} />
         {/* Redirect old routes */}
         <Route path="/live-party/:partyId?"element={<Navigate to="/" replace />} />

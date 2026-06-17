@@ -268,7 +268,7 @@ export default function Challenges() {
           </div>
 
           {/* Rank Journey Ladder */}
-          <div className="rounded-sm p-5 text-left bg-glass overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+          <div className="rounded-lg p-5 text-left bg-glass overflow-hidden" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
             <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text-muted)' }}>🗡️ Rank Journey</p>
             <div className="space-y-2.5">
               {RANK_LADDER.map((rank) => {
@@ -304,7 +304,7 @@ export default function Challenges() {
                       )}
                     </div>
                     {isCurrentRank && (
-                      <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 ml-2" style={{ background: `${rank.color}20`, color: rank.color, borderRadius: '2px' }}>YOU</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 ml-2" style={{ background: `${rank.color}20`, color: rank.color, borderRadius: '10px' }}>YOU</span>
                     )}
                     {!isUnlocked && (
                       <Lock size={14} className="ml-2" style={{ color: 'var(--text-ghost)' }} />
@@ -418,7 +418,7 @@ export default function Challenges() {
                         <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: catMeta.color }}>Completed ✓</span>
                       )}
                     </div>
-                    <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 shrink-0" style={{ background: catMeta.bg, color: catMeta.color, border: `1px solid ${catMeta.color}30`, borderRadius: '2px' }}>
+                    <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 shrink-0" style={{ background: catMeta.bg, color: catMeta.color, border: `1px solid ${catMeta.color}30`, borderRadius: '10px' }}>
                       {catMeta.label}
                     </span>
                   </div>
@@ -488,7 +488,7 @@ function BountyCard({ emoji, title, description, xpReward, current, target, comp
           )}
         </div>
         <div className="shrink-0 flex flex-col items-end gap-1">
-          <span className="text-[9px] font-black px-1.5 py-0.5" style={{ background: bg, color, border: `1px solid ${color}30`, borderRadius: '2px' }}>
+          <span className="text-[9px] font-black px-1.5 py-0.5" style={{ background: bg, color, border: `1px solid ${color}30`, borderRadius: '10px' }}>
             +{xpReward} XP
           </span>
           {category && (

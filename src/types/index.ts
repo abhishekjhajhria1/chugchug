@@ -4,9 +4,8 @@
 import type { User } from "@supabase/supabase-js"
 
 // ─── Theme ───────────────────────────────────────────────────────
-// Flat list of complete looks (each is a full style, not just a palette).
-// Freely selectable — no level gating.
-export type Theme = "dark" | "light" | "minimal" | "minimal-dark" | "neo" | "cyber"
+// Two refined looks: clean Light (default) + Dark.
+export type Theme = "light" | "dark"
 
 // ─── Activity ────────────────────────────────────────────────────
 export type ActivityCategory = 'drink' | 'cigarette' | 'snack' | 'gym' | 'detox' | 'water'

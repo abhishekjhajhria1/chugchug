@@ -267,7 +267,7 @@ export default function AdminDashboard() {
           <p className="section-label mb-2 border-l-2 pl-2" style={{ borderColor: 'var(--text-muted)' }}>Recent Actions</p>
           <div className="space-y-1">
             {actionLog.slice(0, 10).map((log, i) => (
-              <div key={i} className="text-xs py-1.5 px-3" style={{ background: 'var(--bg-deep)', borderRadius: '2px', color: 'var(--text-muted)' }}>
+              <div key={i} className="text-xs py-1.5 px-3" style={{ background: 'var(--bg-deep)', borderRadius: '10px', color: 'var(--text-muted)' }}>
                 {log}
               </div>
             ))}

@@ -77,12 +77,8 @@ export interface ThemeMeta {
 }
 
 export const THEMES: ThemeMeta[] = [
-  { themeId: 'minimal',      label: 'Minimal',  desc: 'Clean · Light',     emoji: '⬜', mode: 'light', swatch: ['#FBFBFA', '#111111'] },
-  { themeId: 'minimal-dark', label: 'Mono',     desc: 'Minimal · Dark',    emoji: '◾', mode: 'dark',  swatch: ['#0E0E10', '#FFFFFF'] },
-  { themeId: 'dark',         label: 'Wano',     desc: 'Japanese · Dark',   emoji: '🎌', mode: 'dark',  swatch: ['#0B111F', '#D8A25E'] },
-  { themeId: 'light',        label: 'Wano Day', desc: 'Japanese · Light',  emoji: '⛩️', mode: 'light', swatch: ['#F7F3EB', '#D88E30'] },
-  { themeId: 'neo',          label: 'Neo',      desc: 'Playful · Vibrant', emoji: '🎨', mode: 'light', swatch: ['#F3EEFF', '#7C3AED'] },
-  { themeId: 'cyber',        label: 'Cyber',    desc: 'Neon · Night',      emoji: '🌃', mode: 'dark',  swatch: ['#05060A', '#22D3EE'] },
+  { themeId: 'light', label: 'Light', desc: 'Clean · Day',   emoji: '☀️', mode: 'light', swatch: ['#F6F5F1', '#D9660F'] },
+  { themeId: 'dark',  label: 'Dark',  desc: 'Clean · Night', emoji: '🌙', mode: 'dark',  swatch: ['#0F1012', '#F59A45'] },
 ]
 
 export const THEME_IDS = THEMES.map(t => t.themeId)

@@ -21,7 +21,7 @@ import type { ActivityLog } from "../types"
 export default function GroupFeed() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { user, profile } = useChug()
+    const { user } = useChug()
     const toast = useToast()
 
     const [group, setGroup] = useState<{ name: string, invite_code: string } | null>(null)
@@ -341,7 +341,7 @@ export default function GroupFeed() {
                         </div>
                     </div>
                     <div className="text-right">
-                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[2px]" style={{ background: 'color-mix(in srgb, var(--text-primary) 4%, transparent)', color: 'var(--text-ghost)', border: '1px solid var(--border)' }}>
+                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[10px]" style={{ background: 'color-mix(in srgb, var(--text-primary) 4%, transparent)', color: 'var(--text-ghost)', border: '1px solid var(--border)' }}>
                             Best: {crewStreak.crewLongestStreak}
                         </span>
                     </div>
@@ -360,7 +360,6 @@ export default function GroupFeed() {
                 {/* Start Party */}
                 <button onClick={async () => {
                     if (!user || !id) return;
-                    if (!profile?.is_premium) { toast.error("Hosting parties is Premium — upgrade to start one 🎉"); navigate('/premium'); return; }
                     const { data, error } = await supabase.from('parties').insert({
                         host_id: user.id, title: `${group?.name || 'Group'} Party`, description: 'Group party!',
                         address: 'TBD', privacy_level: 'invite_only', group_id: id,
@@ -421,7 +420,7 @@ export default function GroupFeed() {
                     style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)', borderLeft: '4px solid var(--amber)' }}
                 >
                     <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-10 h-10 rounded-[2px] flex items-center justify-center" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)' }}>
+                        <div className="w-10 h-10 rounded-[10px] flex items-center justify-center" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)' }}>
                             <Beer size={20} />
                         </div>
                         <div className="text-left">

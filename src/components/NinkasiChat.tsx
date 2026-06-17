@@ -150,7 +150,7 @@ export default function NinkasiChat({ onBack }: { onBack: () => void }) {
                 {msg.recipes && msg.recipes.length > 0 && (
                   <div className="mt-3 pt-3 flex flex-wrap gap-1.5" style={{ borderTop: '1px dashed var(--border)' }}>
                     {msg.recipes.map((r, i) => (
-                      <span key={i} className="text-[9px] font-bold px-2 py-1 flex items-center gap-1" style={{ background: 'rgba(200,80,192,0.1)', color: '#c850c0', border: '1px solid rgba(200,80,192,0.2)', borderRadius: '2px' }}>
+                      <span key={i} className="text-[9px] font-bold px-2 py-1 flex items-center gap-1" style={{ background: 'rgba(200,80,192,0.1)', color: '#c850c0', border: '1px solid rgba(200,80,192,0.2)', borderRadius: '10px' }}>
                         <Sparkles size={8} /> {r}
                       </span>
                     ))}

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { PartyPopper, Calendar, MapPin, Beer, CheckCircle2, XCircle, QrCode, Scan } from "lucide-react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import QRCodeModal from "../components/QRCodeModal"
 import LiveCounter from "../components/LiveCounter"
 import { useToast } from "../components/Toast"
@@ -33,9 +33,8 @@ interface HostedParty extends Party {
 }
 
 export default function Party() {
-  const { user, profile } = useChug()
+  const { user } = useChug()
   const toast = useToast()
-  const navigate = useNavigate()
   const [view, setView] = useState<'feed' | 'create' | 'manage' | 'history'>('feed')
 
   const [parties, setParties] = useState<Party[]>([])
@@ -95,12 +94,6 @@ export default function Party() {
 
   const handleCreate = async () => {
     if (!user || !form.title || !form.address || !form.date) { toast.error("Fill required fields (Title, Address, Date)"); return }
-    // Monetization: hosting is a Premium perk — host pays, guests join free.
-    if (!profile?.is_premium) {
-      toast.error("Hosting parties is a Premium perk — upgrade to throw your party 🎉")
-      navigate("/premium")
-      return
-    }
     setLoading(true)
     const { error } = await supabase.from("parties").insert({
       host_id: user.id,

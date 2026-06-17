@@ -16,7 +16,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const DEFAULT_THEME: Theme = "minimal";
+const DEFAULT_THEME: Theme = "light";
 const isTheme = (v: unknown): v is Theme =>
   typeof v === "string" && THEME_IDS.includes(v);
 

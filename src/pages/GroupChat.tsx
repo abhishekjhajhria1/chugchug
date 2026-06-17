@@ -325,17 +325,16 @@ export default function GroupChat() {
       <div className="flex items-center gap-3 mb-4 shrink-0">
         <button
           onClick={() => navigate(`/group/${groupId}`)}
-          className="p-2 rounded-xl transition-transform active:scale-95"
-          style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+          className="w-10 h-10 flex items-center justify-center rounded-full transition-transform active:scale-95"
+          style={{ background: 'var(--glass-fill-inset)', color: 'var(--text-secondary)' }}
         >
           <ArrowLeft size={18} strokeWidth={2} />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-black truncate" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{groupName || "Chat"}</h1>
-          <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>Group Chat</p>
-        </div>
-        <div className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(244,132,95,0.25)', color: 'var(--coral)' }}>
-          💬 Live
+          <h1 className="text-lg font-extrabold truncate" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{groupName || "Chat"}</h1>
+          <p className="text-xs font-medium flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--acid)' }} /> Group chat
+          </p>
         </div>
       </div>
 
@@ -363,18 +362,17 @@ export default function GroupChat() {
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} ${showAvatar ? "mt-3" : "mt-1"}`}>
                 <div className={`max-w-[80%] ${isMe ? "items-end" : "items-start"} flex flex-col`}>
                   {showAvatar && !isMe && (
-                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 ml-3" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-xs font-bold mb-1 ml-3" style={{ color: 'var(--text-muted)' }}>
                       {msg.username}
                     </p>
                   )}
                   <div
-                    className={`rounded-2xl px-4 py-2.5 ${
-                      isMe ? 'rounded-br-sm' : 'rounded-bl-sm'
-                    }`}
+                    className={`px-4 py-2.5 rounded-2xl ${isMe ? 'rounded-br-md' : 'rounded-bl-md'}`}
                     style={{
-                      background: isMe ? 'var(--amber-dim)' : 'var(--bg-raised)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text-primary)',
+                      background: isMe ? 'var(--btn-bg)' : 'var(--bg-surface)',
+                      border: isMe ? 'none' : '1px solid var(--border)',
+                      color: isMe ? 'var(--btn-color)' : 'var(--text-primary)',
+                      boxShadow: 'var(--card-shadow)',
                     }}
                   >
                     {msg.imageUrl && (
@@ -407,7 +405,7 @@ export default function GroupChat() {
                       <p className="font-bold text-sm leading-snug wrap-break-word">{msg.content}</p>
                     )}
                   </div>
-                  <p className={`text-[10px] font-bold opacity-40 mt-1 ${isMe ? "mr-2 text-right" : "ml-3"}`}>
+                  <p className={`text-[10px] font-medium mt-1 ${isMe ? "mr-2 text-right" : "ml-3"}`} style={{ color: 'var(--text-ghost)' }}>
                     {formatTime(msg.timestamp)}
                   </p>
                 </div>
@@ -434,7 +432,7 @@ export default function GroupChat() {
       )}
 
       {/* Input Bar */}
-      <div className="shrink-0 flex items-center gap-2 pt-3 border-t-2 border-[var(--border-mid)]">
+      <div className="shrink-0 flex items-center gap-2 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
         <input
           ref={fileInputRef}
           type="file"
@@ -483,10 +481,10 @@ export default function GroupChat() {
 
       {/* EXPENSE MODAL */}
       {showExpenseModal && (
-        <div className="fixed inset-0 z-100 bg-black/60 flex items-center justify-center p-4 animate-fadeInScale" onClick={() => setShowExpenseModal(false)}>
-          <div className="bg-[var(--glass-fill-inset)] rounded-3xl border border-[var(--border-mid)] shadow-lg shadow-black/20 p-5 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-100 bg-black/60 flex items-center justify-center p-4 anim-fade" onClick={() => setShowExpenseModal(false)}>
+          <div className="p-5 w-full max-w-sm space-y-4 animate-fadeInScale" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.4)' }} onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center">
-              <h3 className="font-black text-xl flex items-center gap-2" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}><Receipt style={{ color: 'var(--acid)' }} /> Add Expense</h3>
+              <h3 className="font-extrabold text-xl flex items-center gap-2" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}><Receipt style={{ color: 'var(--acid)' }} /> Add expense</h3>
               <button onClick={() => setShowExpenseModal(false)} style={{ color: 'var(--text-muted)' }}>
                 <X size={20} strokeWidth={2} />
               </button>
@@ -505,13 +503,13 @@ export default function GroupChat() {
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                   <label className="font-bold text-xs uppercase tracking-widest block" style={{ color: 'var(--text-secondary)' }}>Split Method</label>
-                   <div className="flex bg-black/20 rounded-lg p-1 border border-[var(--border-mid)]">
-                      <button onClick={() => setSplitMode('equal')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'equal' ? 'bg-[var(--glass-fill-inset)] text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>Equally</button>
-                      <button onClick={() => setSplitMode('drink')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'drink' ? 'bg-amber-500/20 text-amber-500' : 'text-[var(--text-muted)]'}`}>DrinkSplit</button>
+                   <label className="font-semibold text-sm block" style={{ color: 'var(--text-secondary)' }}>Split method</label>
+                   <div className="flex p-1 rounded-xl" style={{ background: 'var(--glass-fill-inset)' }}>
+                      <button onClick={() => setSplitMode('equal')} className="px-3 py-1 text-xs font-bold rounded-lg transition-all" style={{ background: splitMode === 'equal' ? 'var(--card-bg)' : 'transparent', color: splitMode === 'equal' ? 'var(--text-primary)' : 'var(--text-muted)', boxShadow: splitMode === 'equal' ? 'var(--card-shadow)' : 'none' }}>Equally</button>
+                      <button onClick={() => setSplitMode('drink')} className="px-3 py-1 text-xs font-bold rounded-lg transition-all" style={{ background: splitMode === 'drink' ? 'var(--amber-dim)' : 'transparent', color: splitMode === 'drink' ? 'var(--amber)' : 'var(--text-muted)' }}>By drinks</button>
                    </div>
                 </div>
-                <div className="max-h-40 overflow-y-auto space-y-2 border border-[var(--border-mid)] rounded-xl p-2 bg-white/3">
+                <div className="max-h-40 overflow-y-auto space-y-2 rounded-xl p-2" style={{ background: 'var(--glass-fill-inset)' }}>
                   {groupMembers.map(member => (
                     <label key={member.id} className="flex items-center gap-3 cursor-pointer p-1">
                       <input 

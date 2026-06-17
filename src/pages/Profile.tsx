@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Check, Lock, Share2 } from "lucide-react"
+import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Lock, Share2, Sun, Moon, Swords } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import { useTheme } from "../context/ThemeContext"
 import type { Theme } from "../types"
@@ -16,7 +16,7 @@ import type { PrivacySettings } from "../types"
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useChug()
-  const { theme, setTheme, themes } = useTheme()
+  const { theme, setTheme } = useTheme()
   const toast = useToast()
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
@@ -53,7 +53,6 @@ export default function Profile() {
       toast.error("Error saving: " + error.message)
     } else {
       setIsEditing(false)
-      // Refresh in background — don't block the UI
       refreshProfile().catch(console.error)
     }
   }
@@ -98,165 +97,103 @@ export default function Profile() {
   }
 
   const levelColor = (p.level || 1) >= 25 ? 'var(--acid)' : (p.level || 1) >= 10 ? 'var(--amber)' : 'var(--coral)'
+  const ri = getRankInfo(p.level ?? 1, p.xp ?? 0)
 
   return (
     <div className="space-y-5 pb-24 wano-fade">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="page-title">My Profile</h1>
+        <h1 className="page-title">Profile</h1>
         {!isEditing ? (
           <button onClick={() => setIsEditing(true)} className="glass-btn-secondary flex items-center gap-2 text-sm" style={{ padding: '8px 16px' }}>
             <Edit3 size={15} /> Edit
           </button>
         ) : (
-          <button onClick={() => setIsEditing(false)} className="glass-btn-secondary flex items-center gap-2 text-sm" style={{ padding: '8px 16px', borderColor: 'rgba(229,83,75,0.3)', color: 'var(--danger, var(--coral))' }}>
+          <button onClick={() => setIsEditing(false)} className="glass-btn-secondary flex items-center gap-2 text-sm" style={{ padding: '8px 16px', borderColor: 'color-mix(in srgb, var(--coral) 30%, transparent)', color: 'var(--coral)' }}>
             <X size={15} /> Cancel
           </button>
         )}
       </div>
 
-      {/* ── Profile Card ── */}
-      <div className="glass-card text-center">
-        {/* Avatar */}
+      {/* ── Identity card ── */}
+      <div className="glass-card text-center" style={{ padding: 22 }}>
         <div className="flex justify-center mb-3">
           <div className="relative">
-            {/* Orbiting ring */}
+            <div className="absolute -inset-2" style={{ border: `1.5px dashed ${levelColor}`, borderRadius: '50%', opacity: 0.22, animation: 'spin 14s linear infinite' }} />
             <div
-              className="absolute -inset-2"
-              style={{
-                border: `1.5px dashed ${levelColor}`,
-                borderRadius: '50%',
-                opacity: 0.25,
-                animation: 'spin 12s linear infinite',
-              }}
-            />
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-black relative"
-              style={{
-                background: 'var(--bg-raised)',
-                border: `3px solid ${levelColor}`,
-                boxShadow: `0 0 20px ${levelColor}40`,
-                color: levelColor,
-                fontFamily: 'Syne, sans-serif',
-              }}
+              className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-extrabold relative"
+              style={{ background: 'var(--glass-fill-inset)', border: `3px solid ${levelColor}`, color: levelColor, fontFamily: 'Syne, sans-serif' }}
             >
               {p.username?.[0]?.toUpperCase() || '?'}
-              {/* Level badge */}
-              <div
-                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black"
-                style={{ background: levelColor, color: '#1A1208', border: '2px solid var(--bg-deep)' }}
-              >
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-extrabold" style={{ background: levelColor, color: '#fff', border: '2px solid var(--card-bg)' }}>
                 {p.level ?? 1}
               </div>
             </div>
           </div>
         </div>
 
-        <h2 className="text-xl font-black mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
-          {p.username}
-        </h2>
+        <h2 className="text-2xl font-extrabold mb-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{p.username}</h2>
+        <p className="text-sm font-bold mb-2" style={{ color: ri.current.color }}>{ri.current.emoji} {ri.current.title}</p>
 
-        {/* Rank title */}
-        {(() => {
-          const ri = getRankInfo(p.level ?? 1, p.xp ?? 0);
-          return (
-            <p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: ri.current.color }}>
-              {ri.current.emoji} {ri.current.title}
-            </p>
-          );
-        })()}
-
-        {/* Archetype badge */}
+        {/* Archetype */}
         {p.archetype && ARCHETYPES[p.archetype as ArchetypeId] ? (
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-[2px]" style={{ background: `${ARCHETYPES[p.archetype as ArchetypeId].color}15`, color: ARCHETYPES[p.archetype as ArchetypeId].color, border: `1px solid ${ARCHETYPES[p.archetype as ArchetypeId].color}30` }}>
+            <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: `${ARCHETYPES[p.archetype as ArchetypeId].color}1A`, color: ARCHETYPES[p.archetype as ArchetypeId].color }}>
               {ARCHETYPES[p.archetype as ArchetypeId].emoji} The {ARCHETYPES[p.archetype as ArchetypeId].title}
             </span>
-            <button onClick={() => setShowArchetypeQuiz(true)} className="text-[8px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-ghost)' }}>
-              Retake
-            </button>
+            <button onClick={() => setShowArchetypeQuiz(true)} className="text-[11px] font-semibold" style={{ color: 'var(--text-ghost)' }}>Retake</button>
           </div>
         ) : !isEditing && (
-          <button
-            onClick={() => setShowArchetypeQuiz(true)}
-            className="text-[10px] font-bold uppercase tracking-widest mb-2 px-3 py-1.5 rounded-[2px] transition-all active:scale-95"
-            style={{ background: 'rgba(155,89,182,0.1)', color: '#9B59B6', border: '1px solid rgba(155,89,182,0.2)' }}
-          >
-            🎭 Discover Your Archetype
+          <button onClick={() => setShowArchetypeQuiz(true)} className="text-xs font-bold mb-2 px-3 py-1.5 rounded-full active:scale-95 transition-transform" style={{ background: 'rgba(155,89,182,0.12)', color: '#9B59B6' }}>
+            🎭 Discover your archetype
           </button>
         )}
 
-        {/* Archetype Quiz Modal */}
         {showArchetypeQuiz && (
-          <ArchetypeQuiz
-            onComplete={() => setShowArchetypeQuiz(false)}
-            onSkip={() => setShowArchetypeQuiz(false)}
-          />
+          <ArchetypeQuiz onComplete={() => setShowArchetypeQuiz(false)} onSkip={() => setShowArchetypeQuiz(false)} />
         )}
 
-        {p.bio && !isEditing && (
-          <p className="text-sm font-medium mb-3 italic" style={{ color: 'var(--text-secondary)' }}>"{p.bio}"</p>
-        )}
-
+        {p.bio && !isEditing && <p className="text-sm mb-2.5" style={{ color: 'var(--text-secondary)' }}>{p.bio}</p>}
         {(p.city || p.country) && !isEditing && (
-          <p className="text-xs font-medium mb-3 flex items-center justify-center gap-1" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs font-medium mb-2 flex items-center justify-center gap-1" style={{ color: 'var(--text-muted)' }}>
             <MapPin size={11} /> {[p.city, p.country].filter(Boolean).join(', ')}
           </p>
         )}
 
-        {/* Stats row */}
+        {/* Stats */}
         {!isEditing && (
-          <div className="grid grid-cols-3 gap-3 mt-4">
+          <div className="grid grid-cols-3 gap-2.5 mt-4">
             {[
               { label: 'Level', value: p.level ?? 1, color: levelColor },
-              { label: 'Total XP', value: p.xp ?? 0, color: 'var(--amber)' },
+              { label: 'Total XP', value: (p.xp ?? 0).toLocaleString(), color: 'var(--amber)' },
               { label: 'Logs', value: activities.length, color: 'var(--coral)' },
             ].map(stat => (
-              <div key={stat.label} className="rounded-sm py-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
-                <p className="text-xl font-black" style={{ color: stat.color, fontFamily: 'Syne, sans-serif' }}>{stat.value}</p>
-                <p className="text-[10px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+              <div key={stat.label} className="py-3 rounded-xl" style={{ background: 'var(--glass-fill-inset)' }}>
+                <p className="text-xl font-extrabold" style={{ color: stat.color, fontFamily: 'Syne, sans-serif' }}>{stat.value}</p>
+                <p className="text-[11px] font-semibold mt-0.5" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
               </div>
             ))}
           </div>
         )}
 
-        {/* Theme Picker — free choice, full looks */}
+        {/* ── Appearance (Light / Dark) ── */}
         {!isEditing && (
-          <div className="mt-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-center" style={{ color: 'var(--text-ghost)' }}>
-              App Theme
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {themes.map(t => {
-                const active = theme === t.themeId
+          <div className="mt-5 text-left">
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Appearance</p>
+            <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl" style={{ background: 'var(--glass-fill-inset)' }}>
+              {([
+                { id: 'light' as Theme, label: 'Light', Icon: Sun },
+                { id: 'dark' as Theme, label: 'Dark', Icon: Moon },
+              ]).map(({ id, label, Icon }) => {
+                const active = theme === id
                 return (
                   <button
-                    key={t.themeId}
-                    onClick={() => setTheme(t.themeId as Theme)}
-                    className="p-2.5 text-left transition-all active:scale-95 relative overflow-hidden"
-                    style={{
-                      background: active ? 'var(--amber-dim)' : 'var(--bg-raised)',
-                      border: active ? '2px solid var(--amber)' : '1px solid var(--border)',
-                      borderRadius: 'var(--card-radius)',
-                    }}
+                    key={id}
+                    onClick={() => setTheme(id)}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95"
+                    style={{ background: active ? 'var(--card-bg)' : 'transparent', color: active ? 'var(--text-primary)' : 'var(--text-muted)', boxShadow: active ? 'var(--card-shadow)' : 'none' }}
                   >
-                    {/* swatch */}
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0"
-                        style={{ background: t.swatch[0], border: '1px solid var(--border-mid)' }}>
-                        <span className="w-2 h-2 rounded-full" style={{ background: t.swatch[1] }} />
-                      </span>
-                      <span className="text-sm leading-none">{t.emoji}</span>
-                      {active && (
-                        <span className="ml-auto"><Check size={12} style={{ color: 'var(--amber)' }} /></span>
-                      )}
-                    </div>
-                    <div className="text-[11px] font-bold truncate" style={{ color: active ? 'var(--amber)' : 'var(--text-primary)' }}>
-                      {t.label}
-                    </div>
-                    <div className="text-[8px] font-semibold uppercase tracking-wider truncate" style={{ color: 'var(--text-ghost)' }}>
-                      {t.desc}
-                    </div>
+                    <Icon size={16} /> {label}
                   </button>
                 )
               })}
@@ -264,57 +201,43 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Calendar + QR buttons */}
+        {/* ── Actions ── */}
         {!isEditing && (
-          <div className="mt-4 space-y-3">
-            {/* Premium badge */}
-            {profile?.is_premium && (
-              <div className="flex items-center justify-center gap-2 py-2.5 px-4" style={{ background: 'linear-gradient(135deg, var(--amber-dim), rgba(232,196,74,0.05))', border: '1px solid rgba(232,196,74,0.3)', borderRadius: 'var(--card-radius)' }}>
-                <span className="text-sm">👑</span>
-                <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--amber)' }}>Premium Member</span>
-              </div>
-            )}
-
-            <button onClick={() => navigate('/calendar')} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'color-mix(in srgb, var(--acid) 25%, transparent)', color: 'var(--acid)' }}>
-              <CalendarDays size={18} /> Drinking Calendar
+          <div className="mt-4 space-y-2.5">
+            <button onClick={() => navigate('/calendar')} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm">
+              <CalendarDays size={18} style={{ color: 'var(--acid)' }} /> Drinking calendar
             </button>
-            <button onClick={() => setShowMyQR(true)} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(245,166,35,0.25)', color: 'var(--amber)' }}>
-              <QrCode size={18} /> My QR (Friends + Loyalty)
+            <button onClick={() => setShowMyQR(true)} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm">
+              <QrCode size={18} style={{ color: 'var(--amber)' }} /> My QR code
             </button>
 
             <NotificationToggle />
 
             <button onClick={() => setShowStatCard(true)} className="glass-btn w-full py-3 flex items-center justify-center gap-2 text-sm">
-              <Share2 size={18} /> Share My Stats
+              <Share2 size={18} /> Share my stats
             </button>
 
-            {/* Quick nav row */}
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => navigate('/tavern')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
-                🏯 Tavern
+            <div className="grid grid-cols-2 gap-2.5">
+              <button onClick={() => navigate('/tavern')} className="py-3 text-sm font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform rounded-xl" style={{ background: 'var(--glass-fill-inset)', color: 'var(--text-secondary)' }}>
+                🍸 Taverns
               </button>
-              {!profile?.is_premium ? (
-                <button onClick={() => navigate('/premium')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)', borderRadius: 'var(--card-radius)' }}>
-                  👑 Go Premium
-                </button>
-              ) : (
-                <button onClick={() => navigate('/challenges')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
-                  ⚔️ Challenges
-                </button>
-              )}
+              <button onClick={() => navigate('/challenges')} className="py-3 text-sm font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-transform rounded-xl" style={{ background: 'var(--glass-fill-inset)', color: 'var(--text-secondary)' }}>
+                <Swords size={15} /> Challenges
+              </button>
             </div>
+
             {sessionFriends.length > 0 && (
-              <div className="rounded-sm p-3 text-left" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
+              <div className="rounded-xl p-3 text-left" style={{ background: 'var(--glass-fill-inset)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <UsersIcon size={14} style={{ color: 'var(--coral)' }} />
-                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Active Session Friends</span>
+                  <span className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>Active session friends</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {sessionFriends.map((sf: any) => {
                     const name = sf.user_a === p.id ? sf.user_b_profile?.username : sf.user_a_profile?.username
                     return (
-                      <div key={sf.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid rgba(244,132,95,0.2)' }}>
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                      <div key={sf.id} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: 'var(--coral-dim)', color: 'var(--coral)' }}>
+                        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--acid)' }} />
                         {name}
                       </div>
                     )
@@ -323,50 +246,32 @@ export default function Profile() {
               </div>
             )}
 
-            {/* Rank Journey Ladder */}
-            <div className="rounded-sm p-4 text-left" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
-              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>🗡️ Rank Journey</p>
-              <div className="space-y-2">
+            {/* Rank journey */}
+            <div className="rounded-xl p-4 text-left" style={{ background: 'var(--glass-fill-inset)' }}>
+              <p className="text-sm font-bold mb-3" style={{ color: 'var(--text-secondary)' }}>Rank journey</p>
+              <div className="space-y-1.5">
                 {RANK_LADDER.map((rank) => {
-                  const userLevel = p.level ?? 1;
-                  const isCurrentRank = userLevel >= rank.minLevel && userLevel <= rank.maxLevel;
-                  const isUnlocked = userLevel >= rank.minLevel;
-                  const ri = getRankInfo(userLevel, p.xp ?? 0);
+                  const userLevel = p.level ?? 1
+                  const isCurrentRank = userLevel >= rank.minLevel && userLevel <= rank.maxLevel
+                  const isUnlocked = userLevel >= rank.minLevel
                   return (
-                    <div
-                      key={rank.title}
-                      className="flex items-center gap-3 p-2 transition-all"
-                      style={{
-                        background: isCurrentRank ? `${rank.color}15` : 'transparent',
-                        border: isCurrentRank ? `1px solid ${rank.color}40` : '1px solid transparent',
-                        borderRadius: 'var(--card-radius)',
-                        opacity: isUnlocked ? 1 : 0.4,
-                      }}
-                    >
-                      <span className="text-lg w-8 text-center">{rank.emoji}</span>
-                      <div className="flex-1">
+                    <div key={rank.title} className="flex items-center gap-3 p-2 rounded-xl" style={{ background: isCurrentRank ? `${rank.color}14` : 'transparent', opacity: isUnlocked ? 1 : 0.45 }}>
+                      <span className="text-lg w-7 text-center">{rank.emoji}</span>
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold" style={{ color: isCurrentRank ? rank.color : isUnlocked ? 'var(--text-primary)' : 'var(--text-ghost)' }}>
-                            {rank.title}
-                          </span>
-                          <span className="text-[9px] font-bold" style={{ color: 'var(--text-ghost)' }}>
-                            Lv. {rank.minLevel}{rank.maxLevel < 999 ? `-${rank.maxLevel}` : '+'}
-                          </span>
+                          <span className="text-sm font-bold" style={{ color: isCurrentRank ? rank.color : isUnlocked ? 'var(--text-primary)' : 'var(--text-ghost)' }}>{rank.title}</span>
+                          <span className="text-[11px] font-medium" style={{ color: 'var(--text-ghost)' }}>Lv {rank.minLevel}{rank.maxLevel < 999 ? `–${rank.maxLevel}` : '+'}</span>
                         </div>
                         {isCurrentRank && ri.next && (
-                          <div className="h-1 mt-1 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)', borderRadius: '1px' }}>
-                            <div className="h-full transition-all duration-500" style={{ width: `${ri.progressPercent}%`, background: rank.color }} />
+                          <div className="h-1.5 mt-1.5 overflow-hidden rounded-full" style={{ background: 'var(--bg-surface)' }}>
+                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${ri.progressPercent}%`, background: rank.color }} />
                           </div>
                         )}
                       </div>
-                      {isCurrentRank && (
-                        <span className="text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5" style={{ background: `${rank.color}20`, color: rank.color, borderRadius: '2px' }}>YOU</span>
-                      )}
-                      {!isUnlocked && (
-                        <Lock size={12} style={{ color: 'var(--text-ghost)' }} />
-                      )}
+                      {isCurrentRank && <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full" style={{ background: `${rank.color}22`, color: rank.color }}>YOU</span>}
+                      {!isUnlocked && <Lock size={13} style={{ color: 'var(--text-ghost)' }} />}
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -377,57 +282,56 @@ export default function Profile() {
         {isEditing && (
           <div className="mt-4 space-y-4 text-left">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>Bio</label>
-              <textarea value={editForm.bio} onChange={e => setEditForm({ ...editForm, bio: e.target.value })} className="glass-input min-h-[72px]" placeholder="Say something interesting..." style={{ resize: 'vertical' }} />
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Bio</label>
+              <textarea value={editForm.bio} onChange={e => setEditForm({ ...editForm, bio: e.target.value })} className="glass-input min-h-[72px]" placeholder="Say something about yourself…" style={{ resize: 'vertical' }} />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>College / University</label>
+              <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>College / university</label>
               <input type="text" value={editForm.college} onChange={e => setEditForm({ ...editForm, college: e.target.value })} className="glass-input" placeholder="State University" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>City</label>
+                <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>City</label>
                 <input type="text" value={editForm.city} onChange={e => setEditForm({ ...editForm, city: e.target.value })} className="glass-input" />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-muted)' }}>Country</label>
+                <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--text-secondary)' }}>Country</label>
                 <input type="text" value={editForm.country} onChange={e => setEditForm({ ...editForm, country: e.target.value })} className="glass-input" />
               </div>
             </div>
 
-            {/* Privacy settings */}
-            <div className="rounded-sm p-4 space-y-3" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
-              <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Privacy Settings</p>
+            <div className="rounded-xl p-4 space-y-3" style={{ background: 'var(--glass-fill-inset)' }}>
+              <p className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>Privacy</p>
               {[
-                { key: 'beer_counter', label: 'Beer Counter', options: [['public','Public'],['group','Group Only'],['private','Private']] },
-                { key: 'location_sharing', label: 'Location Sharing', options: [['always','Always'],['sessions','Active Sessions'],['off','Off']] },
+                { key: 'beer_counter', label: 'Beer counter', options: [['public', 'Public'], ['group', 'Group only'], ['private', 'Private']] },
+                { key: 'location_sharing', label: 'Location sharing', options: [['always', 'Always'], ['sessions', 'Active sessions'], ['off', 'Off']] },
               ].map(({ key, label, options }) => (
                 <div key={key} className="flex justify-between items-center">
-                  <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{label}</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                   <div className="relative">
                     <select
                       value={privacySettings[key as keyof PrivacySettings]}
                       onChange={e => setPrivacySettings({ ...privacySettings, [key]: e.target.value })}
-                      className="appearance-none text-xs font-bold pr-6 pl-3 py-1.5 rounded-lg"
+                      className="appearance-none text-sm font-semibold pr-7 pl-3 py-2 rounded-lg"
                       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)', color: 'var(--text-primary)' }}
                     >
                       {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
-                    <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+                    <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </div>
               ))}
               <label className="flex items-center gap-3 cursor-pointer pt-1" style={{ borderTop: '1px solid var(--border)' }}>
                 <input type="checkbox" checked={editForm.stealth_mode} onChange={e => setEditForm({ ...editForm, stealth_mode: e.target.checked })} className="w-5 h-5 rounded" style={{ accentColor: 'var(--coral)' }} />
                 <div>
-                  <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>🥷 Stealth Mode</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>🥷 Stealth mode</span>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Hide your stats from public feeds</p>
                 </div>
               </label>
             </div>
 
             <button onClick={handleSave} disabled={saving} className="glass-btn w-full flex items-center justify-center gap-2">
-              <Save size={18} /> {saving ? "Saving..." : "Save Profile"}
+              <Save size={18} /> {saving ? "Saving…" : "Save profile"}
             </button>
           </div>
         )}
@@ -436,16 +340,14 @@ export default function Profile() {
       <QRCodeModal isOpen={showMyQR} onClose={() => setShowMyQR(false)} mode="display" personalId={p.id} />
       {showStatCard && <StatShareCard onClose={() => setShowStatCard(false)} />}
 
-      {/* ── Activity Log ── */}
+      {/* ── Activity log ── */}
       {!isEditing && (
         <div>
-          <h2 className="font-black text-lg mb-3" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>
-            Your Activity Log
-          </h2>
+          <h2 className="text-lg font-extrabold mb-3" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Activity</h2>
           {activities.length === 0 ? (
-            <div className="glass-card text-center py-8" style={{ borderStyle: 'dashed' }}>
-              <p className="font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Nothing logged yet!</p>
-              <p className="text-sm" style={{ color: 'var(--text-ghost)' }}>Start by logging your first activity.</p>
+            <div className="glass-card text-center py-8">
+              <p className="font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>Nothing logged yet</p>
+              <p className="text-sm" style={{ color: 'var(--text-ghost)' }}>Log your first activity to get started.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -453,34 +355,26 @@ export default function Profile() {
                 <div key={act.id} className="glass-card" style={{ padding: 16, borderLeft: `4px solid ${catColors[act.category] || 'var(--border)'}` }}>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-9 h-9 rounded-sm flex items-center justify-center text-lg"
-                        style={{ background: `${catColors[act.category] || 'var(--text-muted)'}18`, border: `1px solid ${catColors[act.category] || 'var(--border)'}30` }}
-                      >
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style={{ background: `${catColors[act.category] || 'var(--text-muted)'}1A` }}>
                         {catEmoji[act.category] || '📝'}
                       </div>
                       <div>
                         <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>{act.item_name}</p>
-                        <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                          {act.category} · qty {act.quantity}
-                        </p>
+                        <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>{act.category} · qty {act.quantity}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black" style={{ color: 'var(--sage)' }}>+{act.xp_earned} XP</p>
-                      <p className="text-[10px]" style={{ color: 'var(--text-ghost)' }}>
-                        {new Date(act.created_at).toLocaleDateString()}
-                      </p>
+                      <p className="text-sm font-extrabold" style={{ color: 'var(--acid)' }}>+{act.xp_earned} XP</p>
+                      <p className="text-[11px]" style={{ color: 'var(--text-ghost)' }}>{new Date(act.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
 
-                  {/* Inline log edit */}
                   {editingLogId === act.id ? (
                     <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid var(--border)' }}>
                       <div className="relative">
                         <select value={editLogPrivacy} onChange={e => setEditLogPrivacy(e.target.value as any)} className="glass-input text-sm appearance-none pr-8">
                           <option value="public">🌍 Public</option>
-                          <option value="groups">👥 Groups Only</option>
+                          <option value="groups">👥 Groups only</option>
                           <option value="private">🔒 Private</option>
                           <option value="hidden">🥷 Stealth</option>
                         </select>
@@ -488,7 +382,7 @@ export default function Profile() {
                       </div>
                       {editLogPrivacy === 'groups' && groups.length > 0 && (
                         <div className="relative">
-                          <select value={editLogGroupStr} onChange={e => setEditLogGroupStr(e.target.value)} className="glass-input text-sm appearance-none pr-8" style={{ borderColor: 'rgba(244,132,95,0.3)' }}>
+                          <select value={editLogGroupStr} onChange={e => setEditLogGroupStr(e.target.value)} className="glass-input text-sm appearance-none pr-8">
                             {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                           </select>
                           <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
@@ -496,18 +390,16 @@ export default function Profile() {
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => setEditingLogId(null)} className="glass-btn-secondary flex-1 py-2 text-xs">Cancel</button>
-                        <button onClick={() => handleEditLogSave(act.id)} disabled={savingLog} className="glass-btn flex-1 py-2 text-xs">{savingLog ? "..." : "Save"}</button>
+                        <button onClick={() => handleEditLogSave(act.id)} disabled={savingLog} className="glass-btn flex-1 py-2 text-xs">{savingLog ? "…" : "Save"}</button>
                       </div>
                     </div>
                   ) : (
                     <button
                       onClick={() => { setEditLogPrivacy(act.privacy_level || 'public'); setEditLogGroupStr(act.group_id || (groups[0]?.id || '')); setEditingLogId(act.id) }}
-                      className="mt-2 text-[10px] font-bold flex items-center gap-1 transition-colors"
+                      className="mt-2 text-xs font-semibold flex items-center gap-1"
                       style={{ color: 'var(--text-ghost)' }}
-                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-ghost)')}
                     >
-                      <Edit3 size={10} /> Edit Visibility
+                      <Edit3 size={11} /> Edit visibility
                     </button>
                   )}
                 </div>
@@ -518,12 +410,8 @@ export default function Profile() {
       )}
 
       {/* Sign out */}
-      <button
-        onClick={handleLogout}
-        className="glass-btn-secondary w-full py-4 flex items-center justify-center gap-2 text-sm"
-        style={{ borderColor: 'rgba(229,83,75,0.25)', color: 'var(--danger, var(--coral))' }}
-      >
-        <LogOut size={18} /> Sign Out
+      <button onClick={handleLogout} className="glass-btn-secondary w-full py-4 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'color-mix(in srgb, var(--coral) 30%, transparent)', color: 'var(--coral)' }}>
+        <LogOut size={18} /> Sign out
       </button>
     </div>
   )

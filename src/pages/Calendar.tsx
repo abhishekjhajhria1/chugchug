@@ -512,12 +512,12 @@ export default function Calendar() {
               <button
                 key={dateStr}
                 onClick={() => log && setSelectedDay(log)}
-                className="flex flex-col items-center justify-center py-2 rounded-sm active:scale-90 transition-all relative"
+                className="flex flex-col items-center justify-center py-2 rounded-lg active:scale-90 transition-all relative"
                 style={{ background: cellBg, border: cellBorder }}
               >
                 {isToday && (
                   <div
-                    className="absolute inset-0 rounded-sm pointer-events-none"
+                    className="absolute inset-0 rounded-lg pointer-events-none"
                     style={{ border: "2px solid var(--amber)", opacity: 0.6 }}
                   />
                 )}

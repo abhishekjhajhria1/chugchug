@@ -2,11 +2,10 @@ import { useEffect, useState, useRef, useCallback } from "react"
 import { supabase } from "../lib/supabase"
 import { generateInviteCode } from "../utils/InviteCode"
 import { useNavigate } from "react-router-dom"
-import { Plus, Users, PartyPopper, Calendar, MapPin, X, Activity, UserPlus, UserCheck, Flame, Zap, ArrowRight, UserX, QrCode, ScanLine, GlassWater, Wine, Smartphone, Loader2 } from "lucide-react"
+import { Plus, Users, PartyPopper, Calendar, MapPin, X, Activity, UserPlus, UserCheck, Flame, Zap, ArrowRight, UserX, QrCode, ScanLine, GlassWater, Smartphone, Loader2 } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import LiveCounter from "../components/LiveCounter"
 import PhotoMetadata from "../components/PhotoMetadata"
-import NinkasiChat from "../components/NinkasiChat"
 import type { ActivityLog } from "../types"
 import { QRCodeSVG } from "qrcode.react"
 import QRScanner from "../components/QRScanner"
@@ -22,7 +21,7 @@ export default function Groups() {
   const navigate = useNavigate()
   const toast = useToast()
 
-  const [activeTab, setActiveTab] = useState<'crews' | 'buddies' | 'requests' | 'discover' | 'ninkasi'>('crews')
+  const [activeTab, setActiveTab] = useState<'crews' | 'buddies' | 'requests' | 'discover'>('crews')
 
   // --- CREWS STATE ---
   const [groups, setGroups] = useState<Group[]>([])
@@ -409,7 +408,6 @@ export default function Groups() {
           { id: 'crews' as const, label: 'Crews', icon: Users, color: 'var(--amber)' },
           { id: 'buddies' as const, label: 'Buddies', icon: UserCheck, color: 'var(--acid)' },
           { id: 'discover' as const, label: 'Discover', icon: Flame, color: 'var(--coral-light)' },
-          { id: 'ninkasi' as const, label: 'Ninkasi', icon: Wine, color: '#c850c0' },
         ]).map(({ id, label, icon: Icon, color }, i) => (
           <button
             key={id}
@@ -420,7 +418,7 @@ export default function Groups() {
               color: activeTab === id ? color : 'var(--text-muted)',
               fontFamily: 'Syne, sans-serif',
               borderBottom: activeTab === id ? `2px solid ${color}` : '2px solid transparent',
-              borderRight: i < 3 ? '1px solid var(--border)' : 'none',
+              borderRight: i < 2 ? '1px solid var(--border)' : 'none',
             }}
           >
             <Icon size={16} /> {label}
@@ -659,13 +657,6 @@ export default function Groups() {
               <QRCodeSVG value={user?.id || ""} size={200} />
             </div>
           </div>
-        </div>
-      )}
-
-      {/* --- NINKASI TAB --- */}
-      {activeTab === 'ninkasi' && (
-        <div className="anim-enter">
-          <NinkasiChat onBack={() => setActiveTab('crews')} />
         </div>
       )}
 

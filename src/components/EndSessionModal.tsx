@@ -295,7 +295,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
                   border: `1px solid ${selectedGroups.includes(g.id) ? 'color-mix(in srgb, var(--acid) 30%, transparent)' : 'var(--border-mid)'}`,
                 }}
               >
-                <div className="w-5 h-5 rounded-[2px] flex items-center justify-center" style={{
+                <div className="w-5 h-5 rounded-[10px] flex items-center justify-center" style={{
                   background: selectedGroups.includes(g.id) ? 'var(--acid)' : 'transparent',
                   border: selectedGroups.includes(g.id) ? 'none' : '2px solid var(--border-mid)',
                 }}>

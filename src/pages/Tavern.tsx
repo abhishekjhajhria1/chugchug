@@ -310,7 +310,7 @@ export default function Tavern() {
                 <div className="flex items-center gap-2">
                   <h2 className="text-lg font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{selectedBar.name}</h2>
                   {selectedBar.is_partner && (
-                    <span className="text-xs font-bold px-2 py-0.5" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', borderRadius: '2px' }}>
+                    <span className="text-xs font-bold px-2 py-0.5" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', borderRadius: '10px' }}>
                       {PARTNER_BADGE[selectedBar.partner_tier]?.emoji} {PARTNER_BADGE[selectedBar.partner_tier]?.label}
                     </span>
                   )}
@@ -419,7 +419,7 @@ function BarCard({ bar, loyalty, onSelect }: { bar: Bar; loyalty?: UserLoyalty; 
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{bar.name}</span>
             {badge && (
-              <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 shrink-0" style={{ background: 'var(--amber-dim)', color: badge.color, borderRadius: '2px' }}>
+              <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 shrink-0" style={{ background: 'var(--amber-dim)', color: badge.color, borderRadius: '10px' }}>
                 {badge.emoji} {badge.label}
               </span>
             )}
@@ -438,7 +438,7 @@ function BarCard({ bar, loyalty, onSelect }: { bar: Bar; loyalty?: UserLoyalty; 
           {bar.tags && bar.tags.length > 0 && (
             <div className="flex gap-1 mt-1.5 flex-wrap">
               {bar.tags.slice(0, 3).map(tag => (
-                <span key={tag} className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', borderRadius: '2px' }}>
+                <span key={tag} className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', borderRadius: '10px' }}>
                   {tag}
                 </span>
               ))}
@@ -452,7 +452,7 @@ function BarCard({ bar, loyalty, onSelect }: { bar: Bar; loyalty?: UserLoyalty; 
             </span>
           )}
           {loyalty && loyalty.points > 0 && (
-            <span className="text-[9px] font-black px-1.5 py-0.5" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', borderRadius: '2px' }}>
+            <span className="text-[9px] font-black px-1.5 py-0.5" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', borderRadius: '10px' }}>
               {loyalty.points} pts
             </span>
           )}
