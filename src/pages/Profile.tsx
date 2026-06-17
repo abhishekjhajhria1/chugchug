@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Lock } from "lucide-react"
+import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Check, Lock, Share2 } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import { useTheme } from "../context/ThemeContext"
 import type { Theme } from "../types"
 import QRCodeModal from "../components/QRCodeModal"
+import NotificationToggle from "../components/NotificationToggle"
+import StatShareCard from "../components/StatShareCard"
 import { getRankInfo, RANK_LADDER } from "../lib/progression"
 import ArchetypeQuiz, { ARCHETYPES } from "../components/ArchetypeQuiz"
 import type { ArchetypeId } from "../components/ArchetypeQuiz"
@@ -14,7 +16,7 @@ import type { PrivacySettings } from "../types"
 
 export default function Profile() {
   const { user, profile, refreshProfile } = useChug()
-  const { theme, setTheme, getThemeUnlocks } = useTheme()
+  const { theme, setTheme, themes } = useTheme()
   const toast = useToast()
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
@@ -25,6 +27,7 @@ export default function Profile() {
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([])
   const [sessionFriends, setSessionFriends] = useState<any[]>([])
   const [showMyQR, setShowMyQR] = useState(false)
+  const [showStatCard, setShowStatCard] = useState(false)
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({ beer_counter: 'group', location_sharing: 'off' })
 
   const [editingLogId, setEditingLogId] = useState<string | null>(null)
@@ -217,47 +220,46 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Theme Toggle */}
+        {/* Theme Picker — free choice, full looks */}
         {!isEditing && (
           <div className="mt-4">
             <p className="text-[10px] font-bold uppercase tracking-widest mb-2 text-center" style={{ color: 'var(--text-ghost)' }}>
               App Theme
             </p>
-            <div className="grid grid-cols-4 gap-2">
-              {(() => {
-                const themeUnlocks = getThemeUnlocks(p.level ?? 1);
-                return themeUnlocks.map(t => (
+            <div className="grid grid-cols-3 gap-2">
+              {themes.map(t => {
+                const active = theme === t.themeId
+                return (
                   <button
                     key={t.themeId}
-                    onClick={() => !t.locked && setTheme(t.themeId as Theme, p.level ?? 1)}
-                    className="py-2.5 px-1.5 rounded-sm text-center transition-all active:scale-95 relative"
+                    onClick={() => setTheme(t.themeId as Theme)}
+                    className="p-2.5 text-left transition-all active:scale-95 relative overflow-hidden"
                     style={{
-                      background: theme === t.themeId ? 'var(--amber-dim)' : t.locked ? 'var(--bg-deep)' : 'var(--bg-raised)',
-                      border: theme === t.themeId ? '2px solid var(--amber)' : t.locked ? '1px solid var(--border)' : '1px solid var(--border)',
+                      background: active ? 'var(--amber-dim)' : 'var(--bg-raised)',
+                      border: active ? '2px solid var(--amber)' : '1px solid var(--border)',
                       borderRadius: 'var(--card-radius)',
-                      opacity: t.locked ? 0.5 : 1,
-                      cursor: t.locked ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    {t.locked && (
-                      <div className="absolute top-1 right-1">
-                        <Lock size={8} style={{ color: 'var(--text-ghost)' }} />
-                      </div>
-                    )}
-                    <div className="text-[10px] font-bold" style={{ color: theme === t.themeId ? 'var(--amber)' : t.locked ? 'var(--text-ghost)' : 'var(--text-primary)' }}>
-                      {t.emoji}
+                    {/* swatch */}
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0"
+                        style={{ background: t.swatch[0], border: '1px solid var(--border-mid)' }}>
+                        <span className="w-2 h-2 rounded-full" style={{ background: t.swatch[1] }} />
+                      </span>
+                      <span className="text-sm leading-none">{t.emoji}</span>
+                      {active && (
+                        <span className="ml-auto"><Check size={12} style={{ color: 'var(--amber)' }} /></span>
+                      )}
                     </div>
-                    <div className="text-[7px] font-bold mt-0.5 truncate" style={{ color: theme === t.themeId ? 'var(--amber)' : 'var(--text-ghost)' }}>
+                    <div className="text-[11px] font-bold truncate" style={{ color: active ? 'var(--amber)' : 'var(--text-primary)' }}>
                       {t.label}
                     </div>
-                    {t.locked && (
-                      <div className="text-[6px] mt-0.5" style={{ color: 'var(--text-ghost)' }}>
-                        Lv.{t.requiredLevel}
-                      </div>
-                    )}
+                    <div className="text-[8px] font-semibold uppercase tracking-wider truncate" style={{ color: 'var(--text-ghost)' }}>
+                      {t.desc}
+                    </div>
                   </button>
-                ));
-              })()}
+                )
+              })}
             </div>
           </div>
         )}
@@ -273,11 +275,17 @@ export default function Profile() {
               </div>
             )}
 
-            <button onClick={() => navigate('/calendar')} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(124,154,116,0.25)', color: 'var(--acid)' }}>
+            <button onClick={() => navigate('/calendar')} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'color-mix(in srgb, var(--acid) 25%, transparent)', color: 'var(--acid)' }}>
               <CalendarDays size={18} /> Drinking Calendar
             </button>
             <button onClick={() => setShowMyQR(true)} className="glass-btn-secondary w-full py-3 flex items-center justify-center gap-2 text-sm" style={{ borderColor: 'rgba(245,166,35,0.25)', color: 'var(--amber)' }}>
               <QrCode size={18} /> My QR (Friends + Loyalty)
+            </button>
+
+            <NotificationToggle />
+
+            <button onClick={() => setShowStatCard(true)} className="glass-btn w-full py-3 flex items-center justify-center gap-2 text-sm">
+              <Share2 size={18} /> Share My Stats
             </button>
 
             {/* Quick nav row */}
@@ -286,7 +294,7 @@ export default function Profile() {
                 🏯 Tavern
               </button>
               {!p.is_premium ? (
-                <button onClick={() => navigate('/premium')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)', borderRadius: 'var(--card-radius)' }}>
+                <button onClick={() => navigate('/premium')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)', borderRadius: 'var(--card-radius)' }}>
                   👑 Go Premium
                 </button>
               ) : (
@@ -346,7 +354,7 @@ export default function Profile() {
                           </span>
                         </div>
                         {isCurrentRank && ri.next && (
-                          <div className="h-1 mt-1 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+                          <div className="h-1 mt-1 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)', borderRadius: '1px' }}>
                             <div className="h-full transition-all duration-500" style={{ width: `${ri.progressPercent}%`, background: rank.color }} />
                           </div>
                         )}
@@ -426,6 +434,7 @@ export default function Profile() {
       </div>
 
       <QRCodeModal isOpen={showMyQR} onClose={() => setShowMyQR(false)} mode="display" personalId={p.id} />
+      {showStatCard && <StatShareCard onClose={() => setShowStatCard(false)} />}
 
       {/* ── Activity Log ── */}
       {!isEditing && (

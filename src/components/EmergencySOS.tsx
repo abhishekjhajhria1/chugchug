@@ -169,7 +169,7 @@ export default function EmergencySOS({ groupId, crewMembers = [] }: EmergencySOS
                 background: 'linear-gradient(135deg, var(--coral), #D94242)',
                 color: '#fff',
                 borderRadius: 'var(--card-radius)',
-                boxShadow: '0 4px 20px rgba(209,32,32,0.3)',
+                boxShadow: '0 4px 20px color-mix(in srgb, var(--coral) 30%, transparent)',
                 opacity: sending ? 0.7 : 1,
               }}
             >

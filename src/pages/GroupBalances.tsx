@@ -171,7 +171,7 @@ export default function GroupBalances() {
           </div>
         ) : debts.length === 0 ? (
           <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}>
-            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)' }}>
+            <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-3" style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 15%, transparent)' }}>
               <span className="text-2xl">🤝</span>
             </div>
             <p className="font-black text-xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>You are all settled up!</p>
@@ -186,7 +186,7 @@ export default function GroupBalances() {
               return (
                 <div key={index} className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4" style={{
                   background: iAmDebtor ? 'var(--coral-dim)' : iAmCreditor ? 'var(--acid-dim)' : 'var(--bg-raised)',
-                  border: `1px solid ${iAmDebtor ? 'rgba(255,107,107,0.2)' : iAmCreditor ? 'rgba(204,255,0,0.15)' : 'var(--border)'}`,
+                  border: `1px solid ${iAmDebtor ? 'rgba(255,107,107,0.2)' : iAmCreditor ? 'color-mix(in srgb, var(--acid) 15%, transparent)' : 'var(--border)'}`,
                 }}>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -207,7 +207,7 @@ export default function GroupBalances() {
                     <button 
                       onClick={() => handleSettleUp(debt.toId, debt.amount)}
                       disabled={settlingWith === debt.toId}
-                      className="glass-btn-secondary py-2 flex items-center justify-center gap-2 shrink-0" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', borderColor: 'rgba(204,255,0,0.15)' }}
+                      className="glass-btn-secondary py-2 flex items-center justify-center gap-2 shrink-0" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', borderColor: 'color-mix(in srgb, var(--acid) 15%, transparent)' }}
                     >
                       {settlingWith === debt.toId ? <Loader2 size={16} className="animate-spin" /> : <Handshake size={16} strokeWidth={2} />}
                       Settle Up

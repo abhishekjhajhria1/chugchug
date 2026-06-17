@@ -4,6 +4,7 @@ import { firebaseDb } from "../lib/firebase"
 import { ref, set } from "firebase/database"
 import { useChug } from "../context/ChugContext"
 import { evaluateAndAwardBadges } from "../lib/progression"
+import { bumpEventProgress } from "../lib/engagement"
 import { Beer, Share2, Users, Globe, Minus, RotateCcw, Camera, Loader2, X } from "lucide-react"
 import { useToast } from "../components/Toast"
 
@@ -193,6 +194,7 @@ export default function BeerCounter({ compact, partyId, groupId, onSessionLogged
 
       // 3. Add XP
       await supabase.rpc('add_xp', { user_id_param: user.id, xp_to_add: count * 5 })
+      bumpEventProgress(user.id, 'drink').then(done => done.forEach(t => toast.success(`🏆 Event complete: ${t}!`))).catch(() => {})
 
       // Removed reset logic: Daily cumulative count should persist so the Live Leaderboard remains populated.
       await evaluateAndAwardBadges(user.id)
@@ -332,7 +334,7 @@ export default function BeerCounter({ compact, partyId, groupId, onSessionLogged
 
       {/* Share menu */}
       {showShare && (
-        <div className="mt-6 pt-6 space-y-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="mt-6 pt-6 space-y-3" style={{ borderTop: '1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)' }}>
           <p className="text-xs font-bold uppercase tracking-wider mb-2 text-white/50">Display Terminal</p>
 
           {groups.map(g => (
@@ -380,7 +382,7 @@ export default function BeerCounter({ compact, partyId, groupId, onSessionLogged
               style={{
                 background: photoPreview ? `url(${photoPreview}) center/cover` : '',
                 borderStyle: photoPreview ? 'solid' : 'dashed',
-                borderColor: photoPreview ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)'
+                borderColor: photoPreview ? 'color-mix(in srgb, var(--text-primary) 10%, transparent)' : 'color-mix(in srgb, var(--text-primary) 20%, transparent)'
               }}>
               {photoPreview && <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>}
               {!photoPreview && <><div className="bg-white/10 p-4 rounded-full group-hover:scale-110 transition-transform"><Camera size={32} className="text-white" /></div><span className="text-sm font-bold text-white/60">Tap to Camera</span></>}

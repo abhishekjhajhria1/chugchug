@@ -125,7 +125,7 @@ export default function Challenges() {
       {timeTab === 'daily' && (
         <div className="space-y-3">
           {/* Daily summary */}
-          <div className="p-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.03))', border: '1px solid var(--border)', borderLeft: '4px solid var(--amber)', borderRadius: 'var(--card-radius)' }}>
+          <div className="p-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--amber) 3%, transparent))', border: '1px solid var(--border)', borderLeft: '4px solid var(--amber)', borderRadius: 'var(--card-radius)' }}>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Today's Bounties</p>
               <p className="text-2xl font-black mt-1" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>
@@ -163,7 +163,7 @@ export default function Challenges() {
       {/* ── WEEKLY CHALLENGES ── */}
       {timeTab === 'weekly' && (
         <div className="space-y-3">
-          <div className="p-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, var(--acid-dim), rgba(124,154,116,0.03))', border: '1px solid var(--border)', borderLeft: '4px solid var(--acid)', borderRadius: 'var(--card-radius)' }}>
+          <div className="p-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, var(--acid-dim), color-mix(in srgb, var(--acid) 3%, transparent))', border: '1px solid var(--border)', borderLeft: '4px solid var(--acid)', borderRadius: 'var(--card-radius)' }}>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>This Week's Missions</p>
               <p className="text-sm font-bold mt-1" style={{ color: 'var(--acid)' }}>
@@ -198,7 +198,7 @@ export default function Challenges() {
       {/* ── MONTHLY CHALLENGES ── */}
       {timeTab === 'monthly' && (
         <div className="space-y-3">
-          <div className="p-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, var(--coral-dim), rgba(209,32,32,0.03))', border: '1px solid var(--border)', borderLeft: '4px solid var(--coral)', borderRadius: 'var(--card-radius)' }}>
+          <div className="p-4 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, var(--coral-dim), color-mix(in srgb, var(--coral) 3%, transparent))', border: '1px solid var(--border)', borderLeft: '4px solid var(--coral)', borderRadius: 'var(--card-radius)' }}>
             <div>
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Monthly Epics</p>
               <p className="text-sm font-bold mt-1" style={{ color: 'var(--coral)' }}>
@@ -237,7 +237,7 @@ export default function Challenges() {
           <div
             className="p-5 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, var(--amber-dim), rgba(124,154,116,0.06))',
+              background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--acid) 6%, transparent))',
               border: '1px solid var(--border)',
               borderLeft: '5px solid var(--amber)',
               borderRadius: 'var(--card-radius)',
@@ -259,7 +259,7 @@ export default function Challenges() {
                 </span>
               </div>
             </div>
-            <div className="h-2 overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '1px' }}>
+            <div className="h-2 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 8%, transparent)', borderRadius: '1px' }}>
               <div
                 className="h-full transition-all duration-700"
                 style={{ width: `${stats.percentage}%`, background: 'linear-gradient(90deg, var(--amber), var(--acid))' }}
@@ -298,7 +298,7 @@ export default function Challenges() {
                         </span>
                       </div>
                       {isCurrentRank && ri.next && (
-                        <div className="h-1 mt-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+                        <div className="h-1 mt-1.5 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)', borderRadius: '1px' }}>
                           <div className="h-full transition-all duration-500" style={{ width: `${ri.progressPercent}%`, background: rank.color }} />
                         </div>
                       )}
@@ -409,7 +409,7 @@ export default function Challenges() {
                             <span className="text-[10px] font-bold" style={{ color: catMeta.color }}>{prog.current} / {prog.target}</span>
                             <span className="text-[10px] font-bold" style={{ color: 'var(--text-ghost)' }}>{pct}%</span>
                           </div>
-                          <div className="h-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+                          <div className="h-1.5 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)', borderRadius: '1px' }}>
                             <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: catMeta.color }} />
                           </div>
                         </div>
@@ -478,7 +478,7 @@ function BountyCard({ emoji, title, description, xpReward, current, target, comp
                 <span className="text-[10px] font-bold" style={{ color }}>{current} / {target}</span>
                 <span className="text-[10px] font-bold" style={{ color: 'var(--text-ghost)' }}>{pct}%</span>
               </div>
-              <div className="h-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+              <div className="h-1.5 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 6%, transparent)', borderRadius: '1px' }}>
                 <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: color }} />
               </div>
             </div>

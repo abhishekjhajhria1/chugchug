@@ -104,7 +104,7 @@ export default function PhotoUpload({ groupId, userId, onUploadComplete, compact
           <div className="relative">
             <img src={preview} alt="Preview" className="w-full rounded-xl object-cover max-h-72" style={{ border: '1px solid var(--glass-edge)' }} />
             <button onClick={clearSelection} aria-label="Remove selected photo" className="absolute top-2 right-2 p-1.5 rounded-full"
-              style={{ background: 'rgba(0,0,0,0.50)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.10)', color: 'var(--text-bright)' }}
+              style={{ background: 'rgba(0,0,0,0.50)', backdropFilter: 'blur(8px)', border: '1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)', color: 'var(--text-bright)' }}
             ><X size={14} strokeWidth={2} /></button>
           </div>
           <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Add a caption..." className="glass-input w-full" maxLength={200} />

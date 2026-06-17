@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { PartyPopper, Calendar, MapPin, Beer, CheckCircle2, XCircle, QrCode, Scan } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import QRCodeModal from "../components/QRCodeModal"
 import LiveCounter from "../components/LiveCounter"
 import { useToast } from "../components/Toast"
@@ -33,8 +33,9 @@ interface HostedParty extends Party {
 }
 
 export default function Party() {
-  const { user } = useChug()
+  const { user, profile } = useChug()
   const toast = useToast()
+  const navigate = useNavigate()
   const [view, setView] = useState<'feed' | 'create' | 'manage' | 'history'>('feed')
 
   const [parties, setParties] = useState<Party[]>([])
@@ -94,6 +95,12 @@ export default function Party() {
 
   const handleCreate = async () => {
     if (!user || !form.title || !form.address || !form.date) { toast.error("Fill required fields (Title, Address, Date)"); return }
+    // Monetization: hosting is a Premium perk — host pays, guests join free.
+    if (!profile?.is_premium) {
+      toast.error("Hosting parties is a Premium perk — upgrade to throw your party 🎉")
+      navigate("/premium")
+      return
+    }
     setLoading(true)
     const { error } = await supabase.from("parties").insert({
       host_id: user.id,
@@ -281,7 +288,7 @@ export default function Party() {
           <h2 className="text-xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Your Hosted Events</h2>
           {hostedParties.length === 0 && <p className="text-center font-bold opacity-50 mt-10">You haven't hosted any parties yet.</p>}
           {hostedParties.map(p => (
-            <div key={p.id} className="glass-card" style={{ borderColor: 'rgba(204,255,0,0.15)' }}>
+            <div key={p.id} className="glass-card" style={{ borderColor: 'color-mix(in srgb, var(--acid) 15%, transparent)' }}>
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-black text-xl" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>{p.title}</h3>
                 <span className="text-xs font-black uppercase px-2 py-1 rounded-full" style={{ background: p.privacy_level === 'hidden' ? 'var(--coral-dim)' : 'var(--bg-raised)', border: '1px solid var(--border)', color: p.privacy_level === 'hidden' ? 'var(--coral)' : 'var(--text-secondary)' }}>
@@ -293,7 +300,7 @@ export default function Party() {
                 <button onClick={() => showPartyQR(p.id, p.title)} className="glass-btn-secondary flex-1 text-xs py-2 flex items-center justify-center gap-1">
                   <QrCode size={14} className="accent-violet" /> Show QR
                 </button>
-                <button onClick={() => copyInviteLink(p.id)} className="glass-btn-secondary flex-1 text-xs py-2 bg-white/5 flex items-center justify-center gap-1">
+                <button onClick={() => copyInviteLink(p.id)} className="glass-btn-secondary flex-1 text-xs py-2 bg-[var(--glass-fill-inset)] flex items-center justify-center gap-1">
                   🔗 Copy Link
                 </button>
                 <button onClick={() => handleEndParty(p.id)} className="glass-btn-secondary flex-1 text-xs py-2 flex items-center justify-center gap-1" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', borderColor: 'rgba(255,107,107,0.2)' }}>

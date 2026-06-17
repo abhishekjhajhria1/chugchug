@@ -300,6 +300,171 @@ USER SAYS: {req.prompt}
         "referenced_recipes": referenced_recipes  # alias
     }
 
+# ══════════════════════════════════════════════════════════════════════
+# ENGAGEMENT — push nudges + weekly league settling
+# Trigger these from a scheduler (cron-job.org, Render cron, Supabase cron):
+#   POST /nudges/run?secret=...     (e.g. every evening)
+#   POST /league/settle?secret=...  (e.g. Monday 00:05)
+# Protect with NUDGE_SECRET. Push delivery needs VAPID keys (see push.py).
+# ══════════════════════════════════════════════════════════════════════
+from datetime import datetime, timedelta, timezone
+import push as push_mod
+
+NUDGE_SECRET = os.getenv("NUDGE_SECRET", "")
+
+LEAGUE_TIERS = [
+    ("Bronze", "🥉", 0), ("Silver", "🥈", 100), ("Gold", "🥇", 300),
+    ("Diamond", "💎", 700), ("Legend", "🐉", 1500),
+]
+
+
+def _tier_for(xp: int):
+    name, emoji = LEAGUE_TIERS[0][0], LEAGUE_TIERS[0][1]
+    for n, e, m in LEAGUE_TIERS:
+        if xp >= m:
+            name, emoji = n, e
+    return name, emoji
+
+
+def _check_secret(secret: str):
+    if NUDGE_SECRET and secret != NUDGE_SECRET:
+        raise HTTPException(status_code=401, detail="bad secret")
+
+
+def _subs_for(user_ids):
+    user_ids = list(user_ids)
+    if not user_ids or supabase is None:
+        return {}
+    res = supabase.table("push_subscriptions").select("*").in_("user_id", user_ids).execute()
+    out = {}
+    for row in (res.data or []):
+        out.setdefault(row["user_id"], []).append(row)
+    return out
+
+
+def _fan_out(subs_by_user, payload_for):
+    sent, expired = 0, []
+    for uid, subs in subs_by_user.items():
+        payload = payload_for(uid)
+        if not payload:
+            continue
+        for s in subs:
+            r = push_mod.send_web_push(s, payload)
+            if r == "ok":
+                sent += 1
+            elif r == "expired":
+                expired.append(s["endpoint"])
+    for ep in expired:
+        try:
+            supabase.table("push_subscriptions").delete().eq("endpoint", ep).execute()
+        except Exception:
+            pass
+    return sent, len(expired)
+
+
+@app.post("/nudges/run")
+async def nudges_run(secret: str = ""):
+    _check_secret(secret)
+    if supabase is None:
+        raise HTTPException(status_code=500, detail="supabase not configured")
+    if not push_mod.push_ready():
+        return {"ok": False, "reason": "push not configured (VAPID keys missing)"}
+
+    today = datetime.now(timezone.utc).date()
+    yesterday = (today - timedelta(days=1)).isoformat()
+    results = {}
+
+    # 1. Streak-at-risk reminders (streak alive yesterday, not yet claimed today)
+    prof = (supabase.table("profiles")
+            .select("id, login_streak, last_login_date")
+            .eq("last_login_date", yesterday).gte("login_streak", 2).execute())
+    risk = {p["id"]: p for p in (prof.data or [])}
+
+    def streak_payload(uid):
+        n = risk[uid]["login_streak"]
+        return {"title": f"🔥 Your {n}-day streak ends tonight",
+                "body": "Open ChugChug and claim today's reward to keep it alive!",
+                "url": "/", "tag": "streak"}
+
+    s_sent, s_exp = _fan_out(_subs_for(risk.keys()), streak_payload)
+    results["streak"] = {"targets": len(risk), "sent": s_sent, "expired": s_exp}
+
+    # 2. Events ending within 24h → nudge everyone
+    now = datetime.now(timezone.utc)
+    soon = (now + timedelta(hours=24)).isoformat()
+    evs = (supabase.table("events").select("id, title, ends_at")
+           .eq("is_active", True).lte("starts_at", now.isoformat())
+           .gte("ends_at", now.isoformat()).lte("ends_at", soon).execute())
+    if evs.data:
+        title = evs.data[0]["title"]
+        allsubs = supabase.table("push_subscriptions").select("*").execute()
+        by_user = {}
+        for row in (allsubs.data or []):
+            by_user.setdefault(row["user_id"], []).append(row)
+
+        def ev_payload(uid):
+            return {"title": f"✨ {title} ends soon!",
+                    "body": "Last chance for bonus XP — jump in now.",
+                    "url": "/events", "tag": "event"}
+
+        e_sent, e_exp = _fan_out(by_user, ev_payload)
+        results["events"] = {"events_ending": len(evs.data), "sent": e_sent, "expired": e_exp}
+    else:
+        results["events"] = {"events_ending": 0, "sent": 0}
+
+    return {"ok": True, "results": results}
+
+
+@app.post("/league/settle")
+async def league_settle(secret: str = ""):
+    _check_secret(secret)
+    if supabase is None:
+        raise HTTPException(status_code=500, detail="supabase not configured")
+
+    now = datetime.now(timezone.utc)
+    monday = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    logs = (supabase.table("activity_logs").select("user_id, xp_earned")
+            .gte("created_at", monday.isoformat()).execute())
+    totals = {}
+    for l in (logs.data or []):
+        totals[l["user_id"]] = totals.get(l["user_id"], 0) + (l.get("xp_earned") or 0)
+
+    profs = supabase.table("profiles").select("id, league_tier").execute()
+    stored = {p["id"]: p.get("league_tier") for p in (profs.data or [])}
+    order = [t[0] for t in LEAGUE_TIERS]
+
+    changed, promotions = 0, {}
+    for uid, xp in totals.items():
+        name, emoji = _tier_for(xp)
+        if stored.get(uid) != name:
+            supabase.table("profiles").update({"league_tier": name}).eq("id", uid).execute()
+            changed += 1
+            old = stored.get(uid)
+            if old is None or (old in order and order.index(name) > order.index(old)):
+                promotions[uid] = (name, emoji)
+
+    pushed = 0
+    if promotions and push_mod.push_ready():
+        def promo_payload(uid):
+            name, emoji = promotions[uid]
+            return {"title": f"{emoji} Promoted to {name} League!",
+                    "body": "You climbed the ranks this week. Defend the crown.",
+                    "url": "/rank", "tag": "league"}
+        pushed, _ = _fan_out(_subs_for(promotions.keys()), promo_payload)
+
+    return {"ok": True, "players": len(totals), "tier_changes": changed,
+            "promotions": len(promotions), "pushed": pushed}
+
+
+@app.post("/push/test")
+async def push_test(user_id: str, secret: str = ""):
+    _check_secret(secret)
+    subs = _subs_for([user_id])
+    sent, exp = _fan_out(subs, lambda uid: {
+        "title": "🍶 ChugChug", "body": "Test notification — you're all set!", "url": "/"})
+    return {"ok": True, "sent": sent, "expired": exp}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("gotw:app", host="0.0.0.0", port=8001, reload=True)

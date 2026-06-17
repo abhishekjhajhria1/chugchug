@@ -242,7 +242,7 @@ export default function World() {
 
             {/* PERSONAL STATS CARD */}
             {userPercentile !== null && (
-                <div className="glass-card" style={{ background: 'linear-gradient(135deg, var(--amber-dim), rgba(204,255,0,0.08), rgba(255,107,107,0.06))', borderColor: 'rgba(245,166,35,0.2)' }}>
+                <div className="glass-card" style={{ background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--acid) 8%, transparent), rgba(255,107,107,0.06))', borderColor: 'rgba(245,166,35,0.2)' }}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--amber-dim)', border: '1px solid var(--border)' }}>
@@ -258,7 +258,7 @@ export default function World() {
                             <p className="text-[10px] font-black uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Total XP</p>
                         </div>
                     </div>
-                    <div className="mt-3 h-3 overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}>
+                    <div className="mt-3 h-3 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 5%, transparent)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}>
                         <div className="h-full transition-all duration-1000" style={{ width: `${Math.min(userPercentile, 100)}%`, background: 'linear-gradient(90deg, var(--amber), var(--coral))', borderRadius: 'var(--card-radius)' }} />
                     </div>
                 </div>
@@ -418,7 +418,7 @@ export default function World() {
             )}
 
             {/* 🏆 WEEKLY CHALLENGES */}
-            <section className="glass-card" style={{ borderColor: 'rgba(204,255,0,0.15)' }}>
+            <section className="glass-card" style={{ borderColor: 'color-mix(in srgb, var(--acid) 15%, transparent)' }}>
                 <h2 className="flex items-center gap-2 mb-4" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-primary)' }}>
                     <Award size={24} strokeWidth={2} style={{ color: 'var(--acid)' }} /> Weekly Challenges
                 </h2>
@@ -437,7 +437,7 @@ export default function World() {
                                     </div>
                                     <span className="font-black text-sm" style={{ color: 'var(--acid)' }}>{c.current}/{c.target}</span>
                                 </div>
-                                <div className="rounded-full h-2 overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
+                                <div className="rounded-full h-2 overflow-hidden" style={{ background: 'color-mix(in srgb, var(--text-primary) 5%, transparent)', border: '1px solid var(--border)' }}>
                                     <div className="h-full rounded-full transition-all duration-700" style={{ width: `${progress}%`, background: 'var(--acid)' }} />
                                 </div>
                             </div>
@@ -506,7 +506,7 @@ export default function World() {
             </section>
 
             {/* 🌍 COUNTRY LEADERBOARDS */}
-            <section className="glass-card" style={{ borderColor: 'rgba(204,255,0,0.15)' }}>
+            <section className="glass-card" style={{ borderColor: 'color-mix(in srgb, var(--acid) 15%, transparent)' }}>
                 <h2 className="flex items-center gap-2 mb-4" style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-primary)' }}>
                     <Trophy size={24} strokeWidth={2} style={{ color: 'var(--acid)' }} /> Country Leaderboards
                 </h2>

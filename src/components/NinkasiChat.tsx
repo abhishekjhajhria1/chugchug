@@ -94,7 +94,7 @@ export default function NinkasiChat({ onBack }: { onBack: () => void }) {
       <div
         className="flex items-center gap-3 px-4 py-3.5 shrink-0"
         style={{
-          background: 'linear-gradient(135deg, rgba(200,80,192,0.08), rgba(209,32,32,0.06), transparent)',
+          background: 'linear-gradient(135deg, rgba(200,80,192,0.08), color-mix(in srgb, var(--coral) 6%, transparent), transparent)',
           borderBottom: '1px solid var(--border)',
         }}
       >
@@ -102,7 +102,7 @@ export default function NinkasiChat({ onBack }: { onBack: () => void }) {
           <ArrowLeft size={18} />
         </button>
         <div className="relative">
-          <div className="w-11 h-11 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,80,192,0.2), rgba(209,32,32,0.15))', border: '2px solid rgba(200,80,192,0.4)', borderRadius: 'var(--card-radius)' }}>
+          <div className="w-11 h-11 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(200,80,192,0.2), color-mix(in srgb, var(--coral) 15%, transparent))', border: '2px solid rgba(200,80,192,0.4)', borderRadius: 'var(--card-radius)' }}>
             <Wine size={22} style={{ color: '#c850c0' }} />
           </div>
           {/* Online indicator */}
@@ -134,11 +134,11 @@ export default function NinkasiChat({ onBack }: { onBack: () => void }) {
                 className="px-4 py-3 text-[13px] font-medium leading-[1.6]"
                 style={{
                   background: msg.role === 'user'
-                    ? 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.08))'
+                    ? 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--amber) 8%, transparent))'
                     : 'var(--bg-raised)',
                   color: msg.role === 'user' ? 'var(--amber)' : 'var(--text-primary)',
                   border: msg.role === 'user'
-                    ? '1px solid rgba(216,162,94,0.25)'
+                    ? '1px solid color-mix(in srgb, var(--amber) 25%, transparent)'
                     : '1px solid var(--border)',
                   borderRadius: msg.role === 'user'
                     ? 'var(--card-radius) var(--card-radius) 2px var(--card-radius)'

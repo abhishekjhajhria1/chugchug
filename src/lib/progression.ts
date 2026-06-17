@@ -61,34 +61,35 @@ export function getRankInfo(level: number, xp: number = 0): RankInfo {
 }
 
 // ══════════════════════════════════════════════════════════════
-// ── THEME UNLOCKS ──
-// Themes gated by rank level. Subtle accent changes, not full redesigns.
+// ── THEMES ──
+// Flat list of complete looks. Each is a full style (shape, density,
+// decoration, palette), not just an accent swap. Freely selectable.
 // ══════════════════════════════════════════════════════════════
 
-export interface ThemeUnlock {
+export interface ThemeMeta {
   themeId: string
   label: string
   desc: string
   emoji: string
-  requiredLevel: number
-  requiredRank: string
+  mode: 'light' | 'dark'
+  /** Two swatch colors for the picker preview: [bg, accent]. */
+  swatch: [string, string]
 }
 
-export const THEME_UNLOCKS: ThemeUnlock[] = [
-  { themeId: 'dark',     label: 'Wano Arc',      desc: 'Dark · Samurai',             emoji: '🎌', requiredLevel: 1,  requiredRank: 'Wanderer'    },
-  { themeId: 'light',    label: 'Wano Day',      desc: 'Light · Clean',              emoji: '☀️', requiredLevel: 4,  requiredRank: 'Ronin'       },
-  { themeId: 'midnight', label: 'Midnight',       desc: 'Deep Ocean · Night',         emoji: '🌊', requiredLevel: 5,  requiredRank: 'Ronin'       },
-  { themeId: 'verdant',  label: 'Verdant',        desc: 'Earthy · Calm',              emoji: '🌿', requiredLevel: 7,  requiredRank: 'Samurai'     },
-  { themeId: 'sakura',   label: 'Sakura',         desc: 'Cherry Blossom · Vibrant',   emoji: '🌸', requiredLevel: 11, requiredRank: 'War Captain' },
-  { themeId: 'ember',    label: 'Ember',          desc: 'Volcanic · Forge',           emoji: '🔥', requiredLevel: 14, requiredRank: 'War Captain' },
-  { themeId: 'frost',    label: 'Arctic Frost',   desc: 'Ice Blue · Tundra',          emoji: '❄️', requiredLevel: 20, requiredRank: 'Daimyo'      },
-  { themeId: 'gold',     label: 'Imperial Gold',  desc: 'Shogun\'s Palace · Luxe',    emoji: '👑', requiredLevel: 30, requiredRank: 'Shogun'      },
+export const THEMES: ThemeMeta[] = [
+  { themeId: 'minimal',      label: 'Minimal',  desc: 'Clean · Light',     emoji: '⬜', mode: 'light', swatch: ['#FBFBFA', '#111111'] },
+  { themeId: 'minimal-dark', label: 'Mono',     desc: 'Minimal · Dark',    emoji: '◾', mode: 'dark',  swatch: ['#0E0E10', '#FFFFFF'] },
+  { themeId: 'dark',         label: 'Wano',     desc: 'Japanese · Dark',   emoji: '🎌', mode: 'dark',  swatch: ['#0B111F', '#D8A25E'] },
+  { themeId: 'light',        label: 'Wano Day', desc: 'Japanese · Light',  emoji: '⛩️', mode: 'light', swatch: ['#F7F3EB', '#D88E30'] },
+  { themeId: 'neo',          label: 'Neo',      desc: 'Playful · Vibrant', emoji: '🎨', mode: 'light', swatch: ['#F3EEFF', '#7C3AED'] },
+  { themeId: 'cyber',        label: 'Cyber',    desc: 'Neon · Night',      emoji: '🌃', mode: 'dark',  swatch: ['#05060A', '#22D3EE'] },
 ]
 
-export function isThemeUnlocked(themeId: string, level: number): boolean {
-  const unlock = THEME_UNLOCKS.find(t => t.themeId === themeId)
-  if (!unlock) return true // unknown themes are always unlocked
-  return level >= unlock.requiredLevel
+export const THEME_IDS = THEMES.map(t => t.themeId)
+
+/** Kept for backwards-compat — all themes are now freely selectable. */
+export function isThemeUnlocked(_themeId: string, _level: number): boolean {
+  return true
 }
 
 // ══════════════════════════════════════════════════════════════

@@ -172,7 +172,7 @@ export default function AdminDashboard() {
         onClick={() => setIsScanning(true)}
         className="w-full p-5 flex items-center justify-center gap-3 active:scale-[0.98] transition-transform"
         style={{
-          background: 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.05))',
+          background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--amber) 5%, transparent))',
           border: '2px dashed var(--amber)',
           borderRadius: 'var(--card-radius)',
         }}
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
               onClick={handleGrantPoints}
               disabled={!deductAmount || loading}
               className="flex-1 py-3 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform disabled:opacity-30"
-              style={{ background: 'var(--acid-dim)', border: '1px solid rgba(124,154,116,0.3)', color: 'var(--acid)', borderRadius: 'var(--card-radius)' }}
+              style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 30%, transparent)', color: 'var(--acid)', borderRadius: 'var(--card-radius)' }}
             >
               <Gift size={14} /> Grant
             </button>
@@ -245,7 +245,7 @@ export default function AdminDashboard() {
               onClick={handleDeductPoints}
               disabled={!deductAmount || loading}
               className="flex-1 py-3 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform disabled:opacity-30"
-              style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)', color: 'var(--coral)', borderRadius: 'var(--card-radius)' }}
+              style={{ background: 'var(--coral-dim)', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)', color: 'var(--coral)', borderRadius: 'var(--card-radius)' }}
             >
               <Minus size={14} /> Deduct
             </button>

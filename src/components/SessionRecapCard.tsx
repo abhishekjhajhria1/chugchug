@@ -61,28 +61,28 @@ export default function SessionRecapCard({
       ctx.fillRect(0, 0, W, H)
 
       // Decorative border
-      ctx.strokeStyle = 'rgba(216,162,94,0.3)'
+      ctx.strokeStyle = 'color-mix(in srgb, var(--amber) 30%, transparent)'
       ctx.lineWidth = 4
       ctx.strokeRect(40, 40, W - 80, H - 80)
 
       // Inner border
-      ctx.strokeStyle = 'rgba(216,162,94,0.12)'
+      ctx.strokeStyle = 'color-mix(in srgb, var(--amber) 12%, transparent)'
       ctx.lineWidth = 1
       ctx.strokeRect(60, 60, W - 120, H - 120)
 
       // Top section — Branding
-      ctx.fillStyle = 'rgba(216,162,94,0.9)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--amber) 90%, transparent)'
       ctx.font = 'bold 28px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.textAlign = 'center'
       ctx.fillText('⛩️  CHUGCHUG', W / 2, 140)
 
-      ctx.fillStyle = 'rgba(216,162,94,0.4)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--amber) 40%, transparent)'
       ctx.font = '600 16px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.letterSpacing = '6px'
       ctx.fillText('SESSION RECAP', W / 2, 175)
 
       // Decorative line
-      ctx.strokeStyle = 'rgba(216,162,94,0.25)'
+      ctx.strokeStyle = 'color-mix(in srgb, var(--amber) 25%, transparent)'
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(200, 210)
@@ -90,7 +90,7 @@ export default function SessionRecapCard({
       ctx.stroke()
 
       // Date
-      ctx.fillStyle = 'rgba(255,255,255,0.7)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 70%, transparent)'
       ctx.font = '500 32px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText(dateStr, W / 2, 300)
 
@@ -106,7 +106,7 @@ export default function SessionRecapCard({
       drawStatBlock(ctx, statBlockWidth * 2.5, statsY, '👥', `${crewSize}`, 'People')
 
       // Decorative line
-      ctx.strokeStyle = 'rgba(216,162,94,0.15)'
+      ctx.strokeStyle = 'color-mix(in srgb, var(--amber) 15%, transparent)'
       ctx.beginPath()
       ctx.moveTo(100, 620)
       ctx.lineTo(W - 100, 620)
@@ -114,15 +114,15 @@ export default function SessionRecapCard({
 
       // MVP section
       if (mvp && crewSize > 1) {
-        ctx.fillStyle = 'rgba(216,162,94,0.9)'
+        ctx.fillStyle = 'color-mix(in srgb, var(--amber) 90%, transparent)'
         ctx.font = 'bold 20px "Inter", "Segoe UI", system-ui, sans-serif'
         ctx.fillText('🏆 MVP', W / 2, 700)
 
-        ctx.fillStyle = 'rgba(255,255,255,0.95)'
+        ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 95%, transparent)'
         ctx.font = 'bold 48px "Inter", "Segoe UI", system-ui, sans-serif'
         ctx.fillText(`@${mvp.username}`, W / 2, 760)
 
-        ctx.fillStyle = 'rgba(216,162,94,0.7)'
+        ctx.fillStyle = 'color-mix(in srgb, var(--amber) 70%, transparent)'
         ctx.font = '600 28px "Inter", "Segoe UI", system-ui, sans-serif'
         ctx.fillText(`${mvp.count} drinks`, W / 2, 810)
       }
@@ -130,7 +130,7 @@ export default function SessionRecapCard({
       // Participants leaderboard
       const lbStartY = mvp && crewSize > 1 ? 900 : 700
       if (crewSize > 1) {
-        ctx.fillStyle = 'rgba(255,255,255,0.3)'
+        ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 30%, transparent)'
         ctx.font = 'bold 16px "Inter", "Segoe UI", system-ui, sans-serif'
         ctx.fillText('FINAL SCORES', W / 2, lbStartY)
 
@@ -140,18 +140,18 @@ export default function SessionRecapCard({
 
           // Rank number
           ctx.textAlign = 'left'
-          ctx.fillStyle = i === 0 ? 'rgba(216,162,94,0.9)' : 'rgba(255,255,255,0.5)'
+          ctx.fillStyle = i === 0 ? 'color-mix(in srgb, var(--amber) 90%, transparent)' : 'color-mix(in srgb, var(--text-primary) 50%, transparent)'
           ctx.font = `bold 24px "Inter", "Segoe UI", system-ui, sans-serif`
           ctx.fillText(`#${i + 1}`, 180, y)
 
           // Username
-          ctx.fillStyle = 'rgba(255,255,255,0.85)'
+          ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 85%, transparent)'
           ctx.font = `600 24px "Inter", "Segoe UI", system-ui, sans-serif`
           ctx.fillText(p.username, 250, y)
 
           // Count
           ctx.textAlign = 'right'
-          ctx.fillStyle = 'rgba(216,162,94,0.8)'
+          ctx.fillStyle = 'color-mix(in srgb, var(--amber) 80%, transparent)'
           ctx.font = `bold 24px "Inter", "Segoe UI", system-ui, sans-serif`
           ctx.fillText(`${p.count} 🍺`, W - 180, y)
 
@@ -164,34 +164,34 @@ export default function SessionRecapCard({
 
       // Streak + Rank bar
       const barGrad = ctx.createLinearGradient(0, bottomY - 30, 0, bottomY + 80)
-      barGrad.addColorStop(0, 'rgba(216,162,94,0.08)')
-      barGrad.addColorStop(1, 'rgba(209,32,32,0.04)')
+      barGrad.addColorStop(0, 'color-mix(in srgb, var(--amber) 8%, transparent)')
+      barGrad.addColorStop(1, 'color-mix(in srgb, var(--coral) 4%, transparent)')
       ctx.fillStyle = barGrad
       roundRect(ctx, 80, bottomY - 30, W - 160, 110, 12)
       ctx.fill()
 
-      ctx.strokeStyle = 'rgba(216,162,94,0.2)'
+      ctx.strokeStyle = 'color-mix(in srgb, var(--amber) 20%, transparent)'
       ctx.lineWidth = 1
       roundRect(ctx, 80, bottomY - 30, W - 160, 110, 12)
       ctx.stroke()
 
       ctx.textAlign = 'left'
-      ctx.fillStyle = 'rgba(255,255,255,0.9)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 90%, transparent)'
       ctx.font = 'bold 28px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText(`🔥 Day ${currentUserStreak}`, 120, bottomY + 20)
 
       ctx.textAlign = 'right'
-      ctx.fillStyle = 'rgba(216,162,94,0.9)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--amber) 90%, transparent)'
       ctx.font = 'bold 28px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText(`${currentUserRankEmoji} ${currentUserRank}`, W - 120, bottomY + 20)
 
       ctx.textAlign = 'center'
-      ctx.fillStyle = 'rgba(255,255,255,0.2)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 20%, transparent)'
       ctx.font = '500 14px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText(`${currentUserRankEmoji} ${currentUserRank} · Streak: ${currentUserStreak} days`, W / 2, bottomY + 60)
 
       // Footer
-      ctx.fillStyle = 'rgba(216,162,94,0.35)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--amber) 35%, transparent)'
       ctx.font = '600 14px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText('@chugchug.app', W / 2, H - 80)
 
@@ -207,19 +207,19 @@ export default function SessionRecapCard({
       ctx.fillStyle = stickerGrad
       ctx.fill()
 
-      ctx.strokeStyle = 'rgba(216,162,94,0.4)'
+      ctx.strokeStyle = 'color-mix(in srgb, var(--amber) 40%, transparent)'
       ctx.lineWidth = 2
       roundRect(ctx, 20, 20, W - 40, H - 40, 24)
       ctx.stroke()
 
       // Branding line
       ctx.textAlign = 'left'
-      ctx.fillStyle = 'rgba(216,162,94,0.9)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--amber) 90%, transparent)'
       ctx.font = 'bold 28px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText('⛩️ CHUGCHUG', 60, 85)
 
       ctx.textAlign = 'right'
-      ctx.fillStyle = 'rgba(255,255,255,0.5)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 50%, transparent)'
       ctx.font = '500 22px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText(dateStr, W - 60, 85)
 
@@ -235,20 +235,20 @@ export default function SessionRecapCard({
 
       // Rank + MVP bar
       ctx.textAlign = 'left'
-      ctx.fillStyle = 'rgba(216,162,94,0.7)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--amber) 70%, transparent)'
       ctx.font = 'bold 22px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText(`${currentUserRankEmoji} ${currentUserRank}`, 60, 340)
 
       if (mvp && crewSize > 1) {
         ctx.textAlign = 'right'
-        ctx.fillStyle = 'rgba(255,255,255,0.7)'
+        ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 70%, transparent)'
         ctx.font = '500 22px "Inter", "Segoe UI", system-ui, sans-serif'
         ctx.fillText(`🏆 MVP: @${mvp.username} (${mvp.count})`, W - 60, 340)
       }
 
       // Footer
       ctx.textAlign = 'center'
-      ctx.fillStyle = 'rgba(216,162,94,0.3)'
+      ctx.fillStyle = 'color-mix(in srgb, var(--amber) 30%, transparent)'
       ctx.font = '500 16px "Inter", "Segoe UI", system-ui, sans-serif'
       ctx.fillText('@chugchug.app', W / 2, H - 50)
     }
@@ -302,10 +302,10 @@ export default function SessionRecapCard({
           <button
             key={m}
             onClick={() => setMode(m)}
-            className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-[4px]"
+            className="px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all rounded-[var(--card-radius)]"
             style={{
               background: mode === m ? 'var(--amber-dim)' : 'var(--bg-deep)',
-              border: mode === m ? '1px solid rgba(216,162,94,0.4)' : '1px solid var(--border-mid)',
+              border: mode === m ? '1px solid color-mix(in srgb, var(--amber) 40%, transparent)' : '1px solid var(--border-mid)',
               color: mode === m ? 'var(--amber)' : 'var(--text-muted)',
             }}
           >
@@ -324,7 +324,7 @@ export default function SessionRecapCard({
             src={imageUrl}
             alt="Session Recap"
             className="w-full rounded-lg shadow-2xl"
-            style={{ border: '1px solid rgba(216,162,94,0.2)' }}
+            style={{ border: '1px solid color-mix(in srgb, var(--amber) 20%, transparent)' }}
           />
         </div>
       )}
@@ -333,14 +333,14 @@ export default function SessionRecapCard({
       <div className="flex gap-3 mt-5 w-full max-w-xs">
         <button
           onClick={handleDownload}
-          className="flex-1 py-3.5 rounded-[4px] flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-transform"
+          className="flex-1 py-3.5 rounded-[var(--card-radius)] flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-transform"
           style={{ background: 'var(--bg-raised)', color: 'var(--text-primary)', border: '1px solid var(--border-mid)' }}
         >
           <Download size={16} /> Save
         </button>
         <button
           onClick={handleShare}
-          className="flex-1 py-3.5 rounded-[4px] flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-transform"
+          className="flex-1 py-3.5 rounded-[var(--card-radius)] flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest active:scale-95 transition-transform"
           style={{ background: 'linear-gradient(135deg, var(--amber), #E8880A)', color: '#1A1208' }}
         >
           <Share2 size={16} /> Share
@@ -356,24 +356,24 @@ export default function SessionRecapCard({
 
 // ── Helper: draw stat block for full card ──
 function drawStatBlock(ctx: CanvasRenderingContext2D, x: number, y: number, emoji: string, value: string, label: string) {
-  ctx.fillStyle = 'rgba(255,255,255,0.9)'
+  ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 90%, transparent)'
   ctx.font = `bold 56px "Inter", "Segoe UI", system-ui, sans-serif`
   ctx.textAlign = 'center'
   ctx.fillText(value, x, y)
 
-  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 40%, transparent)'
   ctx.font = `600 18px "Inter", "Segoe UI", system-ui, sans-serif`
   ctx.fillText(`${emoji} ${label}`, x, y + 35)
 }
 
 // ── Helper: draw mini stat for sticker mode ──
 function drawMiniStat(ctx: CanvasRenderingContext2D, x: number, y: number, emoji: string, value: string, label: string) {
-  ctx.fillStyle = 'rgba(255,255,255,0.9)'
+  ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 90%, transparent)'
   ctx.font = `bold 36px "Inter", "Segoe UI", system-ui, sans-serif`
   ctx.textAlign = 'center'
   ctx.fillText(value, x, y)
 
-  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.fillStyle = 'color-mix(in srgb, var(--text-primary) 40%, transparent)'
   ctx.font = `500 14px "Inter", "Segoe UI", system-ui, sans-serif`
   ctx.fillText(`${emoji} ${label}`, x, y + 28)
 }

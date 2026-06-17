@@ -396,7 +396,7 @@ export default function Groups() {
             <ScanLine size={18} />
           </button>
           {hasNfc && (
-            <button onClick={handleNfcWrite} className="p-2 rounded-full transition-colors" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)', color: 'var(--acid)' }} title="Share via NFC">
+            <button onClick={handleNfcWrite} className="p-2 rounded-full transition-colors" style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 30%, transparent)', color: 'var(--acid)' }} title="Share via NFC">
               <Smartphone size={18} />
             </button>
           )}
@@ -470,7 +470,7 @@ export default function Groups() {
           )}
 
           {modalMode === 'join' && (
-            <div className="glass-card relative mb-6" style={{ borderColor: 'rgba(204,255,0,0.15)' }}>
+            <div className="glass-card relative mb-6" style={{ borderColor: 'color-mix(in srgb, var(--acid) 15%, transparent)' }}>
               <button onClick={() => setModalMode(null)} className="absolute top-2 right-2 p-1" style={{ color: 'var(--text-muted)' }}><X size={20} strokeWidth={2} /></button>
               <h2 className="text-xl font-black mb-4" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Join a Group</h2>
               <div className="space-y-3">
@@ -545,9 +545,9 @@ export default function Groups() {
                 <h2 className="text-xs uppercase font-black tracking-widest" style={{ color: 'var(--coral)' }}>Pending Requests</h2>
               </div>
               {requests.map(r => (
-                <div key={r.id} className="flex flex-col sm:flex-row gap-3 items-center justify-between p-4 rounded-[4px]" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
+                <div key={r.id} className="flex flex-col sm:flex-row gap-3 items-center justify-between p-4 rounded-[var(--card-radius)]" style={{ background: 'var(--coral-dim)', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)' }}>
                   <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <div className="w-12 h-12 rounded-[4px] flex items-center justify-center overflow-hidden" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
+                    <div className="w-12 h-12 rounded-[var(--card-radius)] flex items-center justify-center overflow-hidden" style={{ background: 'var(--coral-dim)', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)' }}>
                       {r.profiles.avatar_url ? <img src={r.profiles.avatar_url} className="w-full h-full object-cover" /> : <UserPlus size={20} style={{ color: 'var(--coral)' }} />}
                     </div>
                     <div>
@@ -556,8 +556,8 @@ export default function Groups() {
                     </div>
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto">
-                    <button onClick={() => handleAccept(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-[4px]" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.3)' }}>Accept</button>
-                    <button onClick={() => handleDecline(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-[4px]" style={{ background: 'var(--bg-deep)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>Decline</button>
+                    <button onClick={() => handleAccept(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-[var(--card-radius)]" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid color-mix(in srgb, var(--acid) 30%, transparent)' }}>Accept</button>
+                    <button onClick={() => handleDecline(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-[var(--card-radius)]" style={{ background: 'var(--bg-deep)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>Decline</button>
                   </div>
                 </div>
               ))}
@@ -578,10 +578,10 @@ export default function Groups() {
             ) : (
               <div className="grid grid-cols-1 gap-3">
                 {friends.map(f => (
-                  <div key={f.friend_id} className="flex flex-col p-4 rounded-[4px] transition-colors gap-3" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+                  <div key={f.friend_id} className="flex flex-col p-4 rounded-[var(--card-radius)] transition-colors gap-3" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/profile/${f.friend_id}`)}>
-                        <div className="w-12 h-12 rounded-[4px] flex items-center justify-center overflow-hidden" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)' }}>
+                        <div className="w-12 h-12 rounded-[var(--card-radius)] flex items-center justify-center overflow-hidden" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)' }}>
                           {f.avatar_url ? <img src={f.avatar_url} className="w-full h-full object-cover" /> : <UserCheck size={20} style={{ color: 'var(--amber)' }} />}
                         </div>
                         <div>
@@ -589,11 +589,11 @@ export default function Groups() {
                           <p className="text-[10px] uppercase tracking-wider font-bold" style={{ color: 'var(--acid)' }}>Lvl {f.level} • {f.xp} XP</p>
                         </div>
                       </div>
-                      <button onClick={() => handleRemoveFriend(f.friend_id)} className="p-2.5 rounded-[4px] transition-colors" style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-mid)' }}>
+                      <button onClick={() => handleRemoveFriend(f.friend_id)} className="p-2.5 rounded-[var(--card-radius)] transition-colors" style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-mid)' }}>
                         <UserX size={16} />
                       </button>
                     </div>
-                    <button onClick={() => handlePingDrink(f.friend_id, f.username)} className="w-full py-2.5 rounded-[4px] text-[10px] uppercase font-black tracking-widest flex justify-center items-center gap-2 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)' }}>
+                    <button onClick={() => handlePingDrink(f.friend_id, f.username)} className="w-full py-2.5 rounded-[var(--card-radius)] text-[10px] uppercase font-black tracking-widest flex justify-center items-center gap-2 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)' }}>
                       <GlassWater size={14} /> Ping for a Drink!
                     </button>
                   </div>
@@ -674,16 +674,16 @@ export default function Groups() {
       {/* --- NFC MODAL --- */}
       {showNfcModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 anim-fade" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
-          <div className="p-8 rounded-[4px] max-w-sm w-full relative flex flex-col items-center gap-6 anim-enter" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', boxShadow: '0 16px 64px rgba(0,0,0,0.6)' }}>
+          <div className="p-8 rounded-[var(--card-radius)] max-w-sm w-full relative flex flex-col items-center gap-6 anim-enter" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', boxShadow: '0 16px 64px rgba(0,0,0,0.6)' }}>
             <button onClick={closeNfcModal} className="absolute top-4 right-4 p-2 rounded-full transition-colors" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)' }}>
               <X size={16} />
             </button>
 
             <div className="text-center space-y-4">
               {/* Animated icon */}
-              <div className="w-20 h-20 mx-auto rounded-[4px] flex items-center justify-center relative" style={{
+              <div className="w-20 h-20 mx-auto rounded-[var(--card-radius)] flex items-center justify-center relative" style={{
                 background: nfcMode === 'success' ? 'var(--acid-dim)' : nfcMode === 'error' ? 'var(--coral-dim)' : 'var(--amber-dim)',
-                border: `1px solid ${nfcMode === 'success' ? 'rgba(204,255,0,0.3)' : nfcMode === 'error' ? 'rgba(209,32,32,0.3)' : 'rgba(216,162,94,0.3)'}`,
+                border: `1px solid ${nfcMode === 'success' ? 'color-mix(in srgb, var(--acid) 30%, transparent)' : nfcMode === 'error' ? 'color-mix(in srgb, var(--coral) 30%, transparent)' : 'color-mix(in srgb, var(--amber) 30%, transparent)'}`,
               }}>
                 {(nfcMode === 'writing' || nfcMode === 'scanning') && (
                   <Loader2 size={36} className="animate-spin" style={{ color: 'var(--amber)' }} />
@@ -704,17 +704,17 @@ export default function Groups() {
               {/* Action buttons */}
               {nfcMode !== 'writing' && nfcMode !== 'scanning' && (
                 <div className="flex gap-3 w-full pt-2">
-                  <button onClick={handleNfcWrite} className="flex-1 py-3 rounded-[4px] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)' }}>
+                  <button onClick={handleNfcWrite} className="flex-1 py-3 rounded-[var(--card-radius)] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)' }}>
                     Share My Profile
                   </button>
-                  <button onClick={handleNfcScan} className="flex-1 py-3 rounded-[4px] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)', color: 'var(--acid)' }}>
+                  <button onClick={handleNfcScan} className="flex-1 py-3 rounded-[var(--card-radius)] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 30%, transparent)', color: 'var(--acid)' }}>
                     Scan a Friend
                   </button>
                 </div>
               )}
 
               {(nfcMode === 'writing' || nfcMode === 'scanning') && (
-                <button onClick={closeNfcModal} className="w-full py-3 rounded-[4px] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)', color: 'var(--text-muted)' }}>
+                <button onClick={closeNfcModal} className="w-full py-3 rounded-[var(--card-radius)] text-[10px] uppercase font-black tracking-widest active:scale-95 transition-transform" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)', color: 'var(--text-muted)' }}>
                   Cancel
                 </button>
               )}

@@ -135,7 +135,12 @@ export default function Tavern() {
   })
 
   const partnerBars = filteredBars.filter(b => b.is_partner)
-  const nearbyBars = [...filteredBars].sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999))
+  // Monetization: partners get a tier-weighted "boost" (effective distance shrinks)
+  // so paying bars surface higher without burying genuinely nearby spots.
+  const tierBoostKm = (b: Bar) => b.is_partner ? (b.partner_tier === 'gold' ? 3 : b.partner_tier === 'silver' ? 1.5 : 0.5) : 0
+  const nearbyBars = [...filteredBars].sort(
+    (a, b) => ((a.distance ?? 999) - tierBoostKm(a)) - ((b.distance ?? 999) - tierBoostKm(b))
+  )
 
   const getLoyaltyForBar = (barId: string) => loyalty.find(l => l.bar_id === barId)
   const totalLoyalty = loyalty.reduce((sum, l) => sum + l.points, 0)
@@ -171,7 +176,7 @@ export default function Tavern() {
           </p>
         </div>
         {totalLoyalty > 0 && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', borderRadius: 'var(--card-radius)' }}>
+          <div className="flex items-center gap-1.5 px-3 py-1.5" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', borderRadius: 'var(--card-radius)' }}>
             <Gift size={14} style={{ color: 'var(--amber)' }} />
             <span className="text-xs font-black" style={{ color: 'var(--amber)' }}>{totalLoyalty}</span>
           </div>
@@ -236,7 +241,7 @@ export default function Tavern() {
 
       {activeTab === 'partner' && (
         <div className="space-y-3">
-          <div className="p-4" style={{ background: 'linear-gradient(135deg, var(--acid-dim), rgba(124,154,116,0.05))', border: '1px solid var(--border)', borderLeft: '4px solid var(--acid)', borderRadius: 'var(--card-radius)' }}>
+          <div className="p-4" style={{ background: 'linear-gradient(135deg, var(--acid-dim), color-mix(in srgb, var(--acid) 5%, transparent))', border: '1px solid var(--border)', borderLeft: '4px solid var(--acid)', borderRadius: 'var(--card-radius)' }}>
             <p className="text-xs font-bold" style={{ color: 'var(--acid)' }}>🤝 Partner bars give you bonus loyalty points</p>
             <p className="text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>Log sessions at partner bars → earn 2x-5x points → redeem for drinks & perks</p>
           </div>
@@ -255,7 +260,7 @@ export default function Tavern() {
       {activeTab === 'loyalty' && (
         <div className="space-y-3">
           {/* Total points card */}
-          <div className="p-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.05))', border: '1px solid var(--border)', borderLeft: '5px solid var(--amber)', borderRadius: 'var(--card-radius)' }}>
+          <div className="p-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--amber) 5%, transparent))', border: '1px solid var(--border)', borderLeft: '5px solid var(--amber)', borderRadius: 'var(--card-radius)' }}>
             <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Total Loyalty Points</p>
             <p className="text-4xl font-black mt-2" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>{totalLoyalty}</p>
             <p className="text-[10px] mt-1" style={{ color: 'var(--text-ghost)' }}>Earn points by logging sessions at partner bars</p>
@@ -365,7 +370,7 @@ export default function Tavern() {
             {(() => {
               const l = getLoyaltyForBar(selectedBar.id)
               return l ? (
-                <div className="flex items-center justify-between p-3" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', borderRadius: 'var(--card-radius)' }}>
+                <div className="flex items-center justify-between p-3" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', borderRadius: 'var(--card-radius)' }}>
                   <span className="text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>Your Points</span>
                   <span className="text-lg font-black" style={{ color: 'var(--amber)' }}>{l.points}</span>
                 </div>
@@ -400,10 +405,10 @@ function BarCard({ bar, loyalty, onSelect }: { bar: Bar; loyalty?: UserLoyalty; 
       className="w-full text-left p-4 transition-all active:scale-[0.98]"
       style={{
         background: bar.is_partner
-          ? 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.03))'
+          ? 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--amber) 3%, transparent))'
           : 'var(--card-bg)',
         border: bar.is_partner
-          ? '1px solid rgba(216,162,94,0.25)'
+          ? '1px solid color-mix(in srgb, var(--amber) 25%, transparent)'
           : '1px solid var(--border)',
         borderLeft: bar.is_partner ? '4px solid var(--amber)' : undefined,
         borderRadius: 'var(--card-radius)',

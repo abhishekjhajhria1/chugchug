@@ -2,13 +2,13 @@ import { type ReactNode } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTheme } from "../context/ThemeContext"
 import BottomNav from "./BottomNav"
-import { Moon, Sun } from "lucide-react"
+import { Palette } from "lucide-react"
 
 
 
 export default function Layout({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
-  const { theme, toggleTheme } = useTheme()
+  const { toggleTheme } = useTheme()
 
   return (
     <div className="desktop-outer">
@@ -24,8 +24,8 @@ export default function Layout({ children }: { children: ReactNode }) {
       <div className="desktop-shell relative min-h-dvh transition-colors duration-300" style={{ background: 'var(--bg-deep)' }}>
         {/* Subtle ambient blooms — Wano Sakura and Kozuki Gold */}
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          <div className="absolute rounded-full" style={{ width: 250, height: 250, top: '-8%', left: '-5%', background: 'radial-gradient(circle, rgba(216,142,48,0.06), transparent 60%)' }} />
-          <div className="absolute rounded-full" style={{ width: 200, height: 200, bottom: '5%', right: '-8%', background: 'radial-gradient(circle, rgba(216,60,60,0.04), transparent 60%)' }} />
+          <div className="absolute rounded-full" style={{ width: 250, height: 250, top: '-8%', left: '-5%', background: 'radial-gradient(circle, var(--amber-dim), transparent 60%)' }} />
+          <div className="absolute rounded-full" style={{ width: 200, height: 200, bottom: '5%', right: '-8%', background: 'radial-gradient(circle, var(--coral-dim), transparent 60%)' }} />
         </div>
 
         {/* Sakura petals — hidden in verdant mode via CSS */}
@@ -89,9 +89,9 @@ export default function Layout({ children }: { children: ReactNode }) {
                 borderColor: 'var(--border-mid)',
                 color: 'var(--text-primary)',
               }}
-              title="Toggle Wano Theme"
+              title="Switch theme"
             >
-              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              <Palette size={16} />
             </button>
           </div>
         </header>

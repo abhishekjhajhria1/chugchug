@@ -680,7 +680,7 @@
   --desktop-glow-3: rgba(209,32,32,0.06);
 }
 
-:root:not(.dark):not(.midnight):not(.sakura):not(.ember):not(.frost):not(.gold):not(.verdant) {
+:root:not(.dark):not(.minimal):not(.minimal-dark):not(.neo):not(.cyber) {
   --desktop-bg: #18140E;
   --desktop-accent-rgb: 216,142,48;
   --desktop-shell-glow: rgba(216,142,48,0.15);
@@ -689,58 +689,40 @@
   --desktop-glow-3: rgba(95,150,98,0.05);
 }
 
-.midnight {
-  --desktop-bg: #030A18;
-  --desktop-accent-rgb: 74,158,214;
-  --desktop-shell-glow: rgba(74,158,214,0.22);
-  --desktop-glow-1: rgba(74,158,214,0.15);
-  --desktop-glow-2: rgba(61,214,140,0.08);
-  --desktop-glow-3: rgba(91,142,245,0.08);
+.minimal {
+  --desktop-bg: #ECECEA;
+  --desktop-accent-rgb: 17,17,17;
+  --desktop-shell-glow: rgba(0,0,0,0.10);
+  --desktop-glow-1: rgba(0,0,0,0.05);
+  --desktop-glow-2: rgba(0,0,0,0.04);
+  --desktop-glow-3: rgba(0,0,0,0.03);
 }
 
-.sakura {
-  --desktop-bg: #0A0510;
-  --desktop-accent-rgb: 232,117,168;
-  --desktop-shell-glow: rgba(232,117,168,0.22);
-  --desktop-glow-1: rgba(232,117,168,0.14);
-  --desktop-glow-2: rgba(196,57,124,0.1);
-  --desktop-glow-3: rgba(168,137,212,0.08);
+.minimal-dark {
+  --desktop-bg: #08080A;
+  --desktop-accent-rgb: 250,250,250;
+  --desktop-shell-glow: rgba(255,255,255,0.10);
+  --desktop-glow-1: rgba(255,255,255,0.06);
+  --desktop-glow-2: rgba(255,255,255,0.04);
+  --desktop-glow-3: rgba(255,255,255,0.03);
 }
 
-.ember {
-  --desktop-bg: #0C0605;
-  --desktop-accent-rgb: 240,133,58;
-  --desktop-shell-glow: rgba(240,133,58,0.25);
-  --desktop-glow-1: rgba(240,133,58,0.16);
-  --desktop-glow-2: rgba(232,58,58,0.1);
-  --desktop-glow-3: rgba(212,170,74,0.08);
+.neo {
+  --desktop-bg: #E7DEFF;
+  --desktop-accent-rgb: 124,58,237;
+  --desktop-shell-glow: rgba(124,58,237,0.22);
+  --desktop-glow-1: rgba(124,58,237,0.14);
+  --desktop-glow-2: rgba(236,72,153,0.10);
+  --desktop-glow-3: rgba(20,184,166,0.08);
 }
 
-.frost {
-  --desktop-bg: #050A14;
-  --desktop-accent-rgb: 122,197,232;
-  --desktop-shell-glow: rgba(122,197,232,0.22);
-  --desktop-glow-1: rgba(122,197,232,0.14);
-  --desktop-glow-2: rgba(136,212,176,0.08);
-  --desktop-glow-3: rgba(106,160,216,0.08);
-}
-
-.gold {
-  --desktop-bg: #080605;
-  --desktop-accent-rgb: 232,196,74;
-  --desktop-shell-glow: rgba(232,196,74,0.25);
-  --desktop-glow-1: rgba(232,196,74,0.16);
-  --desktop-glow-2: rgba(212,64,64,0.08);
-  --desktop-glow-3: rgba(184,208,96,0.06);
-}
-
-.verdant {
-  --desktop-bg: #080C06;
-  --desktop-accent-rgb: 107,158,122;
-  --desktop-shell-glow: rgba(107,158,122,0.18);
-  --desktop-glow-1: rgba(107,158,122,0.12);
-  --desktop-glow-2: rgba(196,114,74,0.08);
-  --desktop-glow-3: rgba(212,160,67,0.06);
+.cyber {
+  --desktop-bg: #04060A;
+  --desktop-accent-rgb: 34,211,238;
+  --desktop-shell-glow: rgba(34,211,238,0.24);
+  --desktop-glow-1: rgba(34,211,238,0.16);
+  --desktop-glow-2: rgba(255,0,255,0.10);
+  --desktop-glow-3: rgba(163,230,53,0.08);
 }
 
 /* ══════════════════════════════════════
@@ -1487,3 +1469,217 @@ body::after {
 @supports (padding-top: env(safe-area-inset-top)) {
   .safe-top { padding-top: env(safe-area-inset-top); }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   🎨 THEME SYSTEM v3 — FLAT MULTI-STYLE THEMES
+   Six complete looks, freely selectable. Each defines a full token set:
+   color palette + structural tokens (radius, blur, shadow, button style).
+   Component classes below read these tokens, so every page adapts.
+   Theme classes live on <html>: (none)=light Wano, .dark, .minimal,
+   .minimal-dark, .neo, .cyber.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Structural defaults + aliases shared by every theme ── */
+:root {
+  --card-radius: 8px;
+  --card-shadow-hover: 0 10px 34px rgba(0,0,0,0.10);
+  --btn-radius: 8px;
+  --input-radius: 8px;
+  --pill-radius: 999px;
+  --chip-radius: 999px;
+  --btn-bg: linear-gradient(135deg, var(--amber), var(--amber-light));
+  --btn-color: #1a1208;
+  --btn-shadow: 0 4px 16px var(--amber-dim), inset 0 1px 0 rgba(255,255,255,0.25);
+  --btn-hover-shadow: 0 10px 30px var(--amber-dim), inset 0 1px 0 rgba(255,255,255,0.35);
+  --btn2-bg: var(--bg-raised);
+  --ring: var(--amber);
+  --glass-edge: var(--border);
+  --text-dim: var(--text-muted);
+}
+.dark {
+  --card-radius: 8px;
+  --card-shadow-hover: 0 12px 40px rgba(0,0,0,0.55);
+  --btn-radius: 8px;
+  --input-radius: 8px;
+  --btn-bg: linear-gradient(135deg, var(--amber), #b47c38);
+  --btn-color: #0b0b0b;
+  --btn-shadow: 0 4px 18px rgba(216,162,94,0.30), inset 0 1px 0 rgba(255,255,255,0.18);
+  --btn-hover-shadow: 0 10px 32px rgba(216,162,94,0.45), inset 0 1px 0 rgba(255,255,255,0.28);
+  --btn2-bg: var(--bg-raised);
+  --ring: var(--amber);
+  --glass-edge: var(--border);
+  --text-dim: var(--text-muted);
+}
+
+/* ═══════════════ ⬜ MINIMAL — Clean Light (Notion/Linear-ish) ═══════════════ */
+.minimal {
+  --bg-deep: #FBFBFA; --bg-mid: #F4F4F2; --bg-surface: #FFFFFF; --bg-raised: #FFFFFF;
+  --bg-overlay: rgba(251,251,250,0.85);
+  --amber: #111111; --amber-light: #333333; --amber-dim: rgba(17,17,17,0.06); --amber-glow: none;
+  --coral: #E5484D; --coral-light: #EC6064; --coral-dim: rgba(229,72,77,0.08); --coral-glow: none;
+  --acid: #30A46C; --acid-light: #46B583; --acid-dim: rgba(48,164,108,0.08); --acid-glow: none;
+  --primary: var(--amber); --primary-light: var(--amber-light); --primary-dim: var(--amber-dim); --primary-glow: none;
+  --mint: var(--acid); --pink: var(--coral); --gold: var(--amber); --blue: #3358D4;
+  --border: rgba(0,0,0,0.08); --border-mid: rgba(0,0,0,0.12); --border-focus: rgba(17,17,17,0.30);
+  --text-primary: #18181B; --text-secondary: #3F3F46; --text-muted: #71717A; --text-ghost: #A1A1AA;
+  --card-bg: #FFFFFF; --card-blur: 0px; --card-radius: 14px;
+  --card-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  --card-shadow-hover: 0 4px 14px rgba(0,0,0,0.08);
+  --input-bg: #FFFFFF;
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim); --indigo: var(--blue); --indigo-dim: rgba(51,88,212,0.08);
+  --border-warm: rgba(0,0,0,0.06);
+  --glass-bg: var(--card-bg); --glass-border: var(--border); --glass-border-strong: var(--border-mid);
+  --glass-fill: var(--card-bg); --glass-fill-elevated: var(--bg-mid); --glass-fill-hover: #FAFAFA; --glass-fill-inset: #F4F4F5;
+  --glass-edge: var(--border); --text-dim: var(--text-muted);
+  --danger: #E5484D;
+  --btn-radius: 12px; --input-radius: 12px;
+  --btn-bg: #18181B; --btn-color: #FFFFFF;
+  --btn-shadow: 0 1px 2px rgba(0,0,0,0.10); --btn-hover-shadow: 0 6px 18px rgba(0,0,0,0.16);
+  --btn2-bg: #FFFFFF; --ring: #18181B;
+}
+
+/* ═══════════════ ◾ MONO — Minimal Dark ═══════════════ */
+.minimal-dark {
+  --bg-deep: #0E0E10; --bg-mid: #161618; --bg-surface: #1B1B1F; --bg-raised: #202024;
+  --bg-overlay: rgba(14,14,16,0.85);
+  --amber: #FAFAFA; --amber-light: #FFFFFF; --amber-dim: rgba(250,250,250,0.08); --amber-glow: none;
+  --coral: #FF6369; --coral-light: #FF7E83; --coral-dim: rgba(255,99,105,0.10); --coral-glow: none;
+  --acid: #3DD68C; --acid-light: #5EEAA8; --acid-dim: rgba(61,214,140,0.10); --acid-glow: none;
+  --primary: var(--amber); --primary-light: var(--amber-light); --primary-dim: var(--amber-dim); --primary-glow: none;
+  --mint: var(--acid); --pink: var(--coral); --gold: var(--amber); --blue: #6E8AFF;
+  --border: rgba(255,255,255,0.08); --border-mid: rgba(255,255,255,0.14); --border-focus: rgba(255,255,255,0.35);
+  --text-primary: #F4F4F5; --text-secondary: #C4C4CC; --text-muted: #8A8A94; --text-ghost: #55555E;
+  --card-bg: #19191C; --card-blur: 0px; --card-radius: 14px;
+  --card-shadow: 0 1px 2px rgba(0,0,0,0.4); --card-shadow-hover: 0 6px 20px rgba(0,0,0,0.55);
+  --input-bg: #161618;
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim); --indigo: var(--blue); --indigo-dim: rgba(110,138,255,0.12);
+  --border-warm: rgba(255,255,255,0.06);
+  --glass-bg: var(--card-bg); --glass-border: var(--border); --glass-border-strong: var(--border-mid);
+  --glass-fill: var(--card-bg); --glass-fill-elevated: var(--bg-raised); --glass-fill-hover: #232327; --glass-fill-inset: #131315;
+  --glass-edge: var(--border); --text-dim: var(--text-muted);
+  --danger: #FF6369;
+  --btn-radius: 12px; --input-radius: 12px;
+  --btn-bg: #FAFAFA; --btn-color: #111114;
+  --btn-shadow: 0 1px 2px rgba(0,0,0,0.4); --btn-hover-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  --btn2-bg: var(--bg-raised); --ring: #FAFAFA;
+}
+
+/* ═══════════════ 🎨 NEO — Playful / Vibrant ═══════════════ */
+.neo {
+  --bg-deep: #F3EEFF; --bg-mid: #EAE2FF; --bg-surface: #FFFFFF; --bg-raised: #FFFFFF;
+  --bg-overlay: rgba(243,238,255,0.82);
+  --amber: #7C3AED; --amber-light: #9D5CF5; --amber-dim: rgba(124,58,237,0.10); --amber-glow: 0 0 24px rgba(124,58,237,0.30);
+  --coral: #EC4899; --coral-light: #F472B6; --coral-dim: rgba(236,72,153,0.10); --coral-glow: 0 0 24px rgba(236,72,153,0.30);
+  --acid: #14B8A6; --acid-light: #2DD4BF; --acid-dim: rgba(20,184,166,0.10); --acid-glow: 0 0 24px rgba(20,184,166,0.30);
+  --primary: var(--amber); --primary-light: var(--amber-light); --primary-dim: var(--amber-dim); --primary-glow: var(--amber-glow);
+  --mint: var(--acid); --pink: var(--coral); --gold: #F59E0B; --blue: #3B82F6;
+  --border: rgba(124,58,237,0.12); --border-mid: rgba(124,58,237,0.20); --border-focus: rgba(124,58,237,0.45);
+  --text-primary: #1E1B2E; --text-secondary: #4C4866; --text-muted: #7D7894; --text-ghost: #A9A4BE;
+  --card-bg: rgba(255,255,255,0.92); --card-blur: 6px; --card-radius: 22px;
+  --card-shadow: 0 8px 24px rgba(124,58,237,0.12); --card-shadow-hover: 0 14px 40px rgba(124,58,237,0.22);
+  --input-bg: #FFFFFF;
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim); --indigo: var(--blue); --indigo-dim: rgba(59,130,246,0.10);
+  --border-warm: rgba(124,58,237,0.10);
+  --glass-bg: var(--card-bg); --glass-border: var(--border); --glass-border-strong: var(--border-mid);
+  --glass-fill: var(--card-bg); --glass-fill-elevated: #FFFFFF; --glass-fill-hover: #FBF8FF; --glass-fill-inset: #F3EEFF;
+  --glass-edge: var(--border); --text-dim: var(--text-muted);
+  --danger: #EF4444;
+  --btn-radius: 18px; --input-radius: 16px;
+  --btn-bg: linear-gradient(135deg, #7C3AED, #EC4899); --btn-color: #FFFFFF;
+  --btn-shadow: 0 6px 20px rgba(124,58,237,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+  --btn-hover-shadow: 0 12px 30px rgba(236,72,153,0.40), inset 0 1px 0 rgba(255,255,255,0.4);
+  --btn2-bg: #FFFFFF; --ring: #7C3AED;
+}
+
+/* ═══════════════ 🌃 CYBER — Neon Night ═══════════════ */
+.cyber {
+  --bg-deep: #05060A; --bg-mid: #0A0C14; --bg-surface: #0F1320; --bg-raised: #141A2B;
+  --bg-overlay: rgba(5,6,10,0.85);
+  --amber: #22D3EE; --amber-light: #67E8F9; --amber-dim: rgba(34,211,238,0.12); --amber-glow: 0 0 24px rgba(34,211,238,0.45);
+  --coral: #F0F; --coral-light: #FF6AD5; --coral-dim: rgba(255,0,255,0.12); --coral-glow: 0 0 24px rgba(255,0,255,0.40);
+  --acid: #A3E635; --acid-light: #BEF264; --acid-dim: rgba(163,230,53,0.12); --acid-glow: 0 0 24px rgba(163,230,53,0.40);
+  --primary: var(--amber); --primary-light: var(--amber-light); --primary-dim: var(--amber-dim); --primary-glow: var(--amber-glow);
+  --mint: var(--acid); --pink: var(--coral); --gold: var(--acid); --blue: #818CF8;
+  --border: rgba(34,211,238,0.14); --border-mid: rgba(34,211,238,0.26); --border-focus: rgba(34,211,238,0.55);
+  --text-primary: #E6FBFF; --text-secondary: #9FC7D4; --text-muted: #5E7C8A; --text-ghost: #3A5260;
+  --card-bg: rgba(15,19,32,0.80); --card-blur: 14px; --card-radius: 4px;
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 1px rgba(34,211,238,0.4);
+  --card-shadow-hover: 0 8px 30px rgba(0,0,0,0.7), 0 0 18px rgba(34,211,238,0.25);
+  --input-bg: rgba(8,11,20,0.8);
+  --sage: var(--acid); --sage-light: var(--acid-light); --sage-dim: var(--acid-dim);
+  --coral-alias: var(--coral); --coral-dim-alias: var(--coral-dim); --indigo: var(--blue); --indigo-dim: rgba(129,140,248,0.12);
+  --border-warm: rgba(34,211,238,0.10);
+  --glass-bg: var(--card-bg); --glass-border: var(--border); --glass-border-strong: var(--border-mid);
+  --glass-fill: var(--card-bg); --glass-fill-elevated: var(--bg-raised); --glass-fill-hover: #18203400; --glass-fill-inset: var(--input-bg);
+  --glass-edge: var(--border); --text-dim: var(--text-muted);
+  --danger: #FF4D6D;
+  --btn-radius: 4px; --input-radius: 4px;
+  --btn-bg: linear-gradient(135deg, #22D3EE, #A855F7); --btn-color: #04060A;
+  --btn-shadow: 0 0 18px rgba(34,211,238,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+  --btn-hover-shadow: 0 0 28px rgba(168,85,247,0.55), inset 0 1px 0 rgba(255,255,255,0.35);
+  --btn2-bg: var(--bg-raised); --ring: #22D3EE;
+}
+
+/* ── Per-theme ambient backdrops ── */
+.minimal body::before, .minimal-dark body::before { background: none; }
+.minimal body::after, .minimal-dark body::after { display: none; } /* drop grain for clean look */
+.neo body::before {
+  background:
+    radial-gradient(ellipse 60% 45% at 15% 0%,  rgba(124,58,237,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 55% at 85% 100%, rgba(236,72,153,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 45% at 55% 45%, rgba(20,184,166,0.06) 0%, transparent 55%);
+}
+.cyber body::before {
+  background:
+    radial-gradient(ellipse 60% 45% at 12% 0%,  rgba(34,211,238,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 55% at 88% 100%, rgba(255,0,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 55% 50%, rgba(163,230,53,0.05) 0%, transparent 55%);
+}
+.cyber body::after { opacity: 0.05; } /* a touch more grain for grit */
+
+/* ── Decoration (sakura petals) only on the Japanese themes ── */
+.minimal .sakura-layer,
+.minimal-dark .sakura-layer,
+.neo .sakura-layer,
+.cyber .sakura-layer { display: none; }
+
+/* ═══════════════ TOKEN-DRIVEN COMPONENT OVERRIDES ═══════════════ */
+/* These re-declare the core components to read structural tokens so the
+   shape/feel changes per theme (later in the cascade → these win). */
+.glass-card {
+  background: var(--card-bg);
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  backdrop-filter: blur(var(--card-blur));
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+.glass-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--border-mid);
+}
+.glass-btn {
+  background: var(--btn-bg);
+  color: var(--btn-color);
+  border-radius: var(--btn-radius);
+  box-shadow: var(--btn-shadow);
+}
+.glass-btn:hover { box-shadow: var(--btn-hover-shadow); }
+.glass-btn-secondary {
+  background: var(--btn2-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-mid);
+  border-radius: var(--btn-radius);
+}
+.glass-input { border-radius: var(--input-radius); }
+.glass-input:focus { border-color: var(--ring); box-shadow: 0 0 0 3px var(--amber-dim); }
+.glass-chip { border-radius: var(--chip-radius); }
+.badge-pill { border-radius: var(--pill-radius); }
+.emoji-avatar { border-radius: calc(var(--card-radius) * 0.6); }
+
+/* Cyber loves a techy section label */
+.cyber .section-label,
+.cyber .badge-pill { font-family: 'DM Mono', ui-monospace, 'SF Mono', monospace; }

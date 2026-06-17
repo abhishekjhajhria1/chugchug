@@ -10,10 +10,20 @@ export default function Auth() {
   const [password, setPassword] = useState("")
   const [isLogin, setIsLogin] = useState(true)
   const [username, setUsername] = useState("")
+  const [dob, setDob] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const navigate = useNavigate()
   const toast = useToast()
+
+  const LEGAL_AGE = 18 // bump to 21 for markets that require it
+  const ageFrom = (d: string) => {
+    const b = new Date(d), t = new Date()
+    let a = t.getFullYear() - b.getFullYear()
+    const m = t.getMonth() - b.getMonth()
+    if (m < 0 || (m === 0 && t.getDate() < b.getDate())) a--
+    return a
+  }
 
   const handleAuth = async () => {
     setLoading(true)
@@ -27,6 +37,15 @@ export default function Auth() {
       const usernameError = validateUsername(username)
       if (usernameError) { setError(usernameError); setLoading(false); return }
       if (password.length < 6) { setError("Password must be at least 6 characters."); setLoading(false); return }
+
+      // ── Age gate (this is an alcohol app) ──
+      if (!dob) { setError("Please enter your date of birth."); setLoading(false); return }
+      const age = ageFrom(dob)
+      if (Number.isNaN(age) || age < LEGAL_AGE) {
+        setError(`You must be at least ${LEGAL_AGE} to use ChugChug.`)
+        setLoading(false)
+        return
+      }
 
       // Check username uniqueness before signup
       const { data: existing } = await supabase
@@ -43,7 +62,7 @@ export default function Auth() {
       const { data, error } = await supabase.auth.signUp({ email, password })
       if (error) { setError(error.message) }
       else if (data.user) {
-        const { error: profileError } = await supabase.from("profiles").upsert({ id: data.user.id, username: username.trim(), xp: 0, level: 1 })
+        const { error: profileError } = await supabase.from("profiles").upsert({ id: data.user.id, username: username.trim(), xp: 0, level: 1, birth_date: dob, age_verified: true })
         if (profileError) {
           toast.error("Account created but profile setup failed. Try logging in.")
         }
@@ -121,6 +140,23 @@ export default function Auth() {
                 className="glass-input"
               />
               <p className="text-[10px] mt-1 font-bold" style={{ color: 'var(--text-ghost)' }}>3-20 chars, letters/numbers/underscores only</p>
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="anim-slide">
+              <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
+                Date of Birth
+              </label>
+              <input
+                type="date"
+                value={dob}
+                max={new Date().toISOString().split('T')[0]}
+                onChange={(e) => setDob(e.target.value)}
+                className="glass-input"
+                style={{ colorScheme: 'inherit' }}
+              />
+              <p className="text-[10px] mt-1 font-bold" style={{ color: 'var(--text-ghost)' }}>🔞 You must be {LEGAL_AGE}+ to drink — and to use ChugChug</p>
             </div>
           )}
 

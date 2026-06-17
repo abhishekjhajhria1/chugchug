@@ -381,7 +381,7 @@ export default function GroupChat() {
                       <img
                         src={msg.imageUrl}
                         alt="Shared"
-                        className="w-full max-h-48 object-cover rounded-lg border border-white/15 mb-2 cursor-pointer"
+                        className="w-full max-h-48 object-cover rounded-lg border border-[var(--border-mid)] mb-2 cursor-pointer"
                         onClick={() => window.open(msg.imageUrl, "_blank")}
                       />
                     )}
@@ -397,7 +397,7 @@ export default function GroupChat() {
                           <button 
                             onClick={() => navigate(`/group/${groupId}/balances`)}
                             className="mt-2 w-full text-[10px] font-black uppercase py-1 rounded-lg active:scale-95 transition-transform"
-                            style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.15)' }}
+                            style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid color-mix(in srgb, var(--acid) 15%, transparent)' }}
                           >
                             View Balances
                           </button>
@@ -422,7 +422,7 @@ export default function GroupChat() {
       {imagePreview && (
         <div className="shrink-0 px-2 pb-2">
           <div className="relative inline-block">
-            <img src={imagePreview} alt="Attach" className="h-20 rounded-xl border border-white/15 object-cover" />
+            <img src={imagePreview} alt="Attach" className="h-20 rounded-xl border border-[var(--border-mid)] object-cover" />
             <button
               onClick={clearImage}
               className="absolute -top-2 -right-2 p-1 rounded-full" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}
@@ -434,7 +434,7 @@ export default function GroupChat() {
       )}
 
       {/* Input Bar */}
-      <div className="shrink-0 flex items-center gap-2 pt-3 border-t-2 border-white/15/10">
+      <div className="shrink-0 flex items-center gap-2 pt-3 border-t-2 border-[var(--border-mid)]">
         <input
           ref={fileInputRef}
           type="file"
@@ -446,7 +446,7 @@ export default function GroupChat() {
         <button
           onClick={() => fileInputRef.current?.click()}
           className="p-2.5 rounded-full shrink-0 transition-transform active:scale-95"
-          style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)', color: 'var(--acid)' }}
+          style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 15%, transparent)', color: 'var(--acid)' }}
         >
           {uploadingImage ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} strokeWidth={2} />}
         </button>
@@ -484,7 +484,7 @@ export default function GroupChat() {
       {/* EXPENSE MODAL */}
       {showExpenseModal && (
         <div className="fixed inset-0 z-100 bg-black/60 flex items-center justify-center p-4 animate-fadeInScale" onClick={() => setShowExpenseModal(false)}>
-          <div className="bg-white/5 rounded-3xl border border-white/15 shadow-lg shadow-black/20 p-5 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-[var(--glass-fill-inset)] rounded-3xl border border-[var(--border-mid)] shadow-lg shadow-black/20 p-5 w-full max-w-sm space-y-4" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center">
               <h3 className="font-black text-xl flex items-center gap-2" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}><Receipt style={{ color: 'var(--acid)' }} /> Add Expense</h3>
               <button onClick={() => setShowExpenseModal(false)} style={{ color: 'var(--text-muted)' }}>
@@ -506,12 +506,12 @@ export default function GroupChat() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                    <label className="font-bold text-xs uppercase tracking-widest block" style={{ color: 'var(--text-secondary)' }}>Split Method</label>
-                   <div className="flex bg-black/20 rounded-lg p-1 border border-white/10">
-                      <button onClick={() => setSplitMode('equal')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'equal' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Equally</button>
-                      <button onClick={() => setSplitMode('drink')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'drink' ? 'bg-amber-500/20 text-amber-500' : 'text-white/40'}`}>DrinkSplit</button>
+                   <div className="flex bg-black/20 rounded-lg p-1 border border-[var(--border-mid)]">
+                      <button onClick={() => setSplitMode('equal')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'equal' ? 'bg-[var(--glass-fill-inset)] text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>Equally</button>
+                      <button onClick={() => setSplitMode('drink')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'drink' ? 'bg-amber-500/20 text-amber-500' : 'text-[var(--text-muted)]'}`}>DrinkSplit</button>
                    </div>
                 </div>
-                <div className="max-h-40 overflow-y-auto space-y-2 border border-white/15/10 rounded-xl p-2 bg-white/3">
+                <div className="max-h-40 overflow-y-auto space-y-2 border border-[var(--border-mid)] rounded-xl p-2 bg-white/3">
                   {groupMembers.map(member => (
                     <label key={member.id} className="flex items-center gap-3 cursor-pointer p-1">
                       <input 

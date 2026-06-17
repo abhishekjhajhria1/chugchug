@@ -179,7 +179,7 @@ export default function ArchetypeQuiz({ onComplete, onSkip }: ArchetypeQuizProps
 
           <div className="grid grid-cols-4 gap-2">
             {Object.values(ARCHETYPES).map(a => (
-              <div key={a.id} className="p-3 rounded-[4px] text-center" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+              <div key={a.id} className="p-3 rounded-[var(--card-radius)] text-center" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
                 <div className="text-2xl mb-1">{a.emoji}</div>
                 <p className="text-[8px] font-black uppercase tracking-widest" style={{ color: a.color }}>{a.title}</p>
               </div>
@@ -188,7 +188,7 @@ export default function ArchetypeQuiz({ onComplete, onSkip }: ArchetypeQuizProps
 
           <button
             onClick={() => setStep(1)}
-            className="w-full py-4 rounded-[4px] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            className="w-full py-4 rounded-[var(--card-radius)] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform"
             style={{ background: 'linear-gradient(135deg, var(--amber), #E8880A)', color: '#1A1208' }}
           >
             Begin <ArrowRight size={18} />
@@ -233,7 +233,7 @@ export default function ArchetypeQuiz({ onComplete, onSkip }: ArchetypeQuizProps
             <p className="text-sm font-bold mt-1" style={{ color: archetype.color + 'CC' }}>{archetype.subtitle}</p>
           </div>
 
-          <div className="p-4 rounded-[4px] text-left" style={{ background: 'var(--bg-deep)', border: `1px solid ${archetype.color}30` }}>
+          <div className="p-4 rounded-[var(--card-radius)] text-left" style={{ background: 'var(--bg-deep)', border: `1px solid ${archetype.color}30` }}>
             <p className="text-xs font-black uppercase tracking-widest mb-2" style={{ color: archetype.color }}>
               {archetype.trait}
             </p>
@@ -248,7 +248,7 @@ export default function ArchetypeQuiz({ onComplete, onSkip }: ArchetypeQuizProps
           <button
             onClick={handleSave}
             disabled={saving}
-            className="w-full py-4 rounded-[4px] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            className="w-full py-4 rounded-[var(--card-radius)] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-transform"
             style={{ background: `linear-gradient(135deg, ${archetype.color}, ${archetype.color}DD)`, color: '#fff' }}
           >
             {saving ? 'Saving...' : `Claim ${archetype.title} Identity`}
@@ -277,7 +277,7 @@ export default function ArchetypeQuiz({ onComplete, onSkip }: ArchetypeQuizProps
               className="flex-1 h-1 rounded-full transition-all duration-300"
               style={{
                 background: i < step ? 'var(--amber)' : i === step - 1 ? 'var(--amber)' : 'var(--border-mid)',
-                boxShadow: i < step ? '0 0 6px rgba(216,162,94,0.4)' : 'none',
+                boxShadow: i < step ? '0 0 6px color-mix(in srgb, var(--amber) 40%, transparent)' : 'none',
               }}
             />
           ))}
@@ -301,7 +301,7 @@ export default function ArchetypeQuiz({ onComplete, onSkip }: ArchetypeQuizProps
               key={i}
               onClick={() => handleAnswer(opt.archetype, i)}
               disabled={selectedOption !== null}
-              className="w-full p-4 rounded-[4px] text-left text-sm font-bold transition-all active:scale-[0.98]"
+              className="w-full p-4 rounded-[var(--card-radius)] text-left text-sm font-bold transition-all active:scale-[0.98]"
               style={{
                 background: selectedOption === i ? 'var(--amber-dim)' : 'var(--bg-deep)',
                 border: selectedOption === i ? '2px solid var(--amber)' : '1px solid var(--border-mid)',

@@ -77,16 +77,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               WebkitBackdropFilter: 'blur(20px)',
               animation: 'toastSlideIn 0.3s ease-out',
               ...(toast.type === 'success' ? {
-                background: 'rgba(204,255,0,0.12)',
-                border: '1px solid rgba(204,255,0,0.25)',
+                background: 'color-mix(in srgb, var(--acid) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--acid) 25%, transparent)',
                 color: 'var(--acid, #CCFF00)',
               } : toast.type === 'error' ? {
-                background: 'rgba(209,32,32,0.12)',
-                border: '1px solid rgba(209,32,32,0.3)',
+                background: 'color-mix(in srgb, var(--coral) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)',
                 color: 'var(--coral, #FF6B6B)',
               } : {
-                background: 'rgba(216,162,94,0.12)',
-                border: '1px solid rgba(216,162,94,0.25)',
+                background: 'color-mix(in srgb, var(--amber) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--amber) 25%, transparent)',
                 color: 'var(--amber, #D8A25E)',
               }),
             }}

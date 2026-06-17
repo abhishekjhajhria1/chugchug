@@ -183,7 +183,7 @@ export default function Social() {
                         </div>
                       </div>
                       <div className="flex gap-2 w-full sm:w-auto">
-                        <button onClick={() => handleAccept(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-xl transition-colors" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.2)' }}>Accept</button>
+                        <button onClick={() => handleAccept(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-xl transition-colors" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid color-mix(in srgb, var(--acid) 20%, transparent)' }}>Accept</button>
                         <button onClick={() => handleDecline(r.id)} className="flex-1 px-4 py-2 text-[10px] uppercase tracking-widest font-black rounded-xl transition-colors" style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)' }}>Decline</button>
                       </div>
                     </div>

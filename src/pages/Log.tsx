@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { evaluateAndAwardBadges, updateStreak, updateCrewStreaks, getDailyBounties, checkDailyBountyCompletion } from "../lib/progression"
+import { bumpEventProgress } from "../lib/engagement"
 import { Camera, ChevronDown } from "lucide-react"
 import { extractPhotoMetadata } from "../components/PhotoMetadata"
 import { useToast } from "../components/Toast"
@@ -102,6 +103,11 @@ export default function Log() {
       if (error) throw error
 
       supabase.rpc('add_xp', { user_id_param: user.id, xp_to_add: xpEarned }).then(res => { if (res.error) console.error(res.error) })
+
+      // Advance any live event this log qualifies for; celebrate completions.
+      bumpEventProgress(user.id, category).then(done => {
+        done.forEach(title => toast.success(`🏆 Event complete: ${title}! Bonus XP awarded`))
+      }).catch(() => {})
 
       if (isRecipe && recipeDetails && BARTENDER_API) {
         fetch(`${BARTENDER_API}/embed_recipe`, {

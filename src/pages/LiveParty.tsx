@@ -9,6 +9,7 @@ import LiveCounter from "../components/LiveCounter"
 import BeerCounter from "../components/BeerCounter"
 import { Share2, Users, Globe, PartyPopper, Zap, Clock } from "lucide-react"
 import { useToast } from "../components/Toast"
+import { bumpEventProgress } from "../lib/engagement"
 
 // Base64 for a short "ding" sound
 const CHUG_SOUND = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTv9T19Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Qf1B/UH9Q"
@@ -102,6 +103,7 @@ export default function LiveParty() {
                 xp_earned: finalXp,
                 privacy_level: 'public'
             })
+            bumpEventProgress(user.id, 'drink').catch(() => {})
             toast.success("Shared to your individual Activity Feed!")
         } catch(e) {}
         setSharing(false)
@@ -153,6 +155,7 @@ export default function LiveParty() {
                         }
                     }
                 }
+                bumpEventProgress(user.id, 'drink').catch(() => {})
             } catch (e) {
                 console.warn("Could not share to common groups", e)
             }
@@ -236,7 +239,7 @@ export default function LiveParty() {
                    <button onClick={handleShareGroup} disabled={sharing} className="w-full glass-btn py-3.5 flex justify-center items-center gap-2">
                        <Globe size={18} /> Share as Group (World Forum)
                    </button>
-                   <button onClick={handleShareIndividually} disabled={sharing} className="w-full glass-btn-secondary py-3 flex justify-center items-center gap-2" style={{ color: 'var(--acid)', borderColor: 'rgba(204,255,0,0.15)' }}>
+                   <button onClick={handleShareIndividually} disabled={sharing} className="w-full glass-btn-secondary py-3 flex justify-center items-center gap-2" style={{ color: 'var(--acid)', borderColor: 'color-mix(in srgb, var(--acid) 15%, transparent)' }}>
                        <Users size={18} /> Share Individually (Activity Feed)
                    </button>
                </div>

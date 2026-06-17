@@ -172,28 +172,28 @@ export default function DrinkingSession({ sessionId, joinCode, groupId, onEnd }:
       {/* Session Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--coral)', boxShadow: '0 0 12px rgba(209,32,32,0.5)' }} />
+          <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--coral)', boxShadow: '0 0 12px color-mix(in srgb, var(--coral) 50%, transparent)' }} />
           <div>
             <h2 className="text-lg font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Live Session</h2>
             <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>{activeCount} drinking · {totalDrinks} total</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-[4px]" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--card-radius)]" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
           <Clock size={14} style={{ color: 'var(--amber)' }} />
           <span className="text-xs font-black font-mono" style={{ color: 'var(--amber)' }}>{elapsed}</span>
         </div>
       </div>
 
       {/* Join Code Bar */}
-      <div className="flex items-center gap-2 p-3 rounded-[4px]" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+      <div className="flex items-center gap-2 p-3 rounded-[var(--card-radius)]" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
         <div className="flex-1">
           <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Join Code</p>
           <p className="text-xl font-black tracking-[0.2em]" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>{joinCode}</p>
         </div>
-        <button onClick={copyCode} className="p-2.5 rounded-[4px] active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)' }} title="Copy code">
+        <button onClick={copyCode} className="p-2.5 rounded-[var(--card-radius)] active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)' }} title="Copy code">
           <Copy size={16} />
         </button>
-        <button onClick={shareSession} className="p-2.5 rounded-[4px] active:scale-95 transition-transform" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)', color: 'var(--acid)' }} title="Share session">
+        <button onClick={shareSession} className="p-2.5 rounded-[var(--card-radius)] active:scale-95 transition-transform" style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 30%, transparent)', color: 'var(--acid)' }} title="Share session">
           <Share2 size={16} />
         </button>
       </div>
@@ -206,7 +206,7 @@ export default function DrinkingSession({ sessionId, joinCode, groupId, onEnd }:
           style={{
             border: count > 0 ? '5px solid var(--amber)' : '5px solid var(--border-mid)',
             background: count > 0 ? 'var(--amber-dim)' : 'var(--bg-deep)',
-            boxShadow: count > 0 ? '0 0 40px rgba(216,162,94,0.15), inset 0 0 30px rgba(216,162,94,0.05)' : 'none',
+            boxShadow: count > 0 ? '0 0 40px color-mix(in srgb, var(--amber) 15%, transparent), inset 0 0 30px color-mix(in srgb, var(--amber) 5%, transparent)' : 'none',
             transition: 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)',
             transform: animating ? 'scale(0.92)' : 'scale(1)',
           }}
@@ -220,7 +220,7 @@ export default function DrinkingSession({ sessionId, joinCode, groupId, onEnd }:
         {count > 0 && (
           <button
             onClick={(e) => { e.stopPropagation(); updateCount(-1) }}
-            className="mt-6 px-5 py-2 rounded-[4px] flex items-center justify-center gap-2 transition-all font-bold text-xs uppercase tracking-widest active:scale-95"
+            className="mt-6 px-5 py-2 rounded-[var(--card-radius)] flex items-center justify-center gap-2 transition-all font-bold text-xs uppercase tracking-widest active:scale-95"
             style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)', color: 'var(--text-secondary)' }}
           >
             <Minus size={14} /> Remove One
@@ -243,10 +243,10 @@ export default function DrinkingSession({ sessionId, joinCode, groupId, onEnd }:
             return (
               <div
                 key={p.userId}
-                className="flex items-center justify-between p-3 rounded-[4px] relative overflow-hidden"
+                className="flex items-center justify-between p-3 rounded-[var(--card-radius)] relative overflow-hidden"
                 style={{
-                  background: i === 0 ? 'linear-gradient(90deg, rgba(216,162,94,0.15), var(--bg-deep))' : 'var(--bg-deep)',
-                  border: `1px solid ${i === 0 ? 'rgba(216,162,94,0.3)' : 'var(--border-mid)'}`,
+                  background: i === 0 ? 'linear-gradient(90deg, color-mix(in srgb, var(--amber) 15%, transparent), var(--bg-deep))' : 'var(--bg-deep)',
+                  border: `1px solid ${i === 0 ? 'color-mix(in srgb, var(--amber) 30%, transparent)' : 'var(--border-mid)'}`,
                 }}
               >
                 {i === 0 && <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: 'var(--amber)' }} />}
@@ -263,7 +263,7 @@ export default function DrinkingSession({ sessionId, joinCode, groupId, onEnd }:
                     {isMe ? 'You' : p.username}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 px-3 py-1 rounded-[4px] relative z-10" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-mid)' }}>
+                <div className="flex items-center gap-1 px-3 py-1 rounded-[var(--card-radius)] relative z-10" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-mid)' }}>
                   <span className="font-black text-lg" style={{ color: 'var(--amber)' }}>{p.count}</span>
                   <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>🍺</span>
                 </div>
@@ -277,8 +277,8 @@ export default function DrinkingSession({ sessionId, joinCode, groupId, onEnd }:
       <div className="flex gap-3 pt-2">
         <button
           onClick={onEnd}
-          className="flex-1 py-4 rounded-[4px] text-xs uppercase font-black tracking-widest active:scale-95 transition-transform flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg, var(--coral), #D94242)', color: '#fff', boxShadow: '0 4px 20px rgba(209,32,32,0.3)' }}
+          className="flex-1 py-4 rounded-[var(--card-radius)] text-xs uppercase font-black tracking-widest active:scale-95 transition-transform flex items-center justify-center gap-2"
+          style={{ background: 'linear-gradient(135deg, var(--coral), #D94242)', color: '#fff', boxShadow: '0 4px 20px color-mix(in srgb, var(--coral) 30%, transparent)' }}
         >
           <X size={16} /> End Session
         </button>

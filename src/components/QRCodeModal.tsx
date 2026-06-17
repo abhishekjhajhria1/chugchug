@@ -94,7 +94,7 @@ export default function QRCodeModal({ isOpen, onClose, mode: initialMode, data: 
       onClick={onClose}>
 
       <div className="glass-card w-full max-w-sm anim-pop" role="dialog" aria-modal="true" aria-label={title || (mode === 'display' ? 'QR code modal' : 'QR scanner modal')} onClick={e => e.stopPropagation()}
-        style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(28px)' }}>
+        style={{ background: 'color-mix(in srgb, var(--text-primary) 5%, transparent)', backdropFilter: 'blur(28px)' }}>
 
         {/* Header */}
         <div className="flex justify-between items-center mb-5">

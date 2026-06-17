@@ -106,7 +106,7 @@ export default function PublicProfile() {
                 {user && user.id !== id && (
                     <div className="mt-6 flex justify-center">
                         {friendStatus === 'accepted' ? (
-                            <div className="px-6 py-3 rounded-xl flex items-center gap-2 font-black text-sm uppercase tracking-widest" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.2)' }}>
+                            <div className="px-6 py-3 rounded-xl flex items-center gap-2 font-black text-sm uppercase tracking-widest" style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid color-mix(in srgb, var(--acid) 20%, transparent)' }}>
                                 <Check size={18} /> Friends
                             </div>
                         ) : friendStatus === 'pending' ? (

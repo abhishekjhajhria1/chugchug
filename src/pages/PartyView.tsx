@@ -40,7 +40,7 @@ export default function PartyView() {
     useEffect(() => {
         if (!id) return
         const reactionsRef = ref(firebaseDb, `parties/${id}/reactions`)
-        
+
         const unsubscribe = onChildAdded(reactionsRef, (snapshot) => {
             const reaction = snapshot.val()
             const key = snapshot.key || Date.now().toString()
@@ -141,13 +141,13 @@ export default function PartyView() {
     if (party?.status === 'ended' || party?.status === 'cancelled') {
         return (
             <div className="space-y-6 pb-24 text-center mt-10">
-                <div className="w-20 h-20 bg-white/8 rounded-full border border-white/15 mx-auto flex items-center justify-center text-white/40 mb-4 shadow-lg shadow-black/20">
+                <div className="w-20 h-20 bg-[var(--glass-fill-inset)] rounded-full border border-[var(--border-mid)] mx-auto flex items-center justify-center text-[var(--text-muted)] mb-4 shadow-lg shadow-black/20">
                     <XCircle size={40} strokeWidth={2} />
                 </div>
                 <h1 className="text-3xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Event {party.status}</h1>
-                <p className="font-bold text-white/90 opacity-70">This party has concluded and is no longer accepting RSVPs.</p>
+                <p className="font-bold text-[var(--text-primary)] opacity-70">This party has concluded and is no longer accepting RSVPs.</p>
                 <div className="mt-8 flex justify-center">
-                    <button onClick={() => navigate('/party')} className="glass-btn-secondary text-white/90 border-white/15">
+                    <button onClick={() => navigate('/party')} className="glass-btn-secondary text-[var(--text-primary)] border-[var(--border-mid)]">
                         Return to Hub
                     </button>
                 </div>
@@ -188,7 +188,7 @@ export default function PartyView() {
                 </div>
 
                 {party.description && (
-                    <div className="mt-6 p-4 rounded-xl" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)' }}>
+                    <div className="mt-6 p-4 rounded-xl" style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 15%, transparent)' }}>
                         <p className="font-bold leading-relaxed" style={{ color: 'var(--text-primary)' }}>"{party.description}"</p>
                     </div>
                 )}
@@ -199,8 +199,8 @@ export default function PartyView() {
                             <Calendar size={20} style={{ color: 'var(--coral)' }} strokeWidth={2} />
                         </div>
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-widest text-white/90 opacity-50 mb-1">When</p>
-                            <p className="font-black text-lg text-white/90">{new Date(party.event_date).toLocaleString([], { weekday: 'long', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                            <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] opacity-50 mb-1">When</p>
+                            <p className="font-black text-lg text-[var(--text-primary)]">{new Date(party.event_date).toLocaleString([], { weekday: 'long', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                         </div>
                     </div>
 
@@ -209,31 +209,31 @@ export default function PartyView() {
                             <MapPin size={20} style={{ color: 'var(--amber)' }} strokeWidth={2} />
                         </div>
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-widest text-white/90 opacity-50 mb-1">Where</p>
-                            <p className="font-black text-lg text-white/90">{party.address}</p>
+                            <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] opacity-50 mb-1">Where</p>
+                            <p className="font-black text-lg text-[var(--text-primary)]">{party.address}</p>
                         </div>
                     </div>
 
                     {(party.booze_details || party.snacks_details) && (
                         <div className="flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.15)' }}>
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 15%, transparent)' }}>
                                 <Beer size={20} style={{ color: 'var(--acid)' }} strokeWidth={2} />
                             </div>
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-widest text-white/90 opacity-50 mb-1">Menu</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] opacity-50 mb-1">Menu</p>
                                 <div className="space-y-1">
-                                    {party.booze_details && <p className="font-black text-white/90">🥃 {party.booze_details}</p>}
-                                    {party.snacks_details && <p className="font-black text-white/90">🍕 {party.snacks_details}</p>}
+                                    {party.booze_details && <p className="font-black text-[var(--text-primary)]">🥃 {party.booze_details}</p>}
+                                    {party.snacks_details && <p className="font-black text-[var(--text-primary)]">🍕 {party.snacks_details}</p>}
                                 </div>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="mt-8 pt-6 border-t-4 border-dashed border-white/15/10">
+                <div className="mt-8 pt-6 border-t-4 border-dashed border-[var(--border-mid)]">
                     <div className="flex justify-between items-center mb-4">
-                        <span className="font-bold uppercase tracking-widest text-sm text-white/90 opacity-50">Entry Fee</span>
-                        <span className="font-black text-2xl text-white/90">{party.entry_fee}</span>
+                        <span className="font-bold uppercase tracking-widest text-sm text-[var(--text-primary)] opacity-50">Entry Fee</span>
+                        <span className="font-black text-2xl text-[var(--text-primary)]">{party.entry_fee}</span>
                     </div>
 
                     {user?.id !== party.host_id ? (
@@ -258,7 +258,7 @@ export default function PartyView() {
                             )}
                         </div>
                     ) : (
-                        <div className="mt-6 p-4 bg-white/5 rounded-xl border border-dashed border-white/15/20 text-center font-bold text-white/90/50">
+                        <div className="mt-6 p-4 bg-[var(--glass-fill-inset)] rounded-xl border border-dashed border-[var(--border-mid)] text-center font-bold text-[var(--text-primary)]/50">
                             You are the host of this event. Manage guests in the Party Hub.
                         </div>
                     )}
@@ -274,17 +274,17 @@ export default function PartyView() {
                             </span>
                             <h2 className="text-xl font-black uppercase tracking-wider">Live Dashboard</h2>
                         </div>
-                        
+
                         <BeerCounter partyId={party.id} compact />
                         <LiveCounter partyId={party.id} showLeaderboard />
 
-                        <div className="glass-card bg-white/5 border border-white/10 p-4 mt-4">
-                            <p className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3 text-center">Send Live Reaction</p>
+                        <div className="glass-card bg-[var(--glass-fill-inset)] border border-[var(--border-mid)] p-4 mt-4">
+                            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3 text-center">Send Live Reaction</p>
                             <div className="flex justify-center gap-4">
-                                <button onClick={() => sendReaction('🔥')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-white/5 p-3 rounded-full hover:bg-white/10">🔥</button>
-                                <button onClick={() => sendReaction('🍻')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-white/5 p-3 rounded-full hover:bg-white/10">🍻</button>
-                                <button onClick={() => sendReaction('💖')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-white/5 p-3 rounded-full hover:bg-white/10">💖</button>
-                                <button onClick={() => sendReaction('💯')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-white/5 p-3 rounded-full hover:bg-white/10">💯</button>
+                                <button onClick={() => sendReaction('🔥')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-[var(--glass-fill-inset)] p-3 rounded-full hover:bg-[var(--glass-fill-inset)]">🔥</button>
+                                <button onClick={() => sendReaction('🍻')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-[var(--glass-fill-inset)] p-3 rounded-full hover:bg-[var(--glass-fill-inset)]">🍻</button>
+                                <button onClick={() => sendReaction('💖')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-[var(--glass-fill-inset)] p-3 rounded-full hover:bg-[var(--glass-fill-inset)]">💖</button>
+                                <button onClick={() => sendReaction('💯')} className="text-2xl hover:scale-125 transition-transform active:scale-90 bg-[var(--glass-fill-inset)] p-3 rounded-full hover:bg-[var(--glass-fill-inset)]">💯</button>
                             </div>
                         </div>
                     </div>

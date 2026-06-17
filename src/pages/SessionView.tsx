@@ -109,7 +109,7 @@ export default function SessionView() {
         <div className="text-6xl mb-4">🍺</div>
         <h1 className="text-2xl font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Session Over</h1>
         <p className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>{error}</p>
-        <button onClick={() => navigate('/')} className="mx-auto flex items-center gap-2 px-6 py-3 rounded-[4px] font-bold text-sm" style={{ background: 'var(--bg-raised)', color: 'var(--text-primary)', border: '1px solid var(--border-mid)' }}>
+        <button onClick={() => navigate('/')} className="mx-auto flex items-center gap-2 px-6 py-3 rounded-[var(--card-radius)] font-bold text-sm" style={{ background: 'var(--bg-raised)', color: 'var(--text-primary)', border: '1px solid var(--border-mid)' }}>
           <ArrowLeft size={16} /> Go Home
         </button>
       </div>

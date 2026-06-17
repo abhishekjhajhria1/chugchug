@@ -372,7 +372,7 @@ export default function Calendar() {
           onClick={() => setShowWrapped(true)}
           className="flex items-center gap-1.5 px-3 py-2 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
           style={{
-            background: "var(--amber-dim)", border: "1px solid rgba(216,162,94,0.3)",
+            background: "var(--amber-dim)", border: "1px solid color-mix(in srgb, var(--amber) 30%, transparent)",
             color: "var(--amber)", borderRadius: "var(--card-radius)"
           }}
         >
@@ -503,10 +503,10 @@ export default function Calendar() {
 
             let cellBg = "transparent"
             let cellBorder = "1px solid transparent"
-            if (hasDetox) { cellBg = "var(--acid-dim)"; cellBorder = "1px solid rgba(124,154,116,0.3)" }
+            if (hasDetox) { cellBg = "var(--acid-dim)"; cellBorder = "1px solid color-mix(in srgb, var(--acid) 30%, transparent)" }
             else if (hasGym) { cellBg = "var(--indigo-dim)"; cellBorder = `1px solid rgba(59,130,246,0.3)` }
-            else if (hasDrinks && log.drinks >= 6) { cellBg = "var(--coral-dim)"; cellBorder = "1px solid rgba(209,32,32,0.3)" }
-            else if (hasDrinks) { cellBg = "var(--amber-dim)"; cellBorder = "1px solid rgba(216,162,94,0.3)" }
+            else if (hasDrinks && log.drinks >= 6) { cellBg = "var(--coral-dim)"; cellBorder = "1px solid color-mix(in srgb, var(--coral) 30%, transparent)" }
+            else if (hasDrinks) { cellBg = "var(--amber-dim)"; cellBorder = "1px solid color-mix(in srgb, var(--amber) 30%, transparent)" }
 
             return (
               <button
@@ -772,7 +772,7 @@ export default function Calendar() {
                   { icon: "🔥", label: "Best Streak", value: `${wrappedStats.bestStreak}d`, color: "var(--coral)" },
                   { icon: "💰", label: "Saved", value: `₹${wrappedStats.moneySaved}`, color: "var(--amber)" },
                 ].map(s => (
-                  <div key={s.label} className="py-3 rounded-lg" style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <div key={s.label} className="py-3 rounded-lg" style={{ background: "color-mix(in srgb, var(--text-primary) 5%, transparent)" }}>
                     <div className="text-lg">{s.icon}</div>
                     <p className="text-xl font-black mt-1" style={{ color: s.color, fontFamily: "Syne, sans-serif" }}>{s.value}</p>
                     <p className="text-[8px] font-bold uppercase tracking-widest" style={{ color: "#847C69" }}>{s.label}</p>
@@ -780,7 +780,7 @@ export default function Calendar() {
                 ))}
               </div>
 
-              <div className="pt-3 mt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+              <div className="pt-3 mt-2" style={{ borderTop: "1px solid color-mix(in srgb, var(--text-primary) 10%, transparent)" }}>
                 <p className="text-xs font-black" style={{ color: "#F5F0E6" }}>
                   Rank: <span style={{ color: "var(--amber)" }}>{wrappedStats.rank}</span> · Level {wrappedStats.level}
                 </p>

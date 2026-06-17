@@ -27,6 +27,7 @@ const Landing = lazy(() => import("./pages/Landing"))
 const Tavern = lazy(() => import("./pages/Tavern"))
 const Premium = lazy(() => import("./pages/Premium"))
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
+const Events = lazy(() => import("./pages/Events"))
 
 // ── Loading skeleton ────────────────────────────────────────────
 function PageLoader() {
@@ -101,6 +102,7 @@ function App() {
         <Route path="/calendar"            element={<RouteGuard><Calendar /></RouteGuard>} />
         <Route path="/challenges"          element={<RouteGuard><Challenges /></RouteGuard>} />
         <Route path="/tavern"              element={<RouteGuard><Tavern /></RouteGuard>} />
+        <Route path="/events"              element={<RouteGuard><Events /></RouteGuard>} />
         <Route path="/premium"             element={<RouteGuard><Premium /></RouteGuard>} />
         <Route path="/admin"               element={<RouteGuard><AdminDashboard /></RouteGuard>} />
         {/* Redirect old routes */}

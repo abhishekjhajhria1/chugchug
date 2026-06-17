@@ -21,7 +21,7 @@ import type { ActivityLog } from "../types"
 export default function GroupFeed() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const { user } = useChug()
+    const { user, profile } = useChug()
     const toast = useToast()
 
     const [group, setGroup] = useState<{ name: string, invite_code: string } | null>(null)
@@ -320,10 +320,10 @@ export default function GroupFeed() {
             {/* Crew Streak Banner */}
             {crewStreak.crewStreak > 0 && (
                 <div
-                    className="flex items-center justify-between p-3.5 rounded-[4px] relative overflow-hidden"
+                    className="flex items-center justify-between p-3.5 rounded-[var(--card-radius)] relative overflow-hidden"
                     style={{
-                        background: crewStreak.crewStreak >= 14 ? 'linear-gradient(135deg, rgba(209,32,32,0.12), rgba(216,162,94,0.08))' : crewStreak.crewStreak >= 7 ? 'var(--amber-dim)' : 'var(--bg-deep)',
-                        border: `1px solid ${crewStreak.crewStreak >= 14 ? 'rgba(209,32,32,0.3)' : crewStreak.crewStreak >= 7 ? 'rgba(216,162,94,0.3)' : 'var(--border-mid)'}`,
+                        background: crewStreak.crewStreak >= 14 ? 'linear-gradient(135deg, color-mix(in srgb, var(--coral) 12%, transparent), color-mix(in srgb, var(--amber) 8%, transparent))' : crewStreak.crewStreak >= 7 ? 'var(--amber-dim)' : 'var(--bg-deep)',
+                        border: `1px solid ${crewStreak.crewStreak >= 14 ? 'color-mix(in srgb, var(--coral) 30%, transparent)' : crewStreak.crewStreak >= 7 ? 'color-mix(in srgb, var(--amber) 30%, transparent)' : 'var(--border-mid)'}`,
                     }}
                 >
                     <div className="flex items-center gap-3">
@@ -341,7 +341,7 @@ export default function GroupFeed() {
                         </div>
                     </div>
                     <div className="text-right">
-                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[2px]" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-ghost)', border: '1px solid var(--border)' }}>
+                        <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[2px]" style={{ background: 'color-mix(in srgb, var(--text-primary) 4%, transparent)', color: 'var(--text-ghost)', border: '1px solid var(--border)' }}>
                             Best: {crewStreak.crewLongestStreak}
                         </span>
                     </div>
@@ -351,7 +351,7 @@ export default function GroupFeed() {
             {/* Quick Actions / Info Row */}
             <div className="grid grid-cols-2 gap-2 my-4">
                 {/* Invite Code */}
-                <div onClick={() => { navigator.clipboard.writeText(group?.invite_code || ''); toast.success('Code Copied!') }} className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 cursor-pointer relative overflow-hidden group/tile" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+                <div onClick={() => { navigator.clipboard.writeText(group?.invite_code || ''); toast.success('Code Copied!') }} className="p-4 rounded-[var(--card-radius)] flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 cursor-pointer relative overflow-hidden group/tile" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
                     <span className="text-[10px] uppercase font-bold tracking-widest leading-none z-10" style={{ color: 'var(--text-muted)' }}>Invite Code</span>
                     <span className="text-xl font-black tracking-widest mt-1 z-10" style={{ color: 'var(--amber)', fontFamily: 'Syne, sans-serif' }}>{group?.invite_code || "---"}</span>
                     <div className="absolute top-0 right-0 p-1 opacity-5 group-hover/tile:opacity-10 transition-opacity"><Users size={60} /></div>
@@ -360,6 +360,7 @@ export default function GroupFeed() {
                 {/* Start Party */}
                 <button onClick={async () => {
                     if (!user || !id) return;
+                    if (!profile?.is_premium) { toast.error("Hosting parties is Premium — upgrade to start one 🎉"); navigate('/premium'); return; }
                     const { data, error } = await supabase.from('parties').insert({
                         host_id: user.id, title: `${group?.name || 'Group'} Party`, description: 'Group party!',
                         address: 'TBD', privacy_level: 'invite_only', group_id: id,
@@ -368,8 +369,8 @@ export default function GroupFeed() {
                     if (data) navigate(`/party/${data.id}`);
                     if (error) toast.error(error.message);
                 }}
-                    className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile"
-                    style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
+                    className="p-4 rounded-[var(--card-radius)] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile"
+                    style={{ background: 'var(--coral-dim)', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)' }}>
                     <PartyPopper size={24} style={{ color: 'var(--coral)' }} className="z-10" />
                     <span className="text-[10px] font-black uppercase tracking-widest z-10" style={{ color: 'var(--coral)' }}>Start Party</span>
                     <div className="absolute bottom-0 left-0 p-1 opacity-10 group-hover/tile:opacity-20 transition-opacity"><PartyPopper size={60} /></div>
@@ -378,8 +379,8 @@ export default function GroupFeed() {
                 {/* Add Split */}
                 <button
                     onClick={() => setShowSplitModal(true)}
-                    className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile"
-                    style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)' }}>
+                    className="p-4 rounded-[var(--card-radius)] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile"
+                    style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)' }}>
                     <HandCoins size={24} style={{ color: 'var(--amber)' }} className="z-10" />
                     <span className="text-[10px] font-black uppercase tracking-widest z-10" style={{ color: 'var(--amber)' }}>Add Split</span>
                     <div className="absolute bottom-0 right-0 p-1 opacity-10 group-hover/tile:opacity-20 transition-opacity"><HandCoins size={60} /></div>
@@ -388,7 +389,7 @@ export default function GroupFeed() {
                 {/* View Balances */}
                 <button
                     onClick={() => navigate(`/group/${id}/balances`)}
-                    className="p-4 rounded-[4px] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile"
+                    className="p-4 rounded-[var(--card-radius)] flex flex-col items-center justify-center gap-1.5 transition-transform active:scale-95 relative overflow-hidden group/tile"
                     style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
                     <Crown size={24} style={{ color: 'var(--text-secondary)' }} className="z-10" />
                     <span className="text-[10px] font-black uppercase tracking-widest z-10" style={{ color: 'var(--text-secondary)' }}>Balances</span>
@@ -400,11 +401,11 @@ export default function GroupFeed() {
             {activeGroupSession ? (
                 <button
                     onClick={() => navigate(`/session/${activeGroupSession.id}`)}
-                    className="w-full flex items-center justify-between p-4 rounded-[4px] my-4 transition-transform active:scale-95 relative overflow-hidden"
-                    style={{ background: 'linear-gradient(135deg, rgba(209,32,32,0.15), rgba(216,162,94,0.1))', border: '1px solid rgba(209,32,32,0.3)', borderLeft: '4px solid var(--coral)' }}
+                    className="w-full flex items-center justify-between p-4 rounded-[var(--card-radius)] my-4 transition-transform active:scale-95 relative overflow-hidden"
+                    style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--coral) 15%, transparent), color-mix(in srgb, var(--amber) 10%, transparent))', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)', borderLeft: '4px solid var(--coral)' }}
                 >
                     <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--coral)', boxShadow: '0 0 12px rgba(209,32,32,0.5)' }} />
+                        <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--coral)', boxShadow: '0 0 12px color-mix(in srgb, var(--coral) 50%, transparent)' }} />
                         <div className="text-left">
                             <h2 className="font-black text-sm uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--coral)' }}>Crew is Drinking!</h2>
                             <span className="text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>Code: {activeGroupSession.join_code} · Tap to join</span>
@@ -416,11 +417,11 @@ export default function GroupFeed() {
                 <button
                     onClick={handleStartGroupSession}
                     disabled={startingSession}
-                    className="w-full flex items-center justify-between p-4 rounded-[4px] my-4 transition-transform active:scale-95 relative overflow-hidden"
+                    className="w-full flex items-center justify-between p-4 rounded-[var(--card-radius)] my-4 transition-transform active:scale-95 relative overflow-hidden"
                     style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)', borderLeft: '4px solid var(--amber)' }}
                 >
                     <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-10 h-10 rounded-[2px] flex items-center justify-center" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)', color: 'var(--amber)' }}>
+                        <div className="w-10 h-10 rounded-[2px] flex items-center justify-center" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)' }}>
                             <Beer size={20} />
                         </div>
                         <div className="text-left">
@@ -474,12 +475,12 @@ export default function GroupFeed() {
                                 <p className="text-[10px] font-bold mt-1 uppercase" style={{ color: 'var(--text-muted)' }}>You paid this amount</p>
                             </div>
 
-                            <div className="bg-white/3 p-3 rounded-xl border border-white/15/10">
+                            <div className="bg-white/3 p-3 rounded-xl border border-[var(--border-mid)]">
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="font-bold text-xs uppercase tracking-widest block" style={{ color: 'var(--text-secondary)' }}>Split Method</label>
-                                    <div className="flex bg-black/20 rounded-lg p-1 border border-white/10">
-                                        <button onClick={() => setSplitMode('equal')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'equal' ? 'bg-white/10 text-white' : 'text-white/40'}`}>Equally</button>
-                                        <button onClick={() => setSplitMode('drink')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'drink' ? 'bg-amber-500/20 text-amber-500' : 'text-white/40'}`}>DrinkSplit</button>
+                                    <div className="flex bg-black/20 rounded-lg p-1 border border-[var(--border-mid)]">
+                                        <button onClick={() => setSplitMode('equal')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'equal' ? 'bg-[var(--glass-fill-inset)] text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>Equally</button>
+                                        <button onClick={() => setSplitMode('drink')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${splitMode === 'drink' ? 'bg-amber-500/20 text-amber-500' : 'text-[var(--text-muted)]'}`}>DrinkSplit</button>
                                     </div>
                                 </div>
 
@@ -525,7 +526,7 @@ export default function GroupFeed() {
                 <button
                     onClick={() => navigate(`/group/${id}/chat`)}
                     className="flex-1 py-3 rounded-xl font-black flex items-center justify-center gap-2 transition-transform active:scale-95"
-                    style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid rgba(204,255,0,0.15)' }}
+                    style={{ background: 'var(--acid-dim)', color: 'var(--acid)', border: '1px solid color-mix(in srgb, var(--acid) 15%, transparent)' }}
                 >
                     <MessageCircle size={18} strokeWidth={2} style={{ color: 'var(--acid)' }} /> Group Chat
                 </button>
@@ -590,7 +591,7 @@ export default function GroupFeed() {
                                 <p className="font-bold text-sm" style={{ color: 'var(--amber)' }}>Quantity/Duration: {log.quantity}</p>
 
                                 {log.photo_url && (
-                                    <div className="mt-2 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+                                    <div className="mt-2 rounded-2xl overflow-hidden border border-[var(--border-mid)] shadow-lg">
                                         <img
                                             src={`${supabase.storage.from('photos').getPublicUrl(log.photo_url).data.publicUrl}`}
                                             alt={log.item_name}
@@ -607,7 +608,7 @@ export default function GroupFeed() {
                                     </div>
                                 )}
 
-                                <div className="flex justify-between items-center mt-3 pt-3 border-t-2 border-dashed border-white/15/10">
+                                <div className="flex justify-between items-center mt-3 pt-3 border-t-2 border-dashed border-[var(--border-mid)]">
                                     <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Appraise:</p>
                                     <div className="flex gap-2">
                                         <button

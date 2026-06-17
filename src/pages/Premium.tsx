@@ -65,7 +65,7 @@ export default function Premium() {
 
       {isPremium ? (
         /* Already premium */
-        <div className="p-6 text-center" style={{ background: 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.05))', border: '2px solid var(--amber)', borderRadius: 'var(--card-radius)' }}>
+        <div className="p-6 text-center" style={{ background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--amber) 5%, transparent))', border: '2px solid var(--amber)', borderRadius: 'var(--card-radius)' }}>
           <Crown size={48} className="mx-auto mb-3" style={{ color: 'var(--amber)' }} />
           <p className="text-lg font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>You're Premium!</p>
           <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>All perks are active. Thank you for supporting ChugChug.</p>
@@ -76,7 +76,7 @@ export default function Premium() {
           <div
             className="p-6 text-center relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(232,196,74,0.15), rgba(216,162,94,0.05))',
+              background: 'linear-gradient(135deg, rgba(232,196,74,0.15), color-mix(in srgb, var(--amber) 5%, transparent))',
               border: '1px solid rgba(232,196,74,0.3)',
               borderRadius: 'var(--card-radius)',
             }}

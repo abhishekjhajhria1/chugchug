@@ -11,6 +11,13 @@ import type { BountyDef } from "../lib/progression";
 import ArchetypeQuiz, { ARCHETYPES } from "../components/ArchetypeQuiz";
 import type { ArchetypeId } from "../components/ArchetypeQuiz";
 import { useToast } from "../components/Toast";
+import NearestBarCompass from "../components/NearestBarCompass";
+import DailyRewardStreak from "../components/DailyRewardStreak";
+import LiveActivityFeed from "../components/LiveActivityFeed";
+import WeeklyLeagueCard from "../components/WeeklyLeagueCard";
+import FriendsLeagueCard from "../components/FriendsLeagueCard";
+import CrewBattleCard from "../components/CrewBattleCard";
+import EventBanner from "../components/EventBanner";
 import { generateSessionCode } from "../utils/crypto";
 import type { RankUser, Badge, Recipe } from "../types";
 
@@ -304,6 +311,7 @@ export default function Home() {
     { label: "Log Drink", to: "/log", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "✍️" },
     { label: "Split Bill", to: "/groups", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "💸" },
     { label: "Taverns", to: "/tavern", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🏯" },
+    { label: "Events", to: "/events", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "✨" },
     { label: "Challenges", to: "/challenges", color: 'var(--coral)', bg: 'var(--coral-dim)', emoji: "🎯" },
     { label: "Premium", to: "/premium", color: 'var(--amber)', bg: 'var(--amber-dim)', emoji: "👑" },
     { label: "Shogun Rank", to: "/rank", color: 'var(--acid)', bg: 'var(--acid-dim)', emoji: "🏆" },
@@ -325,15 +333,15 @@ export default function Home() {
         <div
           className="p-6 space-y-4 anim-pop relative overflow-hidden"
           style={{
-            background: 'linear-gradient(145deg, rgba(216,162,94,0.12), rgba(209,32,32,0.06), rgba(124,154,116,0.05))',
-            border: '2px solid rgba(216,162,94,0.3)',
-            borderRadius: '4px',
+            background: 'linear-gradient(145deg, color-mix(in srgb, var(--amber) 12%, transparent), color-mix(in srgb, var(--coral) 6%, transparent), color-mix(in srgb, var(--acid) 5%, transparent))',
+            border: '2px solid color-mix(in srgb, var(--amber) 30%, transparent)',
+            borderRadius: 'var(--card-radius)',
           }}
         >
           <button
             onClick={() => { localStorage.setItem('chugchug_onboarded', '1'); setShowOnboarding(false); }}
             className="absolute top-3 right-3 text-xs px-2 py-1 rounded transition-colors"
-            style={{ color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)' }}
+            style={{ color: 'var(--text-muted)', background: 'var(--glass-fill-inset)' }}
           >
             Skip ✕
           </button>
@@ -358,11 +366,11 @@ export default function Home() {
               <div
                 key={card.title}
                 className="flex items-center gap-3 p-3"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', borderRadius: '4px' }}
+                style={{ background: 'var(--glass-fill-inset)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}
               >
                 <div
                   className="w-11 h-11 flex items-center justify-center text-2xl shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '2px' }}
+                  style={{ background: 'var(--glass-fill-inset)', borderRadius: '2px' }}
                 >
                   {card.emoji}
                 </div>
@@ -384,10 +392,10 @@ export default function Home() {
       <div
         className="p-5 flex flex-col justify-between relative overflow-hidden anim-stagger-1"
         style={{
-          background: 'linear-gradient(135deg, var(--amber-dim), rgba(209,32,32,0.05))',
+          background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--coral) 5%, transparent))',
           border: '1px solid var(--amber)',
           borderLeft: '5px solid var(--amber)',
-          borderRadius: '4px'
+          borderRadius: 'var(--card-radius)'
         }}
       >
         <div className="absolute top-0 right-0 p-3 opacity-20 pointer-events-none">
@@ -417,7 +425,7 @@ export default function Home() {
                   </div>
                   {/* Streak flame */}
                   {streak > 0 && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: streak >= 14 ? 'rgba(209,32,32,0.15)' : streak >= 7 ? 'rgba(216,162,94,0.15)' : 'rgba(255,255,255,0.06)', border: `1px solid ${streak >= 14 ? 'rgba(209,32,32,0.3)' : streak >= 7 ? 'rgba(216,162,94,0.3)' : 'var(--border)'}` }}>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style={{ background: streak >= 14 ? 'var(--coral-dim)' : streak >= 7 ? 'var(--amber-dim)' : 'var(--glass-fill-inset)', border: `1px solid ${streak >= 14 ? 'color-mix(in srgb, var(--coral) 30%, transparent)' : streak >= 7 ? 'color-mix(in srgb, var(--amber) 30%, transparent)' : 'var(--border)'}` }}>
                       <Flame size={14} style={{ color: streak >= 14 ? 'var(--coral)' : streak >= 7 ? 'var(--amber)' : 'var(--text-muted)', animation: streak >= 7 ? 'pulse 1.5s ease-in-out infinite' : 'none' }} />
                       <span className="text-sm font-black" style={{ fontFamily: 'Syne, sans-serif', color: streak >= 14 ? 'var(--coral)' : streak >= 7 ? 'var(--amber)' : 'var(--text-secondary)' }}>{streak}</span>
                     </div>
@@ -433,7 +441,7 @@ export default function Home() {
                   </span>
                 </div>
 
-                <div className="h-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '1px' }}>
+                <div className="h-1.5 overflow-hidden" style={{ background: 'var(--border-mid)', borderRadius: '1px' }}>
                   <div
                     className="h-full transition-all duration-700"
                     style={{
@@ -461,18 +469,26 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ─── ⚡ ENGAGEMENT LAYER — the hooks ─── */}
+      <EventBanner />
+      <DailyRewardStreak />
+      <FriendsLeagueCard />
+      <LiveActivityFeed />
+      <CrewBattleCard />
+      <WeeklyLeagueCard />
+
       {/* ─── 1.1 ARCHETYPE DISCOVER PROMPT ─── */}
       {profile && !profile.archetype && (
         <button
           onClick={() => setShowArchetypeQuiz(true)}
-          className="w-full p-4 rounded-[4px] flex items-center gap-4 active:scale-[0.98] transition-transform relative overflow-hidden anim-stagger-1"
+          className="w-full p-4 rounded-[var(--card-radius)] flex items-center gap-4 active:scale-[0.98] transition-transform relative overflow-hidden anim-stagger-1"
           style={{
-            background: 'linear-gradient(135deg, rgba(155,89,182,0.12), rgba(216,162,94,0.08))',
+            background: 'linear-gradient(135deg, rgba(155,89,182,0.12), color-mix(in srgb, var(--amber) 8%, transparent))',
             border: '1px solid rgba(155,89,182,0.25)',
             borderLeft: '4px solid #9B59B6',
           }}
         >
-          <div className="w-12 h-12 rounded-[4px] flex items-center justify-center text-2xl shrink-0" style={{ background: 'rgba(155,89,182,0.15)', border: '1px solid rgba(155,89,182,0.3)' }}>
+          <div className="w-12 h-12 rounded-[var(--card-radius)] flex items-center justify-center text-2xl shrink-0" style={{ background: 'rgba(155,89,182,0.15)', border: '1px solid rgba(155,89,182,0.3)' }}>
             🎭
           </div>
           <div className="flex-1 text-left">
@@ -501,7 +517,7 @@ export default function Home() {
             <h2 className="text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5" style={{ color: 'var(--amber)' }}>
               <Zap size={12} /> Daily Bounties
             </h2>
-            <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '1px solid rgba(216,162,94,0.2)', borderRadius: '2px' }}>
+            <span className="text-[8px] font-bold uppercase tracking-widest px-2 py-0.5" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '1px solid color-mix(in srgb, var(--amber) 20%, transparent)', borderRadius: '2px' }}>
               Resets at midnight
             </span>
           </div>
@@ -518,7 +534,7 @@ export default function Home() {
                   className="flex items-center gap-3 p-3 transition-all"
                   style={{
                     background: completed ? 'var(--acid-dim)' : 'var(--bg-raised)',
-                    border: completed ? '1px solid rgba(204,255,0,0.2)' : '1px solid var(--border)',
+                    border: completed ? '1px solid color-mix(in srgb, var(--acid) 20%, transparent)' : '1px solid var(--border)',
                     borderRadius: 'var(--card-radius)',
                     opacity: completed ? 0.75 : 1,
                   }}
@@ -540,7 +556,7 @@ export default function Home() {
                     </div>
                     <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{bounty.description}</p>
                     {!completed && (
-                      <div className="h-1 mt-1.5 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+                      <div className="h-1 mt-1.5 overflow-hidden" style={{ background: 'var(--glass-fill-inset)', borderRadius: '1px' }}>
                         <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: 'var(--amber)' }} />
                       </div>
                     )}
@@ -624,7 +640,7 @@ export default function Home() {
             else if (hasGym) cellBg = 'var(--indigo-dim)';
             else if (hasDrinks && log.drinks >= 6) cellBg = 'var(--coral-dim)';
             else if (hasDrinks) cellBg = 'var(--amber-dim)';
-            else if (isPast && !log) cellBg = 'rgba(124,154,116,0.06)';
+            else if (isPast && !log) cellBg = 'color-mix(in srgb, var(--acid) 6%, transparent)';
 
             return (
               <button
@@ -685,14 +701,14 @@ export default function Home() {
         {activeSession ? (
           <button
             onClick={() => navigate(`/session/${activeSession.id}`)}
-            className="w-full p-4 rounded-[4px] flex items-center gap-4 active:scale-[0.98] transition-transform relative overflow-hidden"
+            className="w-full p-4 rounded-[var(--card-radius)] flex items-center gap-4 active:scale-[0.98] transition-transform relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(209,32,32,0.15), rgba(216,162,94,0.1))',
-              border: '1px solid rgba(209,32,32,0.3)',
+              background: 'linear-gradient(135deg, var(--coral-dim), color-mix(in srgb, var(--amber) 10%, transparent))',
+              border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)',
               borderLeft: '4px solid var(--coral)',
             }}
           >
-            <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--coral)', boxShadow: '0 0 12px rgba(209,32,32,0.5)' }} />
+            <div className="w-3 h-3 rounded-full animate-pulse" style={{ background: 'var(--coral)', boxShadow: '0 0 12px color-mix(in srgb, var(--coral) 50%, transparent)' }} />
             <div className="flex-1 text-left">
               <p className="text-sm font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--coral)' }}>Active Session</p>
               <p className="text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>Code: {activeSession.join_code} · Tap to resume</p>
@@ -704,10 +720,10 @@ export default function Home() {
             <button
               onClick={handleStartSession}
               disabled={sessionCreating}
-              className="w-full p-4 rounded-[4px] flex items-center gap-4 active:scale-[0.98] transition-transform"
+              className="w-full p-4 rounded-[var(--card-radius)] flex items-center gap-4 active:scale-[0.98] transition-transform"
               style={{
-                background: 'linear-gradient(135deg, var(--amber-dim), rgba(216,162,94,0.05))',
-                border: '1px solid rgba(216,162,94,0.3)',
+                background: 'linear-gradient(135deg, var(--amber-dim), color-mix(in srgb, var(--amber) 5%, transparent))',
+                border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)',
                 borderLeft: '4px solid var(--amber)',
               }}
             >
@@ -734,8 +750,8 @@ export default function Home() {
               <button
                 onClick={handleJoinSession}
                 disabled={joinCodeInput.length < 4}
-                className="px-5 rounded-[4px] font-black text-xs uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-30"
-                style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)', color: 'var(--acid)' }}
+                className="px-5 rounded-[var(--card-radius)] font-black text-xs uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-30"
+                style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 30%, transparent)', color: 'var(--acid)' }}
               >
                 <LogIn size={14} /> Join
               </button>
@@ -767,16 +783,21 @@ export default function Home() {
             </button>
           ))}
         </div>
+
+        {/* Tavern compass — points to the nearest bar/restaurant */}
+        <div className="mt-2.5">
+          <NearestBarCompass />
+        </div>
       </section>
 
       {/* ─── 3. TAVERN SUPERVISOR: Ninkasi ─── */}
       <section
         className="overflow-hidden anim-stagger-4"
         style={{
-          background: 'linear-gradient(to bottom, rgba(209,32,32,0.05), var(--card-bg))',
+          background: 'linear-gradient(to bottom, color-mix(in srgb, var(--coral) 5%, transparent), var(--card-bg))',
           border: '1px solid var(--border)',
           borderTopColor: 'var(--coral)',
-          borderRadius: '4px'
+          borderRadius: 'var(--card-radius)'
         }}
       >
         <div className="px-4 pt-4 pb-3 flex items-center justify-between relative">
@@ -796,7 +817,7 @@ export default function Home() {
               {referencedRecipes.length > 0 && (
                 <div className="mt-4 pt-3 flex flex-wrap gap-2" style={{ borderTop: '1px dashed var(--border-mid)' }}>
                   {referencedRecipes.map((name) => (
-                    <span key={name} className="text-[10px] font-bold px-2 py-1 flex items-center gap-1.5" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid rgba(209,32,32,0.3)', borderRadius: '2px' }}>
+                    <span key={name} className="text-[10px] font-bold px-2 py-1 flex items-center gap-1.5" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)', borderRadius: '2px' }}>
                       <BookOpen size={10} /> {name}
                     </span>
                   ))}
@@ -831,7 +852,7 @@ export default function Home() {
           )}
 
           {chatError && (
-            <p className="text-[10px] font-black uppercase tracking-widest px-3 py-3" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid rgba(209,32,32,0.3)', borderRadius: '2px' }}>
+            <p className="text-[10px] font-black uppercase tracking-widest px-3 py-3" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)', borderRadius: '2px' }}>
               ⚠ {chatError}
             </p>
           )}
@@ -862,7 +883,7 @@ export default function Home() {
 
       {/* ─── 4. TOP PERFORMERS + RECIPES ─── */}
       <div className="grid grid-cols-2 gap-3 anim-stagger-5">
-        <section className="p-4 relative overflow-hidden" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '4px' }}>
+        <section className="p-4 relative overflow-hidden" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}>
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-4 flex items-center gap-1.5" style={{ color: 'var(--amber)' }}>
             🏆 Shogunate Top 5
           </h2>
@@ -890,7 +911,7 @@ export default function Home() {
           </button>
         </section>
 
-        <section className="p-4 relative overflow-hidden" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '4px' }}>
+        <section className="p-4 relative overflow-hidden" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}>
           <h2 className="text-[10px] font-black uppercase tracking-widest mb-4 flex items-center gap-1.5" style={{ color: 'var(--coral)' }}>
             📜 Recent Recipes
           </h2>
@@ -900,7 +921,7 @@ export default function Home() {
             ) : recipes.map((r) => (
               <div key={r.id} className="flex items-center justify-between">
                 <span className="text-xs font-bold truncate max-w-[70px]" style={{ color: 'var(--text-primary)' }}>{r.item_name}</span>
-                <span className="text-[9px] font-black px-1.5 py-0.5" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.2)', color: 'var(--coral)', borderRadius: '2px' }}>
+                <span className="text-[9px] font-black px-1.5 py-0.5" style={{ background: 'var(--coral-dim)', border: '1px solid color-mix(in srgb, var(--coral) 20%, transparent)', color: 'var(--coral)', borderRadius: '2px' }}>
                   +{r.xp_earned}
                 </span>
               </div>
@@ -909,7 +930,7 @@ export default function Home() {
           <button
             onClick={() => navigate("/log")}
             className="w-full mt-4 text-[9px] uppercase tracking-widest font-black py-2.5 flex items-center justify-center gap-1 transition-colors"
-            style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid rgba(209,32,32,0.2)', borderRadius: '2px' }}
+            style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid color-mix(in srgb, var(--coral) 20%, transparent)', borderRadius: '2px' }}
           >
             Scribe Recipe
           </button>
@@ -917,7 +938,7 @@ export default function Home() {
       </div>
 
       {/* ─── 5. BADGES ─── */}
-      <section className="anim-stagger-6" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '4px', padding: 18 }}>
+      <section className="anim-stagger-6" style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)', padding: 18 }}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-[10px] font-black uppercase tracking-widest border-l-2 pl-2" style={{ borderColor: 'var(--acid)', color: 'var(--text-muted)' }}>
             🎖️ Bounties & Badges
@@ -931,7 +952,7 @@ export default function Home() {
             <button
               onClick={() => navigate("/log")}
               className="text-[10px] font-black uppercase tracking-widest px-4 py-2"
-              style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '1px solid rgba(216, 162, 94, 0.3)', borderRadius: '2px' }}
+              style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', borderRadius: '2px' }}
             >
               Start Your Journey
             </button>

@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase"
 import { firebaseDb } from "../lib/firebase"
 import { ref, get, remove } from "firebase/database"
 import { evaluateAndAwardBadges, getRankInfo } from "../lib/progression"
+import { bumpEventProgress } from "../lib/engagement"
 import { Camera, Loader2, X, Eye, Users, Globe, Lock } from "lucide-react"
 import SessionRecapCard from "./SessionRecapCard"
 import { useToast } from "../components/Toast"
@@ -145,6 +146,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
 
       // 4. Add XP
       await supabase.rpc('add_xp', { user_id_param: user.id, xp_to_add: xpEarned })
+      bumpEventProgress(user.id, 'drink').then(done => done.forEach(t => toast.success(`🏆 Event complete: ${t}!`))).catch(() => {})
       await evaluateAndAwardBadges(user.id)
 
       // 5. End session in Supabase
@@ -194,7 +196,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col justify-end p-4 anim-fade" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
-      <div className="w-full max-w-lg mx-auto space-y-5 anim-enter overflow-y-auto max-h-[85vh] p-6 rounded-[4px]" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', boxShadow: '0 -16px 64px rgba(0,0,0,0.6)' }}>
+      <div className="w-full max-w-lg mx-auto space-y-5 anim-enter overflow-y-auto max-h-[85vh] p-6 rounded-[var(--card-radius)]" style={{ background: 'var(--bg-mid)', border: '1px solid var(--border)', boxShadow: '0 -16px 64px rgba(0,0,0,0.6)' }}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black uppercase tracking-widest" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text-primary)' }}>Session Complete</h2>
@@ -203,15 +205,15 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
 
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 rounded-[4px] text-center" style={{ background: 'var(--amber-dim)', border: '1px solid rgba(216,162,94,0.3)' }}>
+          <div className="p-3 rounded-[var(--card-radius)] text-center" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)' }}>
             <p className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--amber)' }}>{myCount}</p>
             <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Your Drinks</p>
           </div>
-          <div className="p-3 rounded-[4px] text-center" style={{ background: 'var(--acid-dim)', border: '1px solid rgba(204,255,0,0.3)' }}>
+          <div className="p-3 rounded-[var(--card-radius)] text-center" style={{ background: 'var(--acid-dim)', border: '1px solid color-mix(in srgb, var(--acid) 30%, transparent)' }}>
             <p className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--acid)' }}>{totalDrinks}</p>
             <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Total</p>
           </div>
-          <div className="p-3 rounded-[4px] text-center" style={{ background: 'var(--coral-dim)', border: '1px solid rgba(209,32,32,0.3)' }}>
+          <div className="p-3 rounded-[var(--card-radius)] text-center" style={{ background: 'var(--coral-dim)', border: '1px solid color-mix(in srgb, var(--coral) 30%, transparent)' }}>
             <p className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--coral)' }}>{participants.length}</p>
             <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>People</p>
           </div>
@@ -222,7 +224,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
           <div className="space-y-2">
             <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Final Scores</p>
             {participants.map((p, i) => (
-              <div key={p.userId} className="flex items-center justify-between p-2.5 rounded-[4px]" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
+              <div key={p.userId} className="flex items-center justify-between p-2.5 rounded-[var(--card-radius)]" style={{ background: 'var(--bg-deep)', border: '1px solid var(--border-mid)' }}>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black" style={{ color: i === 0 ? 'var(--amber)' : 'var(--text-muted)' }}>#{i + 1}</span>
                   <span className="text-sm font-bold" style={{ color: p.userId === user?.id ? 'var(--amber)' : 'var(--text-primary)' }}>
@@ -242,7 +244,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
           </p>
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="w-full h-32 rounded-[4px] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 overflow-hidden relative"
+            className="w-full h-32 rounded-[var(--card-radius)] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 overflow-hidden relative"
             style={{
               background: photoPreview ? `url(${photoPreview}) center/cover` : 'var(--bg-deep)',
               border: `1px ${photoPreview ? 'solid' : 'dashed'} var(--border-mid)`,
@@ -265,10 +267,10 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
               <button
                 key={opt.value}
                 onClick={() => setVisibility(opt.value)}
-                className="p-3 rounded-[4px] text-center transition-all active:scale-95"
+                className="p-3 rounded-[var(--card-radius)] text-center transition-all active:scale-95"
                 style={{
                   background: visibility === opt.value ? 'var(--amber-dim)' : 'var(--bg-deep)',
-                  border: `1px solid ${visibility === opt.value ? 'rgba(216,162,94,0.4)' : 'var(--border-mid)'}`,
+                  border: `1px solid ${visibility === opt.value ? 'color-mix(in srgb, var(--amber) 40%, transparent)' : 'var(--border-mid)'}`,
                   color: visibility === opt.value ? 'var(--amber)' : 'var(--text-muted)',
                 }}
               >
@@ -287,10 +289,10 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
               <button
                 key={g.id}
                 onClick={() => toggleGroup(g.id)}
-                className="w-full flex items-center gap-3 p-3 rounded-[4px] transition-all active:scale-[0.98]"
+                className="w-full flex items-center gap-3 p-3 rounded-[var(--card-radius)] transition-all active:scale-[0.98]"
                 style={{
                   background: selectedGroups.includes(g.id) ? 'var(--acid-dim)' : 'var(--bg-deep)',
-                  border: `1px solid ${selectedGroups.includes(g.id) ? 'rgba(204,255,0,0.3)' : 'var(--border-mid)'}`,
+                  border: `1px solid ${selectedGroups.includes(g.id) ? 'color-mix(in srgb, var(--acid) 30%, transparent)' : 'var(--border-mid)'}`,
                 }}
               >
                 <div className="w-5 h-5 rounded-[2px] flex items-center justify-center" style={{
@@ -309,7 +311,7 @@ export default function EndSessionModal({ sessionId, groupId, onClose, onDone }:
         <button
           onClick={handleConfirm}
           disabled={saving || (visibility === 'groups' && selectedGroups.length === 0)}
-          className="w-full py-4 rounded-[4px] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40"
+          className="w-full py-4 rounded-[var(--card-radius)] font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-40"
           style={{ background: 'linear-gradient(135deg, var(--amber), #E8880A)', color: '#1A1208' }}
         >
           {saving ? <Loader2 size={18} className="animate-spin" /> : "Confirm & Log Session"}
