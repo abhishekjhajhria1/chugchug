@@ -268,7 +268,7 @@ export default function Profile() {
         {!isEditing && (
           <div className="mt-4 space-y-3">
             {/* Premium badge */}
-            {p.is_premium && (
+            {profile?.is_premium && (
               <div className="flex items-center justify-center gap-2 py-2.5 px-4" style={{ background: 'linear-gradient(135deg, var(--amber-dim), rgba(232,196,74,0.05))', border: '1px solid rgba(232,196,74,0.3)', borderRadius: 'var(--card-radius)' }}>
                 <span className="text-sm">👑</span>
                 <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--amber)' }}>Premium Member</span>
@@ -293,7 +293,7 @@ export default function Profile() {
               <button onClick={() => navigate('/tavern')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: 'var(--card-radius)' }}>
                 🏯 Tavern
               </button>
-              {!p.is_premium ? (
+              {!profile?.is_premium ? (
                 <button onClick={() => navigate('/premium')} className="py-3 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 active:scale-95 transition-transform" style={{ background: 'var(--amber-dim)', border: '1px solid color-mix(in srgb, var(--amber) 30%, transparent)', color: 'var(--amber)', borderRadius: 'var(--card-radius)' }}>
                   👑 Go Premium
                 </button>
@@ -406,7 +406,7 @@ export default function Profile() {
                   <span className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{label}</span>
                   <div className="relative">
                     <select
-                      value={privacySettings[key]}
+                      value={privacySettings[key as keyof PrivacySettings]}
                       onChange={e => setPrivacySettings({ ...privacySettings, [key]: e.target.value })}
                       className="appearance-none text-xs font-bold pr-6 pl-3 py-1.5 rounded-lg"
                       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-mid)', color: 'var(--text-primary)' }}

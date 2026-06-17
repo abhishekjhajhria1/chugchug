@@ -28,7 +28,7 @@ export default function EmergencySOS({ groupId, crewMembers = [] }: EmergencySOS
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => toast.warning("Location unavailable — alert will be sent without coordinates")
+        () => toast.info("Location unavailable — alert will be sent without coordinates")
       )
     }
   }, [showModal, toast])
