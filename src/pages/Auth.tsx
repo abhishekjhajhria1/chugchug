@@ -47,25 +47,30 @@ export default function Auth() {
         return
       }
 
-      // Check username uniqueness before signup
-      const { data: existing } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username.trim())
-        .limit(1)
-      if (existing && existing.length > 0) {
-        setError("Username is already taken. Pick another one!")
-        setLoading(false)
-        return
-      }
-
-      const { data, error } = await supabase.auth.signUp({ email, password })
-      if (error) { setError(error.message) }
-      else if (data.user) {
-        const { error: profileError } = await supabase.from("profiles").upsert({ id: data.user.id, username: username.trim(), xp: 0, level: 1, birth_date: dob, age_verified: true })
-        if (profileError) {
-          toast.error("Account created but profile setup failed. Try logging in.")
-        }
+      // Username uniqueness is enforced server-side: the handle_new_user trigger
+      // inserts the profile using this metadata username, and the profiles.username
+      // UNIQUE constraint rejects duplicates (rolling back the whole signup). We
+      // can't reliably pre-check from the client because RLS hides profiles from
+      // the anon role — so we let the DB decide and map the error to a clear msg.
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username: username.trim() } },
+      })
+      if (error) {
+        const m = (error.message || "").toLowerCase()
+        if (m.includes("already registered") || m.includes("already been registered") || m.includes("user already"))
+          setError("That email is already registered — try signing in instead.")
+        else if (m.includes("database error") || m.includes("duplicate") || m.includes("unique") || m.includes("violates"))
+          setError("That username is already taken. Pick another one!")
+        else setError(error.message)
+      } else if (data.user) {
+        // Fill in the rest of the profile (the trigger only set id + username).
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ birth_date: dob, age_verified: true })
+          .eq("id", data.user.id)
+        if (profileError) toast.error("Account created — finish setting up your profile from the Me tab.")
       }
     }
 

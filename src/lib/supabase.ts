@@ -15,8 +15,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    // Disable navigator.locks — prevents "Lock was not released within 5000ms" in
-    // single-tab mobile-style apps like ChugChug. Falls back to in-process lock.
-    lock: 'no-op' as any,
+    // Disable the navigator LockManager (avoids "Lock was not released within
+    // 5000ms" warnings in single-tab, mobile-style PWAs). NOTE: this MUST be a
+    // function matching auth-js's LockFunc signature — the previous value was the
+    // string 'no-op', which auth-js then tried to CALL as a function, throwing on
+    // every getSession()/token refresh. That stripped the Authorization header
+    // from requests, so they ran as the `anon` role and RLS blocked everything
+    // (logging drinks, starting sessions, etc. all failed silently).
+    lock: async <R>(_name: string, _acquireTimeout: number, fn: () => Promise<R>): Promise<R> => fn(),
   },
 })

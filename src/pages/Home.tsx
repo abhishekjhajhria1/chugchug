@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Loader2, ArrowRight, Beer, LogIn, ChevronLeft, ChevronRight,
-  Flame, Trophy, Sparkles, Send, BookOpen, Zap,
+  Flame, Trophy, Sparkles, Send, BookOpen, Zap, MessageCircle,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useChug } from "../context/ChugContext";
@@ -35,6 +35,7 @@ export default function Home() {
   const [dailyBounties, setDailyBounties] = useState<BountyDef[]>([]);
   const [bountyProgress, setBountyProgress] = useState<Record<string, { completed: boolean; current: number; target: number }>>({});
 
+  // Ninkasi mini-chat (full conversation lives at /ninkasi)
   const [chatPrompt, setChatPrompt] = useState("");
   const [chatReply, setChatReply] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -54,7 +55,6 @@ export default function Home() {
   const [joinCodeInput, setJoinCodeInput] = useState("");
   const [sessionCreating, setSessionCreating] = useState(false);
 
-  // Ninkasi quick prompts
   const quickPrompts = [
     { label: "🍸 Cocktail", prompt: "Recommend a great cocktail for tonight." },
     { label: "🍺 Beer pairing", prompt: "What food pairs well with a cold beer?" },
@@ -137,14 +137,12 @@ export default function Home() {
     fetchData();
   }, [user, profile]);
 
-  // Fetch daily bounties and their completion status
   useEffect(() => {
     if (!user) return;
     setDailyBounties(getDailyBounties());
     checkDailyBountyCompletion(user.id).then(setBountyProgress);
   }, [user]);
 
-  // Fetch month's logs for calendar
   useEffect(() => {
     if (!user) return;
     const fetchMonthLogs = async () => {
@@ -174,7 +172,6 @@ export default function Home() {
     fetchMonthLogs();
   }, [user, calMonth, calYear]);
 
-  // Check for an active session this user created (resume banner)
   useEffect(() => {
     if (!user) return;
     const checkActiveSession = async () => {
@@ -241,7 +238,6 @@ export default function Home() {
     return "Good evening";
   })();
 
-  // Monthly calendar computed values
   const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const DAY_LABELS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
   const CAT_EMOJI: Record<string, string> = { drink: '🍻', snack: '🍟', cigarette: '🚬', gym: '💪', detox: '🧘', water: '💧' };
@@ -306,21 +302,20 @@ export default function Home() {
   };
 
   const quickActions = [
-    { label: "Log a drink", to: "/log", color: 'var(--acid)', emoji: "✍️" },
-    { label: "Split a bill", to: "/groups", color: 'var(--amber)', emoji: "💸" },
-    { label: "Find a bar", to: "/tavern", color: 'var(--coral)', emoji: "🍸" },
-    { label: "Events", to: "/events", color: 'var(--blue)', emoji: "✨" },
-    { label: "Challenges", to: "/challenges", color: 'var(--coral)', emoji: "🎯" },
-    { label: "Leaderboard", to: "/rank", color: 'var(--acid)', emoji: "🏆" },
+    { label: "Log a drink", to: "/log", emoji: "✍️" },
+    { label: "Split a bill", to: "/groups", emoji: "💸" },
+    { label: "Find a bar", to: "/tavern", emoji: "🍸" },
+    { label: "Events", to: "/events", emoji: "✨" },
+    { label: "Challenges", to: "/challenges", emoji: "🎯" },
+    { label: "Leaderboard", to: "/rank", emoji: "🏆" },
   ];
 
   const rankInfo = getRankInfo(profile?.level ?? 1, profile?.xp ?? 0);
   const streak = profile?.current_streak ?? 0;
 
   return (
-    <div className="space-y-5 pb-6 wano-fade">
+    <div className="space-y-6 pb-8 wano-fade">
 
-      {/* Archetype Quiz Modal */}
       {showArchetypeQuiz && (
         <ArchetypeQuiz onComplete={() => setShowArchetypeQuiz(false)} onSkip={() => setShowArchetypeQuiz(false)} />
       )}
@@ -364,8 +359,8 @@ export default function Home() {
       )}
 
       {/* ─── 1. HERO — greeting + XP ─── */}
-      <section className="glass-card anim-stagger-1" style={{ padding: 20 }}>
-        <div className="flex items-start justify-between gap-3 mb-4">
+      <section className="glass-card anim-stagger-1" style={{ padding: 22 }}>
+        <div className="flex items-start justify-between gap-3 mb-5">
           <div className="min-w-0">
             <p className="text-sm font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
               {greeting}, {profile?.username || 'traveler'}
@@ -391,18 +386,14 @@ export default function Home() {
         </div>
 
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>
-            Level {profile?.level ?? 1}
-          </span>
-          <span className="text-sm font-bold" style={{ color: 'var(--amber)' }}>
-            {(profile?.xp ?? 0).toLocaleString()} XP
-          </span>
+          <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>Level {profile?.level ?? 1}</span>
+          <span className="text-sm font-bold" style={{ color: 'var(--amber)' }}>{(profile?.xp ?? 0).toLocaleString()} XP</span>
         </div>
         <div className="h-2.5 overflow-hidden rounded-full" style={{ background: 'var(--glass-fill-inset)' }}>
           <div className="h-full rounded-full transition-all duration-700" style={{ width: `${xpProgress}%`, background: rankInfo.current.color }} />
         </div>
         {rankInfo.next && (
-          <p className="text-xs font-medium mt-2" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs font-medium mt-2.5" style={{ color: 'var(--text-muted)' }}>
             {rankInfo.xpToNext.toLocaleString()} XP to {rankInfo.next.emoji} {rankInfo.next.title}
           </p>
         )}
@@ -410,7 +401,7 @@ export default function Home() {
 
       {/* ─── 2. CALENDAR (right under the XP bar) ─── */}
       <section className="glass-card anim-stagger-2 overflow-hidden" style={{ padding: 0 }}>
-        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center gap-4">
             <span className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--amber)' }}>
               🍻 {weekStats.drinks} <span className="font-medium" style={{ color: 'var(--text-muted)' }}>this week</span>
@@ -426,7 +417,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+        <div className="flex items-center justify-between px-5 pt-3.5 pb-1">
           <button onClick={handleCalPrev} className="p-2 -ml-2 rounded-full active:scale-90 transition-transform" style={{ color: 'var(--text-secondary)' }}>
             <ChevronLeft size={18} />
           </button>
@@ -439,7 +430,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-7 px-3">
+        <div className="grid grid-cols-7 px-3.5">
           {DAY_LABELS.map(d => (
             <div key={d} className="text-center py-1.5">
               <span className="text-[11px] font-semibold" style={{ color: 'var(--text-ghost)' }}>{d}</span>
@@ -447,7 +438,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1 px-3 pb-3">
+        <div className="grid grid-cols-7 gap-1.5 px-3.5 pb-4">
           {monthGridCells.map((day, i) => {
             if (day === null) return <div key={`e-${i}`} />;
             const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -473,7 +464,7 @@ export default function Home() {
                   background: cellBg,
                   border: isToday ? '2px solid var(--amber)' : '1px solid transparent',
                   borderRadius: 10,
-                  minHeight: 44,
+                  minHeight: 46,
                 }}
               >
                 <span className="text-[13px] font-semibold" style={{ color: isToday ? 'var(--amber)' : isPast ? 'var(--text-primary)' : 'var(--text-ghost)' }}>
@@ -489,7 +480,7 @@ export default function Home() {
           })}
         </div>
 
-        <div className="flex items-center justify-center gap-3 px-4 py-2.5" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="flex items-center justify-center gap-3 px-5 py-3" style={{ borderTop: '1px solid var(--border)' }}>
           <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>🍻 {monthDrinks} drinks this month</span>
           <span style={{ color: 'var(--text-ghost)' }}>·</span>
           <button onClick={() => navigate('/calendar')} className="text-xs font-bold flex items-center gap-1 active:scale-95 transition-transform" style={{ color: 'var(--amber)' }}>
@@ -554,12 +545,12 @@ export default function Home() {
       {/* ─── 4. QUICK ACTIONS ─── */}
       <section className="anim-stagger-3">
         <p className="section-label mb-3">Quick actions</p>
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-3 gap-3">
           {quickActions.map((action) => (
             <button
               key={action.label}
               onClick={() => navigate(action.to)}
-              className="flex flex-col items-center justify-center gap-2 py-4 active:scale-95 transition-transform"
+              className="flex flex-col items-center justify-center gap-2 py-5 active:scale-95 transition-transform"
               style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}
             >
               <span className="text-2xl">{action.emoji}</span>
@@ -567,75 +558,12 @@ export default function Home() {
             </button>
           ))}
         </div>
-        <div className="mt-2.5"><NearestBarCompass /></div>
+        <div className="mt-3"><NearestBarCompass /></div>
       </section>
 
-      {/* ─── 5. ENGAGEMENT ─── */}
-      <EventBanner />
-      <DailyRewardStreak />
-      <FriendsLeagueCard />
-
-      {/* Archetype discover */}
-      {profile && !profile.archetype && (
-        <button
-          onClick={() => setShowArchetypeQuiz(true)}
-          className="w-full p-4 flex items-center gap-3.5 active:scale-[0.99] transition-transform"
-          style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}
-        >
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0" style={{ background: 'rgba(155,89,182,0.14)' }}>🎭</div>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Discover your archetype</p>
-            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>5 quick questions</p>
-          </div>
-          <ArrowRight size={18} style={{ color: '#9B59B6' }} />
-        </button>
-      )}
-
-      {/* Daily bounties */}
-      {dailyBounties.length > 0 && (
-        <section className="glass-card anim-stagger-4 overflow-hidden" style={{ padding: 0 }}>
-          <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <h2 className="text-sm font-extrabold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-              <Zap size={15} style={{ color: 'var(--amber)' }} /> Daily bounties
-            </h2>
-            <span className="text-[11px] font-medium" style={{ color: 'var(--text-ghost)' }}>resets at midnight</span>
-          </div>
-          <div className="px-3 pb-3 space-y-2">
-            {dailyBounties.map((bounty) => {
-              const prog = bountyProgress[bounty.id];
-              const completed = prog?.completed ?? false;
-              const current = prog?.current ?? 0;
-              const target = prog?.target ?? bounty.target;
-              const pct = target > 0 ? Math.round((current / target) * 100) : 0;
-              return (
-                <div key={bounty.id} className="flex items-center gap-3 p-3" style={{ background: completed ? 'var(--acid-dim)' : 'var(--glass-fill-inset)', borderRadius: 12, opacity: completed ? 0.8 : 1 }}>
-                  <div className="w-10 h-10 shrink-0 flex items-center justify-center text-lg rounded-xl" style={{ background: 'var(--bg-surface)' }}>{completed ? '✅' : bounty.emoji}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-sm font-bold" style={{ color: completed ? 'var(--acid)' : 'var(--text-primary)', textDecoration: completed ? 'line-through' : 'none' }}>{bounty.title}</span>
-                      <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-full" style={{ background: completed ? 'var(--acid-dim)' : 'var(--amber-dim)', color: completed ? 'var(--acid)' : 'var(--amber)' }}>+{bounty.xpReward}</span>
-                    </div>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{bounty.description}</p>
-                    {!completed && (
-                      <div className="h-1.5 mt-1.5 overflow-hidden rounded-full" style={{ background: 'var(--bg-surface)' }}>
-                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: 'var(--amber)' }} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      <LiveActivityFeed />
-      <CrewBattleCard />
-      <WeeklyLeagueCard />
-
-      {/* ─── 6. NINKASI — AI bartender ─── */}
-      <section className="glass-card anim-stagger-5" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: '1px solid var(--border)' }}>
+      {/* ─── 5. NINKASI — AI bartender (right under the shortcuts) ─── */}
+      <section className="glass-card anim-stagger-4" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0" style={{ background: 'var(--amber-dim)' }}>🍸</div>
           <div className="flex-1">
             <h2 className="text-base font-extrabold flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
@@ -643,11 +571,14 @@ export default function Home() {
             </h2>
             <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Your AI bartender</p>
           </div>
+          <button onClick={() => navigate('/ninkasi')} className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-full active:scale-95 transition-transform" style={{ background: 'var(--glass-fill-inset)', color: 'var(--amber)' }}>
+            <MessageCircle size={14} /> Full chat
+          </button>
         </div>
 
-        <div className="p-4 space-y-3.5">
+        <div className="p-5 space-y-3.5">
           {chatReply ? (
-            <div className="text-sm leading-relaxed anim-fade p-3.5 rounded-xl" style={{ color: 'var(--text-primary)', background: 'var(--glass-fill-inset)' }}>
+            <div className="text-sm leading-relaxed anim-fade p-4 rounded-xl" style={{ color: 'var(--text-primary)', background: 'var(--glass-fill-inset)' }}>
               <p>{chatReply}</p>
               {referencedRecipes.length > 0 && (
                 <div className="mt-3 pt-3 flex flex-wrap gap-2" style={{ borderTop: '1px solid var(--border)' }}>
@@ -658,10 +589,13 @@ export default function Home() {
                   ))}
                 </div>
               )}
+              <button onClick={() => navigate('/ninkasi')} className="mt-3 text-xs font-bold flex items-center gap-1" style={{ color: 'var(--amber)' }}>
+                Keep chatting <ArrowRight size={12} />
+              </button>
             </div>
           ) : (
             <div>
-              <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm mb-3.5" style={{ color: 'var(--text-secondary)' }}>
                 Need a recipe, a pairing, or just can't decide what to drink? Ask away. 🍶
               </p>
               <div className="flex flex-wrap gap-2">
@@ -670,7 +604,7 @@ export default function Home() {
                     key={qp.label}
                     onClick={() => { setChatPrompt(qp.prompt); handleChatSend(qp.prompt); }}
                     disabled={chatLoading}
-                    className="text-xs font-semibold px-3 py-2 rounded-full active:scale-95 transition-transform disabled:opacity-40"
+                    className="text-xs font-semibold px-3.5 py-2 rounded-full active:scale-95 transition-transform disabled:opacity-40"
                     style={{ background: 'var(--glass-fill-inset)', color: 'var(--text-secondary)' }}
                   >
                     {qp.label}
@@ -712,6 +646,69 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── 6. ENGAGEMENT ─── */}
+      <EventBanner />
+      <DailyRewardStreak />
+      <FriendsLeagueCard />
+
+      {/* Archetype discover */}
+      {profile && !profile.archetype && (
+        <button
+          onClick={() => setShowArchetypeQuiz(true)}
+          className="w-full p-4 flex items-center gap-3.5 active:scale-[0.99] transition-transform"
+          style={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: 'var(--card-radius)' }}
+        >
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0" style={{ background: 'rgba(155,89,182,0.14)' }}>🎭</div>
+          <div className="flex-1 text-left">
+            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Discover your archetype</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>5 quick questions</p>
+          </div>
+          <ArrowRight size={18} style={{ color: '#9B59B6' }} />
+        </button>
+      )}
+
+      {/* Daily bounties */}
+      {dailyBounties.length > 0 && (
+        <section className="glass-card anim-stagger-5 overflow-hidden" style={{ padding: 0 }}>
+          <div className="flex items-center justify-between px-5 pt-4 pb-2">
+            <h2 className="text-sm font-extrabold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Zap size={15} style={{ color: 'var(--amber)' }} /> Daily bounties
+            </h2>
+            <span className="text-[11px] font-medium" style={{ color: 'var(--text-ghost)' }}>resets at midnight</span>
+          </div>
+          <div className="px-3.5 pb-3.5 space-y-2">
+            {dailyBounties.map((bounty) => {
+              const prog = bountyProgress[bounty.id];
+              const completed = prog?.completed ?? false;
+              const current = prog?.current ?? 0;
+              const target = prog?.target ?? bounty.target;
+              const pct = target > 0 ? Math.round((current / target) * 100) : 0;
+              return (
+                <div key={bounty.id} className="flex items-center gap-3 p-3" style={{ background: completed ? 'var(--acid-dim)' : 'var(--glass-fill-inset)', borderRadius: 12, opacity: completed ? 0.8 : 1 }}>
+                  <div className="w-10 h-10 shrink-0 flex items-center justify-center text-lg rounded-xl" style={{ background: 'var(--bg-surface)' }}>{completed ? '✅' : bounty.emoji}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-sm font-bold" style={{ color: completed ? 'var(--acid)' : 'var(--text-primary)', textDecoration: completed ? 'line-through' : 'none' }}>{bounty.title}</span>
+                      <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-full" style={{ background: completed ? 'var(--acid-dim)' : 'var(--amber-dim)', color: completed ? 'var(--acid)' : 'var(--amber)' }}>+{bounty.xpReward}</span>
+                    </div>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{bounty.description}</p>
+                    {!completed && (
+                      <div className="h-1.5 mt-1.5 overflow-hidden rounded-full" style={{ background: 'var(--bg-surface)' }}>
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: 'var(--amber)' }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <LiveActivityFeed />
+      <CrewBattleCard />
+      <WeeklyLeagueCard />
+
       {/* ─── 7. LEADERBOARD + RECIPES ─── */}
       <div className="grid grid-cols-2 gap-3 anim-stagger-6">
         <section className="glass-card" style={{ padding: 16 }}>
@@ -737,9 +734,7 @@ export default function Home() {
         </section>
 
         <section className="glass-card" style={{ padding: 16 }}>
-          <h2 className="text-sm font-extrabold mb-3 flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
-            📒 Recipes
-          </h2>
+          <h2 className="text-sm font-extrabold mb-3 flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>📒 Recipes</h2>
           <div className="space-y-2.5">
             {recipes.length === 0 ? (
               <p className="text-xs text-center py-3" style={{ color: 'var(--text-ghost)' }}>None yet</p>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Lock, Share2, Sun, Moon, Swords } from "lucide-react"
+import { LogOut, Edit3, Save, X, Users as UsersIcon, QrCode, MapPin, ChevronDown, CalendarDays, Lock, Share2, Sun, Moon, Swords, PartyPopper } from "lucide-react"
 import { useChug } from "../context/ChugContext"
 import { useTheme } from "../context/ThemeContext"
 import type { Theme } from "../types"
@@ -212,6 +212,10 @@ export default function Profile() {
             </button>
 
             <NotificationToggle />
+
+            <button onClick={() => navigate('/party', { state: { view: 'create' } })} className="w-full py-3.5 flex items-center justify-center gap-2 text-sm font-bold active:scale-[0.99] transition-transform rounded-xl" style={{ background: 'var(--coral-dim)', color: 'var(--coral)', border: '1px solid color-mix(in srgb, var(--coral) 28%, transparent)' }}>
+              <PartyPopper size={18} /> Host a party
+            </button>
 
             <button onClick={() => setShowStatCard(true)} className="glass-btn w-full py-3 flex items-center justify-center gap-2 text-sm">
               <Share2 size={18} /> Share my stats

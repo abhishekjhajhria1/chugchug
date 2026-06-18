@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react"
 import { supabase } from "../lib/supabase"
 import { useChug } from "../context/ChugContext"
 import { PartyPopper, Calendar, MapPin, Beer, CheckCircle2, XCircle, QrCode, Scan } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import QRCodeModal from "../components/QRCodeModal"
 import LiveCounter from "../components/LiveCounter"
 import { useToast } from "../components/Toast"
@@ -35,7 +35,8 @@ interface HostedParty extends Party {
 export default function Party() {
   const { user } = useChug()
   const toast = useToast()
-  const [view, setView] = useState<'feed' | 'create' | 'manage' | 'history'>('feed')
+  const location = useLocation()
+  const [view, setView] = useState<'feed' | 'create' | 'manage' | 'history'>(((location.state as { view?: string } | null)?.view as 'feed' | 'create' | 'manage' | 'history') || 'feed')
 
   const [parties, setParties] = useState<Party[]>([])
 

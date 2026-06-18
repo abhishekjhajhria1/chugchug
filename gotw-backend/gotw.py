@@ -61,8 +61,8 @@ NINKASI_HOME_PROMPT = """
 You are 'Ninkasi', the Goddess of Tits and Wine — a warm, caring bartender who genuinely looks out for people. Think of a cool older sister who happens to be the best bartender in the world. Samurai/Wano Arc vibe.
 
 RULES:
-- NEVER exceed 6-9 sentences unless giving a recipe. provide recipe in bullet points. This is NON-NEGOTIABLE.
-- Keep replies SHORT and according to timezone of user. The user is probably tipsy or at a bar — they cannot read essays.
+- Keep it tight but FLAVORFUL — a few engaging, personality-rich sentences (expand a little when the topic deserves it). Recipes in bullet points.
+- The user is probably tipsy or at a bar — be punchy and easy to read, but never bland or generic.
 - Be warm, caring, a little cheeky. Not over-the-top. Not cringe. Just genuinely cool just a little flirty but not too much and be carefull of gender of user you're Ninkasi the Goddess of Tits and Wine.
 - If they drank too much, gently tell them to hydrate. Don't lecture.
 - Use light samurai slang naturally: "legend", "warrior", "ronin" — but don't force it.
@@ -95,7 +95,7 @@ RULES:
 - Be warm, caring, witty, a little cheeky — but ALWAYS substantive. Never dodge a question.
 - If they ask about drinks, recipes, pairings, bars, nightlife, drinking culture — give a real, informed answer.
 - If they ask about business, life, career, or anything else — give genuine, thoughtful advice. You're wise, not just a bartender.
-- NEVER exceed 6-9 sentences unless giving a recipe or the topic genuinely requires more.
+- Give RICH, engaging replies — a short paragraph, or two when the topic deserves it. Bring real substance, vivid detail, opinions, and personality. Don't be terse; don't pad either.
 - Use light samurai slang naturally: "legend", "warrior", "ronin" — but don't force it.
 - If they ask for a RECIPE or DRINK: respond with bullet points. Each ingredient on its own line with exact amount in ml or oz.
 - If they're stressed or lost, be genuinely supportive. You care.
@@ -265,26 +265,38 @@ async def chat(req: ChatRequest, background_tasks: BackgroundTasks):
         sponsor = req.user_context["sponsor"]
         sponsor_str = f"IMPORTANT SPONSOR CONTEXT: If relevant to the prompt, subtly hype up and recommend our sponsor: {sponsor}."
 
-    # 5. Build the prompt with data injection
-    full_prompt = f"""
-{selected_prompt}
+    # 5. Build a proper multi-turn message list (system + real prior turns + now).
+    #    Passing the conversation as actual turns (instead of cramming it into one
+    #    string) gives Ninkasi a real context window, so replies stay coherent and
+    #    interesting across a conversation.
+    system_content = f"""{selected_prompt}
 
 USER CONTEXT: {req.user_context if req.user_context else 'Unknown Traveler'}
 {sponsor_str}
 
 AVAILABLE CHUGCHUG RECIPE KNOWLEDGE FROM VECTOR DATABASE:
 {context_str}
-
-USER SAYS: {req.prompt}
 """
+
+    messages = [{"role": "system", "content": system_content}]
+    history = (req.user_context or {}).get("history") if isinstance(req.user_context, dict) else None
+    if isinstance(history, list):
+        for turn in history[-12:]:
+            if not isinstance(turn, dict):
+                continue
+            role = "assistant" if str(turn.get("role", "")).lower() in ("ninkasi", "assistant", "bot") else "user"
+            content = str(turn.get("content", "")).strip()[:1500]
+            if content:
+                messages.append({"role": role, "content": content})
+    messages.append({"role": "user", "content": req.prompt})
 
     # 6. Generate Response via Groq
     try:
         chat_completion = ai_client.chat.completions.create(
-            messages=[{"role": "user", "content": full_prompt}],
+            messages=messages,
             model="llama-3.3-70b-versatile",
-            temperature=0.7,
-            max_tokens=300
+            temperature=0.8,
+            max_tokens=700
         )
         reply = chat_completion.choices[0].message.content
     except Exception as e:

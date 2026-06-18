@@ -27,6 +27,8 @@ const Landing = lazy(() => import("./pages/Landing"))
 const Tavern = lazy(() => import("./pages/Tavern"))
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
 const Events = lazy(() => import("./pages/Events"))
+const Offers = lazy(() => import("./pages/Offers"))
+const Ninkasi = lazy(() => import("./pages/Ninkasi"))
 
 // ── Loading skeleton ────────────────────────────────────────────
 function PageLoader() {
@@ -102,6 +104,8 @@ function App() {
         <Route path="/challenges"          element={<RouteGuard><Challenges /></RouteGuard>} />
         <Route path="/tavern"              element={<RouteGuard><Tavern /></RouteGuard>} />
         <Route path="/events"              element={<RouteGuard><Events /></RouteGuard>} />
+        <Route path="/offers"              element={<RouteGuard><Offers /></RouteGuard>} />
+        <Route path="/ninkasi"             element={<RouteGuard><Ninkasi /></RouteGuard>} />
         <Route path="/admin"               element={<RouteGuard><AdminDashboard /></RouteGuard>} />
         {/* Redirect old routes */}
         <Route path="/live-party/:partyId?"element={<Navigate to="/" replace />} />
